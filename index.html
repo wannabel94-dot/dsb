@@ -91,13 +91,16 @@
 </div>
 
 <script>
-// === DATA ===
+// === DATA & LOCAL STORAGE ===
 let dogNames = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
 let allDogs = [...dogNames, "CHUFI","LUPE","CUSCO"];
 let rates = {}; allDogs.forEach(d=>rates[d]={daycare:10,weekend:12,overnight:20,walk:5});
 let rows=[]; let selections={}; let currentDate=new Date();
 
-// === DOM ===
+function saveData(){localStorage.setItem('dogDashboard',JSON.stringify({rows,rates,selections}));}
+function loadData(){const data=localStorage.getItem('dogDashboard');if(data){const parsed=JSON.parse(data);rows=parsed.rows||[];rates=parsed.rates||rates; selections=parsed.selections||{}}}
+
+// === DOM ELEMENTS ===
 const dateBtn=document.getElementById('dateBtn');
 const dateInput=document.getElementById('dateInput');
 const serviceDropdowns=document.getElementById('serviceDropdowns');
@@ -113,16 +116,12 @@ const editModal=document.getElementById('editModal');
 const editTable=document.getElementById('editTable');
 const clearDayBtn=document.getElementById('clearDay');
 
-// Spanish days
+// Spanish day abbreviations
 const dayAbbr=['Dom.','Lun.','Mar.','Mié.','Jue.','Vie.','Sáb.'];
 
 // === UTILITIES ===
 function formatDate(d){return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();}
 function dayOfWeek(d){return dayAbbr[d.getDay()];}
-
-// === LOCAL STORAGE ===
-function saveData(){localStorage.setItem('dogDashboard',JSON.stringify({rows,rates}));}
-function loadData(){const data=localStorage.getItem('dogDashboard');if(data){const parsed=JSON.parse(data);rows=parsed.rows||[];rates=parsed.rates||rates;}}
 
 // === DATE & TOTALS ===
 function updateDateBtn(){dateBtn.textContent=formatDate(currentDate);}
@@ -131,21 +130,25 @@ function updateTotals(){
   todayLabel.textContent=`Hoy: ${todayStr}`;
   const todayRow=rows.find(r=>r.Fecha===todayStr);
   dailyTotalSpan.textContent='Daily: '+(todayRow?todayRow.Total.toFixed(2):'0')+' €';
+
   let startWeek=new Date(today); startWeek.setDate(today.getDate()-((today.getDay()+6)%7));
   let endWeek=new Date(startWeek); endWeek.setDate(startWeek.getDate()+6);
   let weekSum = rows.filter(r=>{ const d=r.Fecha.split('/'); const rd=new Date(d[2],d[1]-1,d[0]); return rd>=startWeek && rd<=endWeek; }).reduce((a,b)=>a+b.Total,0);
   weeklyTotalSpan.textContent='Weekly: '+weekSum.toFixed(2)+' €';
+
   const startMonth=new Date(today.getFullYear(), today.getMonth(),1);
   const endMonth=new Date(today.getFullYear(), today.getMonth()+1,0);
   let monthSum = rows.filter(r=>{ const d=r.Fecha.split('/'); const rd=new Date(d[2],d[1]-1,d[0]); return rd>=startMonth && rd<=endMonth; }).reduce((a,b)=>a+b.Total,0);
   monthlyTotalSpan.textContent='Monthly: '+monthSum.toFixed(2)+' €';
 }
 
-// === TABLE ===
+// === TABLE BUILD ===
 function buildTable(){
-  tableHeader.innerHTML=''; const headerCells=['Día','Fecha','Total',...allDogs];
+  tableHeader.innerHTML=''; 
+  const headerCells=['Día','Fecha','Total',...allDogs];
   headerCells.forEach(h=>{const th=document.createElement('th');th.textContent=h;tableHeader.appendChild(th);});
   tbody.innerHTML='';
+
   rows.sort((a,b)=>new Date(a.Fecha.split('/').reverse().join('-'))-new Date(b.Fecha.split('/').reverse().join('-')));
   rows.forEach(r=>{
     const tr=document.createElement('tr');
@@ -164,31 +167,53 @@ function createServiceDropdowns(){
   ['Daycare','Walk','Overnight'].forEach(service=>{
     const div=document.createElement('div'); div.classList.add('dropdown');
     const label=document.createElement('div'); label.classList.add('service-label'); label.textContent=service; div.appendChild(label);
+
     const btn=document.createElement('button'); btn.textContent=`Select ${service}`; div.appendChild(btn);
     const content=document.createElement('div'); content.classList.add('dropdown-content');
+
     allDogs.forEach(dog=>{
       const dogBtn=document.createElement('button'); dogBtn.textContent=dog;
-      dogBtn.addEventListener('click',e=>{e.stopPropagation(); toggleDog(dog,service,dogBtn);});
+      dogBtn.addEventListener('click',e=>{ e.stopPropagation(); toggleDog(dog,service,dogBtn); });
       content.appendChild(dogBtn);
     });
+
     div.appendChild(content);
+
     btn.addEventListener('click',e=>{
       e.stopPropagation();
       const isOpen=content.style.display==='block';
       document.querySelectorAll('.dropdown-content').forEach(c=>c.style.display='none');
       content.style.display=isOpen?'none':'block';
+      restoreSelections();
     });
+
     serviceDropdowns.appendChild(div);
   });
+
   document.addEventListener('click',()=>{document.querySelectorAll('.dropdown-content').forEach(c=>c.style.display='none');});
 }
 
 // === TOGGLE DOG ===
 function toggleDog(dog,service,btn){
-  const dateStr=formatDate(currentDate); if(!selections[dateStr]) selections[dateStr]={};
-  const key=dog+'_'+service; selections[dateStr][key]=!selections[dateStr][key];
+  const dateStr=formatDate(currentDate);
+  if(!selections[dateStr]) selections[dateStr]={};
+  const key=`${dog}_${service}`;
+  selections[dateStr][key]=!selections[dateStr][key];
   btn.classList.toggle('active',selections[dateStr][key]);
   updateDogPayment(dog,service,selections[dateStr][key]);
+}
+
+// --- Restore selections when opening dropdown ---
+function restoreSelections(){
+  const dateStr=formatDate(currentDate);
+  document.querySelectorAll('.dropdown-content').forEach(dropdown=>{
+    dropdown.querySelectorAll('button').forEach(btn=>{
+      const dog=btn.textContent;
+      const service=btn.closest('.dropdown').querySelector('.service-label').textContent;
+      const key=`${dog}_${service}`;
+      btn.classList.toggle('active', selections[dateStr] && selections[dateStr][key]);
+    });
+  });
 }
 
 // === UPDATE PAYMENT ===
@@ -220,10 +245,22 @@ function populateRatesModal(){
 document.getElementById('ratesBtn').addEventListener('click',()=>{populateRatesModal(); ratesModal.style.display='flex';});
 document.getElementById('closeRates').addEventListener('click',()=>{ratesModal.style.display='none';});
 document.getElementById('saveRates').addEventListener('click',()=>{
-  allDogs.forEach(d=>{rates[d].daycare=parseFloat(document.getElementById('daycare_'+d).value)||0; rates[d].weekend=parseFloat(document.getElementById('weekend_'+d).value)||0; rates[d].overnight=parseFloat(document.getElementById('overnight_'+d).value)||0; rates[d].walk=parseFloat(document.getElementById('walk_'+d).value)||0;});
+  allDogs.forEach(d=>{
+    rates[d].daycare=parseFloat(document.getElementById('daycare_'+d).value)||0;
+    rates[d].weekend=parseFloat(document.getElementById('weekend_'+d).value)||0;
+    rates[d].overnight=parseFloat(document.getElementById('overnight_'+d).value)||0;
+    rates[d].walk=parseFloat(document.getElementById('walk_'+d).value)||0;
+  });
   saveData(); ratesModal.style.display='none'; buildTable();
 });
-document.getElementById('addDog').addEventListener('click',()=>{const newDog=prompt("Enter new dog name:"); if(newDog&&!allDogs.includes(newDog)){allDogs.push(newDog); rates[newDog]={daycare:10,weekend:12,overnight:20,walk:5}; populateRatesModal(); buildTable(); saveData();}});
+document.getElementById('addDog').addEventListener('click',()=>{
+  const newDog=prompt("Enter new dog name:");
+  if(newDog && !allDogs.includes(newDog)){
+    allDogs.push(newDog);
+    rates[newDog]={daycare:10,weekend:12,overnight:20,walk:5};
+    populateRatesModal(); buildTable(); saveData();
+  }
+});
 function deleteDog(d){delete rates[d]; allDogs=allDogs.filter(x=>x!==d); populateRatesModal(); buildTable(); saveData();}
 
 // === EDIT DAY MODAL ===
@@ -244,9 +281,9 @@ function openEditModal(row){
 
 // === DATE CONTROLS ===
 dateBtn.addEventListener('click',()=>{ dateInput.valueAsDate=currentDate; dateInput.style.display='inline-block'; });
-dateInput.addEventListener('change',e=>{currentDate=new Date(e.target.value); updateDateBtn(); dateInput.style.display='none'; buildTable();});
-document.getElementById('prevDay').addEventListener('click',()=>{currentDate.setDate(currentDate.getDate()-1); updateDateBtn(); buildTable();});
-document.getElementById('nextDay').addEventListener('click',()=>{currentDate.setDate(currentDate.getDate()+1); updateDateBtn(); buildTable();});
+dateInput.addEventListener('change',e=>{currentDate=new Date(e.target.value); updateDateBtn(); restoreSelections(); dateInput.style.display='none'; buildTable();});
+document.getElementById('prevDay').addEventListener('click',()=>{currentDate.setDate(currentDate.getDate()-1); updateDateBtn(); restoreSelections(); buildTable();});
+document.getElementById('nextDay').addEventListener('click',()=>{currentDate.setDate(currentDate.getDate()+1); updateDateBtn(); restoreSelections(); buildTable();});
 
 // === INIT ===
 loadData(); updateDateBtn(); createServiceDropdowns(); buildTable();
