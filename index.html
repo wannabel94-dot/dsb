@@ -9,15 +9,14 @@
   .container {max-width: 1500px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.06);}
   h1 {margin-bottom: 15px;}
   .date-controls {display: flex; align-items: center; gap: 10px; margin-bottom: 18px;}
-  .date-btn, .date-nav {padding: 10px 18px; font-size: 16px; cursor: pointer;}
+  .date-btn, .date-nav, #ratesBtn {padding: 10px 18px; font-size: 16px; cursor: pointer;}
   .dropdown {position: relative; display: inline-block; margin-bottom: 18px; margin-right: 20px;}
   .dropdown button {padding: 10px 18px; cursor: pointer;}
   .dropdown-content {display: none; position: absolute; background-color: #f9f9f9; min-width: 180px; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 1; border-radius: 8px; max-height: 300px; overflow-y: auto;}
   .dropdown-content button {display: block; width: 100%; border: none; background: none; padding: 8px 12px; text-align: left; cursor: pointer; border-radius: 5px;}
   .dropdown-content button.active {background: #2b6cb0; color: #fff;}
   .service-label {margin-bottom: 5px; font-weight: bold;}
-  #ratesBtn {padding: 10px 18px; font-size: 16px; margin-left:10px; cursor:pointer;}
-  table {width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; min-width: 1400px;}
+  table {width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px;}
   th, td {padding: 8px; border: 1px solid #ddd; text-align: right;}
   th {background: #f1f5f9; text-align: left;}
   td.currency {white-space: nowrap;}
@@ -50,11 +49,7 @@
 
   <table id="paymentTable">
     <thead>
-      <tr>
-        <th>Día</th>
-        <th>Fecha</th>
-        <th>Total</th>
-      </tr>
+      <tr id="tableHeader"></tr>
     </thead>
     <tbody id="tableBody"></tbody>
   </table>
@@ -96,81 +91,75 @@
 </div>
 
 <script>
-const dogNames = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
+// === DATA ===
+let dogNames = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
 let allDogs = [...dogNames, "CHUFI","LUPE","CUSCO"];
 let rates = {}; allDogs.forEach(d=>rates[d]={daycare:10,weekend:12,overnight:20,walk:5});
-let rows = []; // table data
-let selections = {}; // current date selections
-let currentDate = new Date();
+let rows=[]; let selections={}; let currentDate=new Date();
 
-// DOM elements
-const dateBtn = document.getElementById('dateBtn');
-const dateInput = document.getElementById('dateInput');
-const serviceDropdowns = document.getElementById('serviceDropdowns');
-const tbody = document.getElementById('tableBody');
-const todayLabel = document.getElementById('todayLabel');
-const dailyTotalSpan = document.getElementById('dailyTotal');
-const weeklyTotalSpan = document.getElementById('weeklyTotal');
-const monthlyTotalSpan = document.getElementById('monthlyTotal');
-const ratesModal = document.getElementById('ratesModal');
-const ratesTableBody = document.querySelector('#ratesTable tbody');
-const editModal = document.getElementById('editModal');
-const editTable = document.getElementById('editTable');
-const clearDayBtn = document.getElementById('clearDay');
+// === DOM ===
+const dateBtn=document.getElementById('dateBtn');
+const dateInput=document.getElementById('dateInput');
+const serviceDropdowns=document.getElementById('serviceDropdowns');
+const tbody=document.getElementById('tableBody');
+const tableHeader=document.getElementById('tableHeader');
+const todayLabel=document.getElementById('todayLabel');
+const dailyTotalSpan=document.getElementById('dailyTotal');
+const weeklyTotalSpan=document.getElementById('weeklyTotal');
+const monthlyTotalSpan=document.getElementById('monthlyTotal');
+const ratesModal=document.getElementById('ratesModal');
+const ratesTableBody=document.querySelector('#ratesTable tbody');
+const editModal=document.getElementById('editModal');
+const editTable=document.getElementById('editTable');
+const clearDayBtn=document.getElementById('clearDay');
 
-// Spanish day abbreviations
-const dayAbbr = ['Dom.','Lun.','Mar.','Mié.','Jue.','Vie.','Sáb.'];
+// Spanish days
+const dayAbbr=['Dom.','Lun.','Mar.','Mié.','Jue.','Vie.','Sáb.'];
 
-function formatDate(d){ const dd=('0'+d.getDate()).slice(-2); const mm=('0'+(d.getMonth()+1)).slice(-2); const yyyy=d.getFullYear(); return `${dd}/${mm}/${yyyy}`; }
-function dayOfWeek(d){ return dayAbbr[d.getDay()]; }
+// === UTILITIES ===
+function formatDate(d){return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();}
+function dayOfWeek(d){return dayAbbr[d.getDay()];}
 
-// LocalStorage
-function saveData(){ localStorage.setItem('dogDashboard',JSON.stringify({rows, rates})); }
-function loadData(){ const data = localStorage.getItem('dogDashboard'); if(data){ const parsed=JSON.parse(data); rows=parsed.rows||[]; rates=parsed.rates||rates; } }
+// === LOCAL STORAGE ===
+function saveData(){localStorage.setItem('dogDashboard',JSON.stringify({rows,rates}));}
+function loadData(){const data=localStorage.getItem('dogDashboard');if(data){const parsed=JSON.parse(data);rows=parsed.rows||[];rates=parsed.rates||rates;}}
 
-function updateDateBtn(){ dateBtn.textContent=formatDate(currentDate); }
+// === DATE & TOTALS ===
+function updateDateBtn(){dateBtn.textContent=formatDate(currentDate);}
+function updateTotals(){
+  const today=new Date(); const todayStr=formatDate(today);
+  todayLabel.textContent=`Hoy: ${todayStr}`;
+  const todayRow=rows.find(r=>r.Fecha===todayStr);
+  dailyTotalSpan.textContent='Daily: '+(todayRow?todayRow.Total.toFixed(2):'0')+' €';
+  let startWeek=new Date(today); startWeek.setDate(today.getDate()-((today.getDay()+6)%7));
+  let endWeek=new Date(startWeek); endWeek.setDate(startWeek.getDate()+6);
+  let weekSum = rows.filter(r=>{ const d=r.Fecha.split('/'); const rd=new Date(d[2],d[1]-1,d[0]); return rd>=startWeek && rd<=endWeek; }).reduce((a,b)=>a+b.Total,0);
+  weeklyTotalSpan.textContent='Weekly: '+weekSum.toFixed(2)+' €';
+  const startMonth=new Date(today.getFullYear(), today.getMonth(),1);
+  const endMonth=new Date(today.getFullYear(), today.getMonth()+1,0);
+  let monthSum = rows.filter(r=>{ const d=r.Fecha.split('/'); const rd=new Date(d[2],d[1]-1,d[0]); return rd>=startMonth && rd<=endMonth; }).reduce((a,b)=>a+b.Total,0);
+  monthlyTotalSpan.textContent='Monthly: '+monthSum.toFixed(2)+' €';
+}
+
+// === TABLE ===
 function buildTable(){
+  tableHeader.innerHTML=''; const headerCells=['Día','Fecha','Total',...allDogs];
+  headerCells.forEach(h=>{const th=document.createElement('th');th.textContent=h;tableHeader.appendChild(th);});
   tbody.innerHTML='';
-  const headerRow = document.createElement('tr');
-  const headerCells = ['Día','Fecha','Total',...allDogs];
-  headerCells.forEach(h=>{ const th=document.createElement('th'); th.textContent=h; headerRow.appendChild(th); });
-  if(tbody.querySelector('tr')===null) tbody.appendChild(headerRow);
   rows.sort((a,b)=>new Date(a.Fecha.split('/').reverse().join('-'))-new Date(b.Fecha.split('/').reverse().join('-')));
   rows.forEach(r=>{
     const tr=document.createElement('tr');
-    const d = r.Fecha.split('/'); const rowDate = new Date(d[2],d[1]-1,d[0]);
+    const d=r.Fecha.split('/'); const rowDate=new Date(d[2],d[1]-1,d[0]);
     if(rowDate.getDay()===0||rowDate.getDay()===6) tr.classList.add('weekend');
-    const tdDay=document.createElement('td'); tdDay.textContent=dayOfWeek(rowDate); tr.appendChild(tdDay);
-    const tdFecha=document.createElement('td'); tdFecha.textContent=r.Fecha; tr.appendChild(tdFecha);
-    const tdTotal=document.createElement('td'); tdTotal.textContent=r.Total.toFixed(2)+' €'; tdTotal.classList.add('currency'); tr.appendChild(tdTotal);
-    allDogs.forEach(dog=>{
-      const td=document.createElement('td'); td.textContent=r[dog]||''; td.classList.add('currency'); tr.appendChild(td);
-    });
+    tr.innerHTML='<td>'+dayOfWeek(rowDate)+'</td><td>'+r.Fecha+'</td><td>'+r.Total.toFixed(2)+' €</td>';
+    allDogs.forEach(dog){const val=r[dog]||0; tr.innerHTML+='<td>'+ (val?val:'')+'</td>';});
     tr.addEventListener('click',()=>openEditModal(r));
     tbody.appendChild(tr);
   });
   updateTotals();
 }
 
-// Totals (today-based)
-function updateTotals(){
-  const today = new Date(); const todayStr = formatDate(today);
-  todayLabel.textContent = `Hoy: ${todayStr}`;
-  const todayRow = rows.find(r=>r.Fecha===todayStr);
-  dailyTotalSpan.textContent='Daily: '+(todayRow?todayRow.Total.toFixed(2):'0')+' €';
-  // Weekly
-  let startWeek=new Date(today); startWeek.setDate(today.getDate()-((today.getDay()+6)%7));
-  let endWeek=new Date(startWeek); endWeek.setDate(startWeek.getDate()+6);
-  const weekSum = rows.filter(r=>{ const d=r.Fecha.split('/'); const rd=new Date(d[2],d[1]-1,d[0]); return rd>=startWeek && rd<=endWeek; }).reduce((a,b)=>a+b.Total,0);
-  weeklyTotalSpan.textContent='Weekly: '+weekSum.toFixed(2)+' €';
-  // Monthly
-  const startMonth = new Date(today.getFullYear(), today.getMonth(),1);
-  const endMonth = new Date(today.getFullYear(), today.getMonth()+1,0);
-  const monthSum = rows.filter(r=>{ const d=r.Fecha.split('/'); const rd=new Date(d[2],d[1]-1,d[0]); return rd>=startMonth && rd<=endMonth; }).reduce((a,b)=>a+b.Total,0);
-  monthlyTotalSpan.textContent='Monthly: '+monthSum.toFixed(2)+' €';
-}
-
-// Service dropdowns
+// === SERVICE DROPDOWNS ===
 function createServiceDropdowns(){
   ['Daycare','Walk','Overnight'].forEach(service=>{
     const div=document.createElement('div'); div.classList.add('dropdown');
@@ -179,48 +168,42 @@ function createServiceDropdowns(){
     const content=document.createElement('div'); content.classList.add('dropdown-content');
     allDogs.forEach(dog=>{
       const dogBtn=document.createElement('button'); dogBtn.textContent=dog;
-      dogBtn.addEventListener('click',(e)=>{ 
-        e.stopPropagation();
-        toggleDog(dog,service,dogBtn);
-      });
+      dogBtn.addEventListener('click',e=>{e.stopPropagation(); toggleDog(dog,service,dogBtn);});
       content.appendChild(dogBtn);
     });
     div.appendChild(content);
-    btn.addEventListener('click',(e)=>{
-      document.querySelectorAll('.dropdown-content').forEach(c=>{if(c!==content)c.style.display='none';});
-      content.style.display=content.style.display==='block'?'none':'block';
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const isOpen=content.style.display==='block';
+      document.querySelectorAll('.dropdown-content').forEach(c=>c.style.display='none');
+      content.style.display=isOpen?'none':'block';
     });
     serviceDropdowns.appendChild(div);
   });
-  // Close when clicked outside
-  document.addEventListener('click',()=>{ document.querySelectorAll('.dropdown-content').forEach(c=>c.style.display='none'); });
+  document.addEventListener('click',()=>{document.querySelectorAll('.dropdown-content').forEach(c=>c.style.display='none');});
 }
 
+// === TOGGLE DOG ===
 function toggleDog(dog,service,btn){
-  const dateStr=formatDate(currentDate);
-  if(!selections[dateStr]) selections[dateStr]={};
-  const key=dog+'_'+service;
-  selections[dateStr][key] = !selections[dateStr][key];
+  const dateStr=formatDate(currentDate); if(!selections[dateStr]) selections[dateStr]={};
+  const key=dog+'_'+service; selections[dateStr][key]=!selections[dateStr][key];
   btn.classList.toggle('active',selections[dateStr][key]);
   updateDogPayment(dog,service,selections[dateStr][key]);
 }
 
-function findRow(dateStr){ return rows.find(r=>r.Fecha===dateStr); }
-
+// === UPDATE PAYMENT ===
+function findRow(dateStr){return rows.find(r=>r.Fecha===dateStr);}
 function updateDogPayment(dog,service,add){
   const dateStr=formatDate(currentDate);
-  let row = findRow(dateStr);
-  if(!row){ row={Fecha:dateStr,Total:0}; allDogs.forEach(d=>row[d]=0); rows.push(row); }
+  let row=findRow(dateStr);
+  if(!row){row={Fecha:dateStr,Total:0}; allDogs.forEach(d=>row[d]=0); rows.push(row);}
   let rate=rates[dog][service.toLowerCase()];
-  if(service==='Daycare' && (currentDate.getDay()===0||currentDate.getDay()===6)) rate=rates[dog].weekend;
-  if(add){ row[dog]+=rate; row.Total+=rate; }
-  else{ row.Total-=Math.min(rate,row[dog]); row[dog]=Math.max(0,row[dog]-rate); }
-  row.Total=Math.max(0,row.Total);
-  saveData();
-  buildTable();
+  if(service==='Daycare'&&(currentDate.getDay()===0||currentDate.getDay()===6)) rate=rates[dog].weekend;
+  if(add){row[dog]+=rate; row.Total+=rate;} else {row.Total-=Math.min(rate,row[dog]); row[dog]=Math.max(0,row[dog]-rate);}
+  row.Total=Math.max(0,row.Total); saveData(); buildTable();
 }
 
-// Rates modal
+// === RATES MODAL ===
 function populateRatesModal(){
   ratesTableBody.innerHTML='';
   allDogs.forEach(d=>{
@@ -234,34 +217,19 @@ function populateRatesModal(){
     ratesTableBody.appendChild(tr);
   });
 }
-document.getElementById('ratesBtn').addEventListener('click',()=>{ populateRatesModal(); ratesModal.style.display='flex'; });
-document.getElementById('closeRates').addEventListener('click',()=>{ ratesModal.style.display='none'; });
+document.getElementById('ratesBtn').addEventListener('click',()=>{populateRatesModal(); ratesModal.style.display='flex';});
+document.getElementById('closeRates').addEventListener('click',()=>{ratesModal.style.display='none';});
 document.getElementById('saveRates').addEventListener('click',()=>{
-  allDogs.forEach(d=>{
-    rates[d].daycare=parseFloat(document.getElementById('daycare_'+d).value)||0;
-    rates[d].weekend=parseFloat(document.getElementById('weekend_'+d).value)||0;
-    rates[d].overnight=parseFloat(document.getElementById('overnight_'+d).value)||0;
-    rates[d].walk=parseFloat(document.getElementById('walk_'+d).value)||0;
-  });
+  allDogs.forEach(d=>{rates[d].daycare=parseFloat(document.getElementById('daycare_'+d).value)||0; rates[d].weekend=parseFloat(document.getElementById('weekend_'+d).value)||0; rates[d].overnight=parseFloat(document.getElementById('overnight_'+d).value)||0; rates[d].walk=parseFloat(document.getElementById('walk_'+d).value)||0;});
   saveData(); ratesModal.style.display='none'; buildTable();
 });
-document.getElementById('addDog').addEventListener('click',()=>{
-  const newDog = prompt("Enter new dog name:");
-  if(newDog && !allDogs.includes(newDog)){
-    allDogs.push(newDog);
-    rates[newDog]={daycare:10,weekend:12,overnight:20,walk:5};
-    populateRatesModal(); buildTable(); saveData();
-  }
-});
-function deleteDog(d){ delete rates[d]; allDogs=allDogs.filter(x=>x!==d); populateRatesModal(); buildTable(); saveData(); }
+document.getElementById('addDog').addEventListener('click',()=>{const newDog=prompt("Enter new dog name:"); if(newDog&&!allDogs.includes(newDog)){allDogs.push(newDog); rates[newDog]={daycare:10,weekend:12,overnight:20,walk:5}; populateRatesModal(); buildTable(); saveData();}});
+function deleteDog(d){delete rates[d]; allDogs=allDogs.filter(x=>x!==d); populateRatesModal(); buildTable(); saveData();}
 
-// Edit modal
+// === EDIT DAY MODAL ===
 function openEditModal(row){
-  editModal.style.display='flex';
-  editTable.innerHTML='';
-  const header = document.createElement('tr');
-  header.innerHTML='<th>Dog</th><th>Daycare</th><th>Walk</th><th>Overnight</th>';
-  editTable.appendChild(header);
+  editModal.style.display='flex'; editTable.innerHTML='';
+  const header=document.createElement('tr'); header.innerHTML='<th>Dog</th><th>Daycare</th><th>Walk</th><th>Overnight</th>'; editTable.appendChild(header);
   allDogs.forEach(d=>{
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${d}</td>
@@ -270,21 +238,18 @@ function openEditModal(row){
       <td><input type='number' value='${row[d]||0}' id='edit_overnight_${d}'></td>`;
     editTable.appendChild(tr);
   });
-  clearDayBtn.onclick=()=>{ allDogs.forEach(d=>{ row[d]=0; }); row.Total=0; buildTable(); saveData(); editModal.style.display='none'; };
-  document.getElementById('closeEdit').onclick=()=>{ editModal.style.display='none'; };
+  clearDayBtn.onclick=()=>{allDogs.forEach(d=>{row[d]=0;}); row.Total=0; buildTable(); saveData(); editModal.style.display='none';};
+  document.getElementById('closeEdit').onclick=()=>{editModal.style.display='none';};
 }
-  
-// Date controls
-dateBtn.addEventListener('click',()=>{ dateInput.valueAsDate=currentDate; dateInput.style.display='inline-block'; });
-dateInput.addEventListener('change',(e)=>{ currentDate=new Date(e.target.value); updateDateBtn(); dateInput.style.display='none'; buildTable(); });
-document.getElementById('prevDay').addEventListener('click',()=>{ currentDate.setDate(currentDate.getDate()-1); updateDateBtn(); buildTable(); });
-document.getElementById('nextDay').addEventListener('click',()=>{ currentDate.setDate(currentDate.getDate()+1); updateDateBtn(); buildTable(); });
 
-// Init
-loadData();
-updateDateBtn();
-createServiceDropdowns();
-buildTable();
+// === DATE CONTROLS ===
+dateBtn.addEventListener('click',()=>{ dateInput.valueAsDate=currentDate; dateInput.style.display='inline-block'; });
+dateInput.addEventListener('change',e=>{currentDate=new Date(e.target.value); updateDateBtn(); dateInput.style.display='none'; buildTable();});
+document.getElementById('prevDay').addEventListener('click',()=>{currentDate.setDate(currentDate.getDate()-1); updateDateBtn(); buildTable();});
+document.getElementById('nextDay').addEventListener('click',()=>{currentDate.setDate(currentDate.getDate()+1); updateDateBtn(); buildTable();});
+
+// === INIT ===
+loadData(); updateDateBtn(); createServiceDropdowns(); buildTable();
 </script>
 </body>
 </html>
