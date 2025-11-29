@@ -1,1 +1,162 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dog Services – Table View</title>
 
+<style>
+  body {font-family: Arial, sans-serif; background: #eef2f7; margin:0; padding:0;}
+  .container {max-width: 1600px; margin: 20px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);}
+  h1 {margin-bottom: 20px; font-size: 28px; color: #333;}
+  table {width:100%; border-collapse: collapse; font-size:14px;}
+  th, td {padding:10px; border:1px solid #ddd; text-align:right;}
+  th {background:#f1f5f9; text-align:left; font-weight:600;}
+  td.currency {white-space: nowrap;}
+  td.weekday {text-align:center; font-weight:500; color:#555;}
+  tr.weekend {background-color:#fff3e0;}
+
+  .edit-btn, #backBtn {
+    background:#f0ad4e; color:#fff; border:none; border-radius:5px; cursor:pointer; padding:5px 10px;
+  }
+  .edit-btn:hover, #backBtn:hover {background:#ec971f;}
+
+  .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.5); justify-content:center; align-items:center;}
+  .modal-content {background:#fff; padding:20px; border-radius:10px;
+    max-width:800px; max-height:80%; overflow-y:auto;}
+  .modal-content table {width:100%; border-collapse: collapse;}
+  .modal-content th, .modal-content td {border:1px solid #ccc; padding:8px; text-align:center;}
+  .modal-content input {width:60px;}
+  .modal-content button {margin-top:10px; margin-right:5px; padding:8px 12px; cursor:pointer;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>Dog Services – Table View</h1>
+
+  <button id="backBtn">Back to Data Entry</button>
+
+  <table id="paymentTable">
+    <thead>
+      <tr id="tableHead">
+        <th>Día</th>
+        <th>Fecha</th>
+        <th>Total (€)</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<!-- Edit Row Modal -->
+<div id="editRowModal" class="modal">
+  <div class="modal-content">
+    <h2>Edit Date Entries</h2>
+    <table id="editRowTable">
+      <thead><tr><th>Dog</th><th>Value (€)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <button id="saveEditRow">Save</button>
+    <button id="closeEditRow">Close</button>
+  </div>
+</div>
+
+<script>
+let allDogs = JSON.parse(localStorage.getItem('allDogs')) || [];
+let rows = JSON.parse(localStorage.getItem('rows')) || [];
+
+function saveData() {
+  localStorage.setItem('rows', JSON.stringify(rows));
+}
+
+function buildTable() {
+  const tbody = document.getElementById('tableBody');
+  const tableHead = document.getElementById('tableHead');
+
+  tbody.innerHTML = '';
+  tableHead.innerHTML = `<th>Día</th><th>Fecha</th><th>Total (€)</th>`;
+  allDogs.forEach(d => {
+    const th = document.createElement('th');
+    th.textContent = d;
+    tableHead.appendChild(th);
+  });
+  tableHead.appendChild(document.createElement('th')).textContent = 'Editar';
+
+  rows.sort((a,b)=>{
+    const A = new Date(a.Fecha.split('/').reverse().join('-'));
+    const B = new Date(b.Fecha.split('/').reverse().join('-'));
+    return A - B;
+  });
+
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    let [dd,mm,yy] = r.Fecha.split('/');
+    const d = new Date(yy, mm-1, dd);
+    if (d.getDay()===0 || d.getDay()===6) tr.classList.add('weekend');
+
+    tr.innerHTML = `<td class="weekday">${r.Día}</td><td>${r.Fecha}</td><td>${r.Total.toFixed(2)}</td>`;
+
+    allDogs.forEach(dog => {
+      const td = document.createElement('td');
+      td.textContent = (r.services[dog] || '');
+      td.classList.add('currency');
+      tr.appendChild(td);
+    });
+
+    const tdEdit = document.createElement('td');
+    const editBtn = document.createElement('button');
+    editBtn.classList.add('edit-btn');
+    editBtn.textContent = 'Editar';
+    editBtn.onclick = () => openEditRowModal(r);
+    tdEdit.appendChild(editBtn);
+    tr.appendChild(tdEdit);
+
+    tbody.appendChild(tr);
+  });
+}
+
+// EDIT MODAL
+const editRowModal = document.getElementById('editRowModal');
+const editRowTableBody = document.querySelector('#editRowTable tbody');
+let editingRow = null;
+
+function openEditRowModal(row) {
+  editingRow = row;
+  editRowTableBody.innerHTML = '';
+  allDogs.forEach(dog => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${dog}</td><td><input type="number" value="${row.services[dog] || 0}" min="0"></td>`;
+    editRowTableBody.appendChild(tr);
+  });
+  editRowModal.style.display = 'flex';
+}
+
+document.getElementById('closeEditRow').onclick = () => {
+  editRowModal.style.display = 'none';
+};
+
+document.getElementById('saveEditRow').onclick = () => {
+  const inputs = editRowTableBody.querySelectorAll('input');
+  allDogs.forEach((dog,i)=>{
+    const val = parseFloat(inputs[i].value) || 0;
+    if(val===0) delete editingRow.services[dog];
+    else editingRow.services[dog] = val;
+  });
+  editingRow.Total = Object.values(editingRow.services).reduce((a,b)=>a+b,0);
+  saveData();
+  buildTable();
+  editRowModal.style.display = 'none';
+};
+
+document.getElementById('backBtn').onclick = () => {
+  window.location.href = "data-entry.html";
+};
+
+buildTable();
+</script>
+
+</body>
+</html>
