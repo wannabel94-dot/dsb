@@ -160,7 +160,7 @@ document.getElementById('prevDay').addEventListener('click',()=>{ currentDate.se
 document.getElementById('nextDay').addEventListener('click',()=>{ currentDate.setDate(currentDate.getDate()+1); updateDateBtn(); restoreSelections(); buildTable(); });
 
 // Restore button highlights per date
-def restoreSelections(){
+function restoreSelections() {
   const dateStr=formatDate(currentDate);
   document.querySelectorAll('.dropdown-content button').forEach(btn=>{
     const dog=btn.textContent;
