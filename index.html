@@ -8,24 +8,39 @@
   body {font-family: Arial, sans-serif; padding: 20px; background: #f7fafc;}
   .container {max-width: 1200px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); overflow-x:auto;}
   h1 {margin-bottom: 12px;}
-  .date-btn {padding: 10px 18px; font-size: 16px; margin-bottom: 18px;}
+  .date-controls {display: flex; align-items: center; gap: 10px; margin-bottom: 18px;}
+  .date-btn, .date-nav {padding: 10px 18px; font-size: 16px; cursor: pointer;}
   .dog-buttons {display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 18px;}
   .dog-buttons button {padding: 8px 14px; cursor: pointer; border-radius: 8px; border: 1px solid #888; background: #e2e8f0;}
   .dog-buttons button.active {background: #2b6cb0; color: #fff;}
+  .dropdown {position: relative; display: inline-block;}
+  .dropdown-content {display: none; position: absolute; background-color: #f9f9f9; min-width: 120px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 8px;}
+  .dropdown-content button {width: 100%; text-align: left; border: none; background: none; padding: 8px 12px; cursor: pointer;}
+  .dropdown:hover .dropdown-content {display: block;}
   table {width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; min-width: 1200px;}
   th, td {padding: 8px; border: 1px solid #ddd; text-align: right;}
   th {background: #f1f5f9; text-align: left;}
   td.currency {white-space: nowrap;}
+  .weekend {background-color: #fff3e0;}
 </style>
 </head>
 <body>
 <div class="container">
   <h1>Dog Attendance / Payments</h1>
 
-  <button id="dateBtn" class="date-btn"></button>
-  <input type="date" id="dateInput" style="display:none; margin-bottom:18px;" />
+  <div class="date-controls">
+    <button id="prevDay" class="date-nav">&lt;</button>
+    <button id="dateBtn" class="date-btn"></button>
+    <button id="nextDay" class="date-nav">&gt;</button>
+    <input type="date" id="dateInput" style="display:none; margin-left:10px;" />
+  </div>
 
   <div class="dog-buttons" id="dogButtons"></div>
+
+  <div class="dropdown">
+    <button>Extras ▼</button>
+    <div class="dropdown-content" id="extrasButtons"></div>
+  </div>
 
   <table id="paymentTable">
     <thead>
@@ -52,21 +67,23 @@
       </tr>
     </thead>
     <tbody id="tableBody">
-      <!-- rows inserted by script -->
     </tbody>
   </table>
 </div>
 
 <script>
-const dogNames = ["PABLO","LILI","JUGNIA","LEO","INDIA","CHUFI","CUSCO","KIMCHI","NINA","CARMELA","LUPE","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
+const dogNames = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
+const extraDogs = ["CHUFI","LUPE","CUSCO"];
 let rows = [];
 
 let currentDate = new Date();
 const dateBtn = document.getElementById('dateBtn');
 const dateInput = document.getElementById('dateInput');
 const dogButtonsDiv = document.getElementById('dogButtons');
+const extrasDiv = document.getElementById('extrasButtons');
 const tbody = document.getElementById('tableBody');
 let dogButtons = [];
+let extraButtons = [];
 
 function formatDate(d){
   const dd = String(d.getDate()).padStart(2,'0');
@@ -75,28 +92,11 @@ function formatDate(d){
   return `${dd}/${mm}/${yyyy}`;
 }
 
-function updateDateBtn(){
-  dateBtn.textContent = formatDate(currentDate);
-}
-
-dateBtn.addEventListener('click',()=>{
-  dateInput.valueAsDate = currentDate;
-  dateInput.style.display = 'inline-block';
-});
-
-dateInput.addEventListener('change',(e)=>{
-  currentDate = new Date(e.target.value);
-  updateDateBtn();
-  dateInput.style.display = 'none';
-  resetDogButtons();
-  buildTable();
-});
-
 function resetDogButtons(){
   dogButtons.forEach(btn=>btn.classList.remove('active'));
+  extraButtons.forEach(btn=>btn.classList.remove('active'));
 }
 
-// Create dog buttons
 function createDogButtons(){
   dogNames.forEach(name=>{
     const btn = document.createElement('button');
@@ -109,6 +109,17 @@ function createDogButtons(){
     dogButtonsDiv.appendChild(btn);
     dogButtons.push(btn);
   });
+  extraDogs.forEach(name=>{
+    const btn = document.createElement('button');
+    btn.textContent = name;
+    btn.addEventListener('click',()=>{
+      const adding = !btn.classList.contains('active');
+      btn.classList.toggle('active');
+      updateDogPayment(name, adding);
+    });
+    extrasDiv.appendChild(btn);
+    extraButtons.push(btn);
+  });
 }
 
 function findRowByDate(dateStr){
@@ -120,7 +131,7 @@ function updateDogPayment(dogName, add){
   let row = findRowByDate(dateStr);
   if(!row){
     row = {Fecha: dateStr, Total: 0};
-    dogNames.forEach(d=>row[d]=0);
+    [...dogNames, ...extraDogs].forEach(d=>row[d]=0);
     rows.push(row);
   }
   if(add){
@@ -139,9 +150,17 @@ function buildTable(){
   rows.sort((a,b)=>new Date(a.Fecha.split('/').reverse().join('-')) - new Date(b.Fecha.split('/').reverse().join('-')));
   rows.forEach(r=>{
     const tr = document.createElement('tr');
+
+    // Detect weekend
+    const parts = r.Fecha.split('/');
+    const rowDate = new Date(parts[2], parts[1]-1, parts[0]);
+    if(rowDate.getDay() === 0 || rowDate.getDay() === 6){
+      tr.classList.add('weekend');
+    }
+
     const tdFecha = document.createElement('td'); tdFecha.textContent = r.Fecha; tr.appendChild(tdFecha);
     const tdTotal = document.createElement('td'); tdTotal.textContent = r.Total+' €'; tdTotal.classList.add('currency'); tr.appendChild(tdTotal);
-    dogNames.forEach(d=>{
+    [...dogNames, ...extraDogs].forEach(d=>{
       const td = document.createElement('td');
       td.textContent = r[d]||'';
       td.classList.add('currency');
@@ -150,6 +169,33 @@ function buildTable(){
     tbody.appendChild(tr);
   });
 }
+
+// Date input toggle
+dateBtn.addEventListener('click',()=>{
+  dateInput.valueAsDate = currentDate;
+  dateInput.style.display = 'inline-block';
+});
+dateInput.addEventListener('change',(e)=>{
+  currentDate = new Date(e.target.value);
+  updateDateBtn();
+  dateInput.style.display = 'none';
+  resetDogButtons();
+  buildTable();
+});
+
+// Prev/Next day buttons
+document.getElementById('prevDay').addEventListener('click',()=>{
+  currentDate.setDate(currentDate.getDate()-1);
+  updateDateBtn();
+  resetDogButtons();
+  buildTable();
+});
+document.getElementById('nextDay').addEventListener('click',()=>{
+  currentDate.setDate(currentDate.getDate()+1);
+  updateDateBtn();
+  resetDogButtons();
+  buildTable();
+});
 
 updateDateBtn();
 createDogButtons();
