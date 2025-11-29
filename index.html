@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Dog Payments</title>
+<title>Dog Attendance / Payments</title>
 <style>
   body {font-family: Arial, sans-serif; padding: 20px; background: #f7fafc;}
   .container {max-width: 1200px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); overflow-x:auto;}
@@ -83,6 +83,8 @@
   <div id="ratesModalContent">
     <h2>Set Dog Rates (€)</h2>
     <div id="ratesInputs"></div>
+    <h3>Weekend Rate</h3>
+    <label>Weekend Rate (€): <input type="number" id="weekendRate" value="0" min="0"></label><br>
     <button id="saveRates">Save</button>
     <button id="closeRates">Close</button>
   </div>
@@ -95,7 +97,6 @@ let rows = [];
 
 let rates = {};
 [...dogNames, ...extraDogs].forEach(d => rates[d] = 10);
-
 let currentDate = new Date();
 const dateBtn = document.getElementById('dateBtn');
 const dateInput = document.getElementById('dateInput');
@@ -142,7 +143,12 @@ function updateDogPayment(dogName, add){
   const dateStr = formatDate(currentDate);
   let row = findRowByDate(dateStr);
   if(!row){ row = {Fecha: dateStr, Total: 0}; [...dogNames, ...extraDogs].forEach(d=>row[d]=0); rows.push(row); }
-  const rate = rates[dogName] || 10;
+  
+  // Determine rate, apply weekend rate if weekend
+  let rate = rates[dogName] || 10;
+  const weekendRate = parseFloat(document.getElementById('weekendRate').value) || 0;
+  if(currentDate.getDay() === 0 || currentDate.getDay() === 6) rate = weekendRate;
+
   if(add){ row[dogName] += rate; row.Total += rate; } 
   else{ row.Total -= Math.min(rate, row[dogName]); row[dogName] = Math.max(0,row[dogName]-rate); }
   row.Total = Math.max(0, row.Total);
