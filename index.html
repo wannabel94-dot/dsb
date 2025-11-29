@@ -88,7 +88,6 @@ const extraDogs = ["CHUFI","LUPE","CUSCO"];
 const allDogs = dogNames.concat(extraDogs);
 let rows = [];
 let selections = {};
-
 let rates = {};
 allDogs.forEach(d => rates[d]={daycare:10, weekend:12, overnight:20, walk:5});
 
@@ -113,6 +112,24 @@ function createServiceDropdowns(){
       content.appendChild(dogBtn);
     });
     div.appendChild(content); serviceDropdowns.appendChild(div);
+  });
+
+  // Toggle dropdown content
+  document.querySelectorAll('.dropdown').forEach(dropdown => {
+    const btn = dropdown.querySelector('button');
+    const content = dropdown.querySelector('.dropdown-content');
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.dropdown-content').forEach(c => {
+        if(c !== content) c.style.display = 'none';
+      });
+      content.style.display = content.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+
+  // Close dropdowns if clicked outside
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.dropdown-content').forEach(c => c.style.display = 'none');
   });
 }
 
