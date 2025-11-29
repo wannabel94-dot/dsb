@@ -166,36 +166,40 @@ function updateDateBtn() {
 
 
 // TOTALS -------------------------------------------------------------
-const dailyTotalSpan = document.getElementById('dailyTotal');
-const weeklyTotalSpan = document.getElementById('weeklyTotal');
-const monthlyTotalSpan = document.getElementById('monthlyTotal');
-
 function updateTotals() {
-  const today = formatDate(currentDate);
-  const row = rows.find(r => r.Fecha === today);
+  const now = new Date();                        // <-- always REAL today
+  const todayStr = formatDate(now);
 
+  // find today's row (REAL today)
+  const row = rows.find(r => r.Fecha === todayStr);
   dailyTotalSpan.textContent = 'Daily: ' + (row ? row.Total.toFixed(2) : '0') + ' €';
 
-  // weekly total
-  let startWeek = new Date(currentDate);
-  startWeek.setDate(currentDate.getDate() - ((currentDate.getDay()+6)%7));
+  // --- WEEK MONDAY → SUNDAY ---
+  const monday = new Date(now);
+  let day = monday.getDay();                     // 0=Sun, 1=Mon...
+  const diffToMonday = (day + 6) % 7;            // convert Sunday=6, Monday=0...
+  monday.setDate(now.getDate() - diffToMonday);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
 
   let weekSum = rows.filter(r => {
     let [dd,mm,yy] = r.Fecha.split('/');
-    let d = new Date(yy, mm-1, dd);
-    return d >= startWeek && d <= currentDate;
-  }).reduce((a,b)=>a+b.Total,0);
-  
+    let d = new Date(yy, mm - 1, dd);
+    return d >= monday && d <= sunday;
+  }).reduce((a,b)=>a+b.Total, 0);
+
   weeklyTotalSpan.textContent = 'Weekly: ' + weekSum.toFixed(2) + ' €';
 
-  // monthly total
-  let startMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  // --- MONTHLY TOTAL (REAL current month) ---
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
   let monthSum = rows.filter(r => {
     let [dd,mm,yy] = r.Fecha.split('/');
     let d = new Date(yy, mm-1, dd);
-    return d >= startMonth && d <= currentDate;
-  }).reduce((a,b)=>a+b.Total,0);
+    return d >= firstDay && d <= lastDay;
+  }).reduce((a,b)=>a+b.Total, 0);
 
   monthlyTotalSpan.textContent = 'Monthly: ' + monthSum.toFixed(2) + ' €';
 }
