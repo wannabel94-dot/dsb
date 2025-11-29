@@ -24,12 +24,12 @@
   .dropdown {position: relative; display: inline-block;}
   .dropdown button {width: 160px; text-align:left; border:1px solid #ccc; border-radius:6px; background:#fff; padding:10px;}
   .dropdown-content {display: none; position: absolute; background-color: #f9f9f9;
-    min-width: 180px; box-shadow: 0px 4px 12px rgba(0,0,0,0.15); z-index: 1;
+    min-width: 180px; box-shadow: 0px 4px 12px rgba(0,0,0,0.15); z-index: 10;
     border-radius: 8px; max-height: 300px; overflow-y: auto; margin-top:5px;}
   .dropdown-content button {display: block; width: 100%; border: none; background: none;
     padding: 8px 12px; text-align: left; cursor: pointer; border-radius: 5px; transition:0.2s;}
+  .dropdown-content button.selected,
   .dropdown-content button:hover {background:#2b6cb0; color:#fff;}
-  .dropdown-content button.selected {background:#2b6cb0; color:#fff;}
 
   table {width:100%; border-collapse: collapse; margin-top:20px; font-size:14px;}
   th, td {padding:10px; border:1px solid #ddd; text-align:right;}
@@ -42,7 +42,7 @@
   .edit-btn:hover {background:#ec971f;}
 
   .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.5); justify-content:center; align-items:center;}
+    background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:50;}
   .modal-content {background:#fff; padding:20px; border-radius:10px;
     max-width:800px; max-height:80%; overflow-y:auto;}
   .modal-content table {width:100%; border-collapse: collapse;}
@@ -126,14 +126,13 @@
 // INITIAL DATA -------------------------------------------------------
 const spanishDays = ['Dom.','Lun.','Mar.','Mié.','Jue.','Vie.','Sáb.'];
 
-let dogNames = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
-let allDogs = JSON.parse(localStorage.getItem('allDogs')) || dogNames;
+let defaultDogs = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
+let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
 
 let rows = JSON.parse(localStorage.getItem('rows')) || [];
 let selections = JSON.parse(localStorage.getItem('selections')) || {};
 let rates = JSON.parse(localStorage.getItem('rates')) || {};
 
-// default rates
 if (Object.keys(rates).length === 0) {
   allDogs.forEach(d => rates[d] = { daycare:10, weekend:12, overnight:20, walk:5 });
 }
@@ -167,41 +166,44 @@ function updateDateBtn() {
 
 // TOTALS -------------------------------------------------------------
 function updateTotals() {
-  const now = new Date();                        // <-- always REAL today
+  const now = new Date();
   const todayStr = formatDate(now);
 
-  // find today's row (REAL today)
-  const row = rows.find(r => r.Fecha === todayStr);
-  dailyTotalSpan.textContent = 'Daily: ' + (row ? row.Total.toFixed(2) : '0') + ' €';
+  const dailySpan   = document.getElementById("dailyTotal");
+  const weeklySpan  = document.getElementById("weeklyTotal");
+  const monthlySpan = document.getElementById("monthlyTotal");
 
-  // --- WEEK MONDAY → SUNDAY ---
+  // DAILY
+  const row = rows.find(r => r.Fecha === todayStr);
+  dailySpan.textContent = "Daily: " + (row ? row.Total.toFixed(2) : "0") + " €";
+
+  // WEEK MON → SUN
   const monday = new Date(now);
-  let day = monday.getDay();                     // 0=Sun, 1=Mon...
-  const diffToMonday = (day + 6) % 7;            // convert Sunday=6, Monday=0...
-  monday.setDate(now.getDate() - diffToMonday);
+  const diff = (monday.getDay() + 6) % 7;
+  monday.setDate(now.getDate() - diff);
 
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
 
   let weekSum = rows.filter(r => {
-    let [dd,mm,yy] = r.Fecha.split('/');
-    let d = new Date(yy, mm - 1, dd);
+    let [dd,mm,yy] = r.Fecha.split("/");
+    let d = new Date(yy, mm-1, dd);
     return d >= monday && d <= sunday;
-  }).reduce((a,b)=>a+b.Total, 0);
+  }).reduce((a,b)=> a + b.Total, 0);
 
-  weeklyTotalSpan.textContent = 'Weekly: ' + weekSum.toFixed(2) + ' €';
+  weeklySpan.textContent = "Weekly: " + weekSum.toFixed(2) + " €";
 
-  // --- MONTHLY TOTAL (REAL current month) ---
+  // MONTHLY (real month)
   const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const lastDay  = new Date(now.getFullYear(), now.getMonth()+1, 0);
 
   let monthSum = rows.filter(r => {
-    let [dd,mm,yy] = r.Fecha.split('/');
+    let [dd,mm,yy] = r.Fecha.split("/");
     let d = new Date(yy, mm-1, dd);
     return d >= firstDay && d <= lastDay;
-  }).reduce((a,b)=>a+b.Total, 0);
+  }).reduce((a,b)=> a + b.Total, 0);
 
-  monthlyTotalSpan.textContent = 'Monthly: ' + monthSum.toFixed(2) + ' €';
+  monthlySpan.textContent = "Monthly: " + monthSum.toFixed(2) + " €";
 }
 
 
@@ -209,57 +211,57 @@ function updateTotals() {
 const serviceDropdowns = document.getElementById('serviceDropdowns');
 
 function createServiceDropdowns() {
-  serviceDropdowns.innerHTML = '';
-  ['Daycare','Walk','Overnight'].forEach(service => {
-    const div = document.createElement('div');
-    div.classList.add('dropdown');
+  serviceDropdowns.innerHTML = "";
+  const services = ["Daycare", "Walk", "Overnight"];
 
-    const btn = document.createElement('button');
+  services.forEach(service => {
+    const div = document.createElement("div");
+    div.classList.add("dropdown");
+
+    const btn = document.createElement("button");
     btn.textContent = service;
     div.appendChild(btn);
 
-    const content = document.createElement('div');
-    content.classList.add('dropdown-content');
+    const content = document.createElement("div");
+    content.classList.add("dropdown-content");
+    div.appendChild(content);
 
     allDogs.forEach(dog => {
-      const dogBtn = document.createElement('button');
+      const dogBtn = document.createElement("button");
       dogBtn.textContent = dog;
+      content.appendChild(dogBtn);
 
-      dogBtn.addEventListener('click', e => {
+      dogBtn.onclick = e => {
         e.stopPropagation();
         toggleDogSelection(dog, service, dogBtn);
-      });
-
-      content.appendChild(dogBtn);
+      };
     });
 
-    div.appendChild(content);
-    serviceDropdowns.appendChild(div);
-
-    btn.addEventListener('click', e => {
+    btn.onclick = e => {
       e.stopPropagation();
-      const open = content.style.display === 'block';
       closeAllDropdowns();
-      content.style.display = open ? 'none' : 'block';
-    });
+      content.style.display = content.style.display === "block" ? "none" : "block";
+    };
+
+    serviceDropdowns.appendChild(div);
   });
 }
 
 function closeAllDropdowns() {
-  document.querySelectorAll('.dropdown-content').forEach(dc => dc.style.display = 'none');
+  document.querySelectorAll(".dropdown-content").forEach(dc => dc.style.display = "none");
 }
-document.addEventListener('click', closeAllDropdowns);
+document.addEventListener("click", closeAllDropdowns);
 
 function toggleDogSelection(dog, service, btn) {
   const dateStr = formatDate(currentDate);
   if (!selections[dateStr]) selections[dateStr] = {};
 
   const key = `${dog}_${service}`;
-  const selected = !selections[dateStr][key];
-  selections[dateStr][key] = selected;
+  selections[dateStr][key] = !selections[dateStr][key];
 
-  btn.classList.toggle('selected', selected);
-  updateDogPayment(dog, service, selected);
+  btn.classList.toggle("selected", selections[dateStr][key]);
+
+  updateDogPayment(dog, service, selections[dateStr][key]);
   saveData();
 }
 
@@ -268,7 +270,7 @@ function updateDogPayment(dog, service, add=true) {
   let row = rows.find(r => r.Fecha === dateStr);
 
   if (!row) {
-    row = { Fecha:dateStr, Día:getWeekday(currentDate), Total:0, services:{} };
+    row = { Fecha: dateStr, Día: getWeekday(currentDate), Total: 0, services: {} };
     rows.push(row);
   }
 
@@ -276,7 +278,8 @@ function updateDogPayment(dog, service, add=true) {
   if (!row.services[dog]) row.services[dog] = 0;
 
   let rate = rates[dog][service.toLowerCase()];
-  if (service === 'Daycare' && (currentDate.getDay() === 0 || currentDate.getDay() === 6))
+
+  if (service === "Daycare" && (currentDate.getDay() === 0 || currentDate.getDay() === 6))
     rate = rates[dog].weekend;
 
   row.services[dog] = add ? row.services[dog] + rate : Math.max(0, row.services[dog] - rate);
@@ -290,17 +293,12 @@ function updateDogPayment(dog, service, add=true) {
 
 // TABLE --------------------------------------------------------------
 function buildTable() {
-  tbody.innerHTML = '';
+  tbody.innerHTML = "";
 
-  const tableHead = document.querySelector('#paymentTable thead tr');
-  tableHead.innerHTML = `<th>Día</th><th>Fecha</th><th>Total (€)</th>`;
-  allDogs.forEach(d => {
-    const th = document.createElement('th');
-    th.textContent = d;
-    tableHead.appendChild(th);
-  });
-  
-  tableHead.appendChild(document.createElement('th')).textContent = 'Editar';
+  const headRow = document.querySelector("#paymentTable thead tr");
+  headRow.innerHTML = `<th>Día</th><th>Fecha</th><th>Total (€)</th>`;
+  allDogs.forEach(d => headRow.innerHTML += `<th>${d}</th>`);
+  headRow.innerHTML += `<th>Editar</th>`;
 
   rows.sort((a,b)=>{
     const A = new Date(a.Fecha.split('/').reverse().join('-'));
@@ -309,62 +307,61 @@ function buildTable() {
   });
 
   rows.forEach(r => {
-    const tr = document.createElement('tr');
+    const tr = document.createElement("tr");
 
     let [dd,mm,yy] = r.Fecha.split('/');
     const d = new Date(yy, mm-1, dd);
-    if (d.getDay() === 0 || d.getDay() === 6) tr.classList.add('weekend');
+    if (d.getDay() === 0 || d.getDay() === 6) tr.classList.add("weekend");
 
-    tr.innerHTML = `<td class="weekday">${r.Día}</td><td>${r.Fecha}</td><td>${r.Total.toFixed(2)}</td>`;
+    tr.innerHTML = `
+      <td class="weekday">${r.Día}</td>
+      <td>${r.Fecha}</td>
+      <td>${r.Total.toFixed(2)}</td>
+    `;
 
     allDogs.forEach(dog => {
-      const td = document.createElement('td');
-      td.textContent = (r.services[dog] || '');
-      td.classList.add('currency');
-      tr.appendChild(td);
+      tr.innerHTML += `<td class="currency">${r.services[dog] || ""}</td>`;
     });
 
-    // edit btn
-    const tdEdit = document.createElement('td');
-    const editBtn = document.createElement('button');
-    editBtn.classList.add('edit-btn');
-    editBtn.textContent = 'Editar';
+    const editTd = document.createElement("td");
+    const editBtn = document.createElement("button");
+    editBtn.className = "edit-btn";
+    editBtn.textContent = "Editar";
     editBtn.onclick = () => openEditRowModal(r);
-    tdEdit.appendChild(editBtn);
-    tr.appendChild(tdEdit);
+    editTd.appendChild(editBtn);
+    tr.appendChild(editTd);
 
     tbody.appendChild(tr);
   });
 }
 
 
-// EDIT ROW MODAL -----------------------------------------------------
-const editRowModal = document.getElementById('editRowModal');
-const editRowTableBody = document.querySelector('#editRowTable tbody');
+// EDIT ROW -----------------------------------------------------------
+const editRowModal = document.getElementById("editRowModal");
+const editRowTableBody = document.querySelector("#editRowTable tbody");
 let editingRow = null;
 
 function openEditRowModal(row) {
   editingRow = row;
-  editRowTableBody.innerHTML = '';
+  editRowTableBody.innerHTML = "";
 
   allDogs.forEach(dog => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${dog}</td>
-      <td><input type="number" value="${row.services[dog] || 0}" min="0"></td>
-    `;
-    editRowTableBody.appendChild(tr);
+    editRowTableBody.innerHTML += `
+      <tr>
+        <td>${dog}</td>
+        <td><input type="number" value="${row.services[dog] || 0}" min="0"></td>
+      </tr>`;
   });
 
-  editRowModal.style.display = 'flex';
+  editRowModal.style.display = "flex";
 }
 
-document.getElementById('closeEditRow').onclick = () => {
-  editRowModal.style.display = 'none';
+document.getElementById("closeEditRow").onclick = () => {
+  editRowModal.style.display = "none";
 };
 
-document.getElementById('saveEditRow').onclick = () => {
-  const inputs = editRowTableBody.querySelectorAll('input');
+document.getElementById("saveEditRow").onclick = () => {
+  const inputs = editRowTableBody.querySelectorAll("input");
 
   allDogs.forEach((dog, i) => {
     const val = parseFloat(inputs[i].value) || 0;
@@ -377,30 +374,29 @@ document.getElementById('saveEditRow').onclick = () => {
   saveData();
   updateTotals();
   buildTable();
-  editRowModal.style.display = 'none';
+  editRowModal.style.display = "none";
 };
 
 
 // RATES MODAL --------------------------------------------------------
-const ratesBtn = document.getElementById('ratesBtn');
-const ratesModal = document.getElementById('ratesModal');
-const ratesTableBody = document.querySelector('#ratesTable tbody');
+const ratesModal = document.getElementById("ratesModal");
+const ratesTableBody = document.querySelector("#ratesTable tbody");
 
-ratesBtn.onclick = () => {
+document.getElementById("ratesBtn").onclick = () => {
   buildRatesTable();
-  ratesModal.style.display = 'flex';
+  ratesModal.style.display = "flex";
 };
 
-document.getElementById('closeRates').onclick = () => {
-  ratesModal.style.display = 'none';
+document.getElementById("closeRates").onclick = () => {
+  ratesModal.style.display = "none";
 };
 
 function buildRatesTable() {
-  ratesTableBody.innerHTML = '';
+  ratesTableBody.innerHTML = "";
 
   allDogs.forEach(dog => {
     const r = rates[dog];
-    const tr = document.createElement('tr');
+    const tr = document.createElement("tr");
 
     tr.innerHTML = `
       <td>${dog}</td>
@@ -413,9 +409,9 @@ function buildRatesTable() {
 
     ratesTableBody.appendChild(tr);
 
-    tr.querySelector('.deleteDogBtn').onclick = () => {
+    tr.querySelector(".deleteDogBtn").onclick = () => {
       delete rates[dog];
-      allDogs = allDogs.filter(d => d !== dog);
+      allDogs = allDogs.filter(x => x !== dog);
       buildRatesTable();
       createServiceDropdowns();
       buildTable();
@@ -424,10 +420,10 @@ function buildRatesTable() {
   });
 }
 
-document.getElementById('saveRates').onclick = () => {
-  [...ratesTableBody.querySelectorAll('tr')].forEach(tr => {
+document.getElementById("saveRates").onclick = () => {
+  [...ratesTableBody.querySelectorAll("tr")].forEach(tr => {
     const dog = tr.children[0].textContent;
-    const inputs = tr.querySelectorAll('input');
+    const inputs = tr.querySelectorAll("input");
 
     rates[dog] = {
       daycare: parseFloat(inputs[0].value) || 0,
@@ -438,10 +434,10 @@ document.getElementById('saveRates').onclick = () => {
   });
 
   saveData();
-  ratesModal.style.display = 'none';
+  ratesModal.style.display = "none";
 };
 
-document.getElementById('addDogRateBtn').onclick = () => {
+document.getElementById("addDogRateBtn").onclick = () => {
   const newDog = prompt("Enter dog name:");
   if (!newDog) return;
   if (rates[newDog]) return alert("Dog already exists!");
@@ -460,33 +456,33 @@ document.getElementById('addDogRateBtn').onclick = () => {
 function restoreSelections() {
   const dateStr = formatDate(currentDate);
 
-  document.querySelectorAll('.dropdown-content').forEach(container => {
+  document.querySelectorAll(".dropdown-content").forEach(container => {
     const service = container.previousElementSibling.textContent;
 
-    container.querySelectorAll('button').forEach(btn => {
+    container.querySelectorAll("button").forEach(btn => {
       const dog = btn.textContent;
       const key = `${dog}_${service}`;
-      btn.classList.toggle('selected', selections[dateStr] && selections[dateStr][key]);
+      btn.classList.toggle("selected", selections[dateStr] && selections[dateStr][key]);
     });
   });
 }
 
 
 // DATE CONTROLS ------------------------------------------------------
-document.getElementById('prevDay').onclick = () => {
-  currentDate.setDate(currentDate.getDate()-1);
+document.getElementById("prevDay").onclick = () => {
+  currentDate.setDate(currentDate.getDate() - 1);
   updateDateBtn();
 };
 
-document.getElementById('nextDay').onclick = () => {
-  currentDate.setDate(currentDate.getDate()+1);
+document.getElementById("nextDay").onclick = () => {
+  currentDate.setDate(currentDate.getDate() + 1);
   updateDateBtn();
 };
 
 dateBtn.onclick = () => {
-  const input = document.createElement('input');
-  input.type = 'date';
-  input.style.display = 'none';
+  const input = document.createElement("input");
+  input.type = "date";
+  input.style.display = "none";
   document.body.appendChild(input);
 
   input.valueAsDate = currentDate;
