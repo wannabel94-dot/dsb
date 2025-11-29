@@ -17,6 +17,7 @@ body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   margin: 0; padding: 0;
 }
+
 .container {
   max-width: 1200px;
   margin: 20px auto;
@@ -25,54 +26,63 @@ body {
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
-h1 { font-size: 32px; margin-bottom: 20px; text-align:center; }
 
-.date-controls { display:flex; gap:15px; align-items:center; justify-content:center; flex-wrap:wrap; margin-bottom:20px; }
-.date-btn, .date-nav, #ratesBtn, #viewTableBtn {
-  padding: 10px 20px; cursor:pointer; border-radius:10px; border:none;
-  font-weight:600;
+.date-controls {
+  display:flex; gap:15px; align-items:center; justify-content:center; flex-wrap:wrap; margin-bottom:30px;
 }
-.date-btn { background:#2563eb; color:white; min-width:150px; }
-.date-nav { background:white; color:#2563eb; font-size:18px; width:45px; }
+.date-btn, .date-nav {
+  padding: 15px 30px; cursor:pointer; border-radius:12px; border:none;
+  font-weight:700; font-size:18px;
+}
+.date-btn { background:#2563eb; color:white; min-width:200px; }
+.date-nav { background:white; color:#2563eb; font-size:22px; width:50px; }
 .date-nav:hover { background:#2563eb; color:white; }
-
-#ratesBtn, #viewTableBtn { background:#10b981; color:white; }
-#ratesBtn:hover, #viewTableBtn:hover { opacity:0.9; }
 
 .services { display:flex; gap:20px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
 .service-btn { flex:1 1 120px; padding:20px; background:#f1f5f9; border-radius:12px; font-weight:600; cursor:pointer; text-align:center; transition:0.2s; }
 .service-btn:hover { background:#e2e8f0; }
 
-.totals { display:flex; justify-content:center; gap:20px; font-weight:600; margin-top:20px; }
-.totals span { padding:5px 10px; background:#e2e8f0; border-radius:8px; color:green; }
+.buttons-row { text-align:center; margin-top:20px; }
+.buttons-row button { padding:10px 25px; margin:5px; font-weight:600; border:none; border-radius:8px; cursor:pointer; color:white; background:#10b981; }
+.buttons-row button:hover { opacity:0.9; }
 
 .summary { margin-top:20px; max-width:600px; margin-left:auto; margin-right:auto; background:#f8fafc; padding:15px; border-radius:10px; }
 .summary h3 { margin-top:0; }
 
+.totals { display:flex; justify-content:center; gap:20px; font-weight:600; margin-top:20px; }
+.totals span { padding:5px 10px; background:#e2e8f0; border-radius:8px; color:green; }
+
 .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:50; }
 .modal-content { background:white; max-width:500px; width:90%; max-height:80%; overflow-y:auto; border-radius:16px; padding:20px; }
 .modal-content h2 { display:flex; align-items:center; gap:10px; margin-top:0; margin-bottom:10px; }
+
 .dog-list { display:grid; grid-template-columns: 1fr 1fr; max-height:300px; overflow-y:auto; margin-bottom:10px; gap:5px; }
 .dog-list button { padding:10px; border:none; border-radius:8px; cursor:pointer; text-align:left; transition:0.2s; background:#f1f5f9; }
 .dog-list button.selected { background:#2563eb; color:white; font-weight:600; }
 
 .modal-buttons { display:flex; justify-content:flex-end; gap:10px; margin-top:10px; }
-.modal-buttons button { padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
-.close-modal { background:#e2e8f0; }
-.save-modal { background:#2563eb; color:white; }
+.close-modal { background:#e2e8f0; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
+.save-modal { background:#2563eb; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
+
+#ratesTable { width:100%; border-collapse:collapse; margin-bottom:10px; }
+#ratesTable th, #ratesTable td { padding:5px 8px; text-align:center; border:1px solid #e2e8f0; }
+#ratesTable th { background:#2563eb; color:white; font-weight:600; }
+#ratesTable td input { width:50px; padding:4px; border:1px solid #ccc; border-radius:4px; text-align:center; }
+.deleteDogBtn { background:#ef4444; color:white; padding:4px 8px; border:none; border-radius:6px; cursor:pointer; }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>🐕 Dog Services – Data Entry</h1>
 
+  <!-- Date controls at top -->
   <div class="date-controls">
     <button id="prevDay" class="date-nav">&lt;</button>
     <button id="dateBtn" class="date-btn"></button>
     <button id="nextDay" class="date-nav">&gt;</button>
   </div>
 
+  <!-- Service buttons -->
   <div class="services">
     <div class="service-btn" data-service="Daycare"><img src="daycare.svg" width="20"> Daycare</div>
     <div class="service-btn" data-service="Walk"><img src="walk.svg" width="20"> Walk</div>
@@ -80,16 +90,19 @@ h1 { font-size: 32px; margin-bottom: 20px; text-align:center; }
     <div class="service-btn" data-service="Extra"><img src="extra.svg" width="20"> Extra</div>
   </div>
 
-  <div style="text-align:center; margin-top:20px;">
+  <!-- Tarifas / Table buttons -->
+  <div class="buttons-row">
     <button id="ratesBtn">Tarifas</button>
     <button id="viewTableBtn">Ver Tabla</button>
   </div>
 
+  <!-- Daily summary -->
   <div class="summary" id="dailySummary">
     <h3>Resumen de hoy:</h3>
     <div id="summaryContent">No hay servicios seleccionados.</div>
   </div>
 
+  <!-- Totals -->
   <div class="totals">
     <span id="dailyTotal">Hoy: 0 €</span>
     <span id="weeklyTotal">Semana: 0 €</span>
@@ -113,10 +126,10 @@ h1 { font-size: 32px; margin-bottom: 20px; text-align:center; }
 <div id="ratesModal" class="modal">
   <div class="modal-content">
     <h2>🐾 Dog Rates (€)</h2>
-    <table id="ratesTable" style="width:100%; margin-bottom:10px; border-collapse:collapse;">
+    <table id="ratesTable">
       <thead>
         <tr>
-          <th>Nombre</th><th>Guardería</th><th>Fin de semana</th><th>Noche</th><th>Paseo</th><th>Acciones</th>
+          <th>Nombre</th><th>Guardería</th><th>Fin semana</th><th>Noche</th><th>Paseo</th><th>Acciones</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -132,6 +145,7 @@ h1 { font-size: 32px; margin-bottom: 20px; text-align:center; }
 <script>
 const defaultDogs = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
+allDogs.sort();
 let rates = JSON.parse(localStorage.getItem('rates')) || {};
 let selections = JSON.parse(localStorage.getItem('selections')) || {};
 let rows = JSON.parse(localStorage.getItem('rows')) || {};
@@ -255,7 +269,8 @@ document.getElementById('closeRates').onclick=()=>{ ratesModal.style.display='no
 
 function buildRatesTable(){
   ratesTableBody.innerHTML='';
-  allDogs.forEach(dog=>{
+  const sortedDogs = [...allDogs].sort();
+  sortedDogs.forEach(dog=>{
     const r=rates[dog]; const tr=document.createElement('tr');
     tr.innerHTML=`<td>${dog}</td>
       <td><input type="number" value="${r.daycare}"></td>
@@ -276,7 +291,7 @@ function buildRatesTable(){
 document.getElementById('saveRates').onclick=()=>{
   [...ratesTableBody.querySelectorAll("tr")].forEach(tr=>{
     const dog=tr.children[0].textContent; const inputs=tr.querySelectorAll("input");
-    rates[dog]={daycare:parseFloat(inputs[0].value)||0, weekend:parseFloat(inputs[1].value)||0, overnight:parseFloat(inputs[2].value)||0, walk:parseFloat(inputs[3].value)||0};
+    rates[dog]={daycare:parseFloat(inputs[0].value)||0, weekend:parseFloat(inputs[1].value)||0, overnight:parseFloat(inputs[2].value)||0, walk:parseFloat(inputs[3].value)||0, extra:0};
   });
   localStorage.setItem('rates',JSON.stringify(rates));
   ratesModal.style.display='none';
