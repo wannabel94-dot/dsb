@@ -92,6 +92,10 @@ function formatDate(d){
   return `${dd}/${mm}/${yyyy}`;
 }
 
+function updateDateBtn(){
+  dateBtn.textContent = formatDate(currentDate);
+}
+
 function resetDogButtons(){
   dogButtons.forEach(btn=>btn.classList.remove('active'));
   extraButtons.forEach(btn=>btn.classList.remove('active'));
