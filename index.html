@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Dog Services Dashboard</title>
+<title>Dog Services – Data Entry</title>
 
 <style>
   body {font-family: Arial, sans-serif; background: #eef2f7; margin:0; padding:0;}
@@ -11,11 +11,11 @@
   h1 {margin-bottom: 20px; font-size: 28px; color: #333;}
 
   .date-controls {display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
-  .date-btn, .date-nav, #ratesBtn {
+  .date-btn, .date-nav, #ratesBtn, #viewTableBtn {
     padding: 10px 18px; font-size: 16px; cursor: pointer; border-radius:6px;
     border:1px solid #ccc; background:#fff; transition:0.2s;
   }
-  .date-btn:hover, .date-nav:hover, #ratesBtn:hover {background:#f0f4f8;}
+  .date-btn:hover, .date-nav:hover, #ratesBtn:hover, #viewTableBtn:hover {background:#f0f4f8;}
 
   .totals {margin-left:20px; font-weight:bold; font-size:16px;}
   .totals span {margin-right:15px; color:green;}
@@ -24,37 +24,31 @@
   .dropdown {position: relative; display: inline-block;}
   .dropdown button {width: 160px; text-align:left; border:1px solid #ccc; border-radius:6px; background:#fff; padding:10px;}
   .dropdown-content {display: none; position: absolute; background-color: #f9f9f9;
-    min-width: 180px; box-shadow: 0px 4px 12px rgba(0,0,0,0.15); z-index: 10;
+    min-width: 180px; box-shadow: 0px 4px 12px rgba(0,0,0,0.15); z-index: 5;
     border-radius: 8px; max-height: 300px; overflow-y: auto; margin-top:5px;}
   .dropdown-content button {display: block; width: 100%; border: none; background: none;
     padding: 8px 12px; text-align: left; cursor: pointer; border-radius: 5px; transition:0.2s;}
-  .dropdown-content button.selected,
   .dropdown-content button:hover {background:#2b6cb0; color:#fff;}
-
-  table {width:100%; border-collapse: collapse; margin-top:20px; font-size:14px;}
-  th, td {padding:10px; border:1px solid #ddd; text-align:right;}
-  th {background:#f1f5f9; text-align:left; font-weight:600;}
-  td.currency {white-space: nowrap;}
-  td.weekday {text-align:center; font-weight:500; color:#555;}
-  tr.weekend {background-color:#fff3e0;}
-
-  .edit-btn {background:#f0ad4e; color:#fff; border:none; border-radius:5px; cursor:pointer; padding:5px 10px;}
-  .edit-btn:hover {background:#ec971f;}
+  .dropdown-content button.selected {background:#2b6cb0; color:#fff;}
 
   .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:50;}
+    background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:10;}
   .modal-content {background:#fff; padding:20px; border-radius:10px;
     max-width:800px; max-height:80%; overflow-y:auto;}
+
   .modal-content table {width:100%; border-collapse: collapse;}
   .modal-content th, .modal-content td {border:1px solid #ccc; padding:8px; text-align:center;}
   .modal-content input {width:60px;}
   .modal-content button {margin-top:10px; margin-right:5px; padding:8px 12px; cursor:pointer;}
 </style>
 </head>
+
 <body>
 
 <div class="container">
-  <h1>Dog Services Dashboard</h1>
+  <h1>Dog Services – Data Entry</h1>
+
+  <button id="viewTableBtn">View Table</button>
 
   <div class="date-controls">
     <button id="prevDay" class="date-nav">&lt;</button>
@@ -71,17 +65,6 @@
   </div>
 
   <div class="dropdowns" id="serviceDropdowns"></div>
-
-  <table id="paymentTable">
-    <thead>
-      <tr>
-        <th>Día</th>
-        <th>Fecha</th>
-        <th>Total (€)</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
 </div>
 
 <!-- Rates Modal -->
@@ -107,23 +90,9 @@
   </div>
 </div>
 
-<!-- Edit Row Modal -->
-<div id="editRowModal" class="modal">
-  <div class="modal-content">
-    <h2>Edit Date Entries</h2>
-    <table id="editRowTable">
-      <thead>
-        <tr><th>Dog</th><th>Value (€)</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <button id="saveEditRow">Save</button>
-    <button id="closeEditRow">Close</button>
-  </div>
-</div>
-
 <script>
-// INITIAL DATA -------------------------------------------------------
+/* ---- SAME JS LOGIC AS BEFORE, EXCEPT WITHOUT TABLE + EDIT CODE ---- */
+
 const spanishDays = ['Dom.','Lun.','Mar.','Mié.','Jue.','Vie.','Sáb.'];
 
 let defaultDogs = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
@@ -136,8 +105,6 @@ let rates = JSON.parse(localStorage.getItem('rates')) || {};
 if (Object.keys(rates).length === 0) {
   allDogs.forEach(d => rates[d] = { daycare:10, weekend:12, overnight:20, walk:5 });
 }
-
-let currentDate = new Date();
 
 function saveData() {
   localStorage.setItem('rows', JSON.stringify(rows));
@@ -152,10 +119,9 @@ function formatDate(d) {
 
 function getWeekday(d) { return spanishDays[d.getDay()]; }
 
-
-// DATE BUTTON --------------------------------------------------------
-const dateBtn = document.getElementById('dateBtn');
-const tbody = document.getElementById('tableBody');
+// DATE CONTROL
+let currentDate = new Date();
+const dateBtn = document.getElementById("dateBtn");
 
 function updateDateBtn() {
   dateBtn.textContent = formatDate(currentDate);
@@ -163,21 +129,18 @@ function updateDateBtn() {
   restoreSelections();
 }
 
-
-// TOTALS -------------------------------------------------------------
+// TOTALS
 function updateTotals() {
   const now = new Date();
   const todayStr = formatDate(now);
 
-  const dailySpan   = document.getElementById("dailyTotal");
-  const weeklySpan  = document.getElementById("weeklyTotal");
+  const dailySpan = document.getElementById("dailyTotal");
+  const weeklySpan = document.getElementById("weeklyTotal");
   const monthlySpan = document.getElementById("monthlyTotal");
 
-  // DAILY
   const row = rows.find(r => r.Fecha === todayStr);
   dailySpan.textContent = "Daily: " + (row ? row.Total.toFixed(2) : "0") + " €";
 
-  // WEEK MON → SUN
   const monday = new Date(now);
   const diff = (monday.getDay() + 6) % 7;
   monday.setDate(now.getDate() - diff);
@@ -186,35 +149,32 @@ function updateTotals() {
   sunday.setDate(monday.getDate() + 6);
 
   let weekSum = rows.filter(r => {
-    let [dd,mm,yy] = r.Fecha.split("/");
+    let [dd,mm,yy] = r.Fecha.split('/');
     let d = new Date(yy, mm-1, dd);
     return d >= monday && d <= sunday;
-  }).reduce((a,b)=> a + b.Total, 0);
+  }).reduce((a,b)=>a+b.Total,0);
 
   weeklySpan.textContent = "Weekly: " + weekSum.toFixed(2) + " €";
 
-  // MONTHLY (real month)
   const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
   const lastDay  = new Date(now.getFullYear(), now.getMonth()+1, 0);
 
   let monthSum = rows.filter(r => {
-    let [dd,mm,yy] = r.Fecha.split("/");
+    let [dd,mm,yy] = r.Fecha.split('/');
     let d = new Date(yy, mm-1, dd);
     return d >= firstDay && d <= lastDay;
-  }).reduce((a,b)=> a + b.Total, 0);
+  }).reduce((a,b)=>a+b.Total,0);
 
   monthlySpan.textContent = "Monthly: " + monthSum.toFixed(2) + " €";
 }
 
-
-// DROPDOWNS ----------------------------------------------------------
-const serviceDropdowns = document.getElementById('serviceDropdowns');
+// DROPDOWNS
+const serviceDropdowns = document.getElementById("serviceDropdowns");
 
 function createServiceDropdowns() {
-  serviceDropdowns.innerHTML = "";
-  const services = ["Daycare", "Walk", "Overnight"];
+  serviceDropdowns.innerHTML = '';
 
-  services.forEach(service => {
+  ["Daycare","Walk","Overnight"].forEach(service => {
     const div = document.createElement("div");
     div.classList.add("dropdown");
 
@@ -224,31 +184,33 @@ function createServiceDropdowns() {
 
     const content = document.createElement("div");
     content.classList.add("dropdown-content");
-    div.appendChild(content);
 
     allDogs.forEach(dog => {
       const dogBtn = document.createElement("button");
       dogBtn.textContent = dog;
-      content.appendChild(dogBtn);
 
       dogBtn.onclick = e => {
         e.stopPropagation();
         toggleDogSelection(dog, service, dogBtn);
       };
+
+      content.appendChild(dogBtn);
     });
+
+    div.appendChild(content);
+    serviceDropdowns.appendChild(div);
 
     btn.onclick = e => {
       e.stopPropagation();
+      const open = content.style.display === "block";
       closeAllDropdowns();
-      content.style.display = content.style.display === "block" ? "none" : "block";
+      content.style.display = open ? "none" : "block";
     };
-
-    serviceDropdowns.appendChild(div);
   });
 }
 
 function closeAllDropdowns() {
-  document.querySelectorAll(".dropdown-content").forEach(dc => dc.style.display = "none");
+  document.querySelectorAll(".dropdown-content").forEach(d => d.style.display = "none");
 }
 document.addEventListener("click", closeAllDropdowns);
 
@@ -257,11 +219,12 @@ function toggleDogSelection(dog, service, btn) {
   if (!selections[dateStr]) selections[dateStr] = {};
 
   const key = `${dog}_${service}`;
-  selections[dateStr][key] = !selections[dateStr][key];
+  const selected = !selections[dateStr][key];
 
-  btn.classList.toggle("selected", selections[dateStr][key]);
+  selections[dateStr][key] = selected;
+  btn.classList.toggle("selected", selected);
 
-  updateDogPayment(dog, service, selections[dateStr][key]);
+  updateDogPayment(dog, service, selected);
   saveData();
 }
 
@@ -270,7 +233,7 @@ function updateDogPayment(dog, service, add=true) {
   let row = rows.find(r => r.Fecha === dateStr);
 
   if (!row) {
-    row = { Fecha: dateStr, Día: getWeekday(currentDate), Total: 0, services: {} };
+    row = { Fecha:dateStr, Día:getWeekday(currentDate), Total:0, services:{} };
     rows.push(row);
   }
 
@@ -278,7 +241,6 @@ function updateDogPayment(dog, service, add=true) {
   if (!row.services[dog]) row.services[dog] = 0;
 
   let rate = rates[dog][service.toLowerCase()];
-
   if (service === "Daycare" && (currentDate.getDay() === 0 || currentDate.getDay() === 6))
     rate = rates[dog].weekend;
 
@@ -287,172 +249,8 @@ function updateDogPayment(dog, service, add=true) {
 
   saveData();
   updateTotals();
-  buildTable();
 }
 
-
-// TABLE --------------------------------------------------------------
-function buildTable() {
-  tbody.innerHTML = "";
-
-  const headRow = document.querySelector("#paymentTable thead tr");
-  headRow.innerHTML = `<th>Día</th><th>Fecha</th><th>Total (€)</th>`;
-  allDogs.forEach(d => headRow.innerHTML += `<th>${d}</th>`);
-  headRow.innerHTML += `<th>Editar</th>`;
-
-  rows.sort((a,b)=>{
-    const A = new Date(a.Fecha.split('/').reverse().join('-'));
-    const B = new Date(b.Fecha.split('/').reverse().join('-'));
-    return A - B;
-  });
-
-  rows.forEach(r => {
-    const tr = document.createElement("tr");
-
-    let [dd,mm,yy] = r.Fecha.split('/');
-    const d = new Date(yy, mm-1, dd);
-    if (d.getDay() === 0 || d.getDay() === 6) tr.classList.add("weekend");
-
-    tr.innerHTML = `
-      <td class="weekday">${r.Día}</td>
-      <td>${r.Fecha}</td>
-      <td>${r.Total.toFixed(2)}</td>
-    `;
-
-    allDogs.forEach(dog => {
-      tr.innerHTML += `<td class="currency">${r.services[dog] || ""}</td>`;
-    });
-
-    const editTd = document.createElement("td");
-    const editBtn = document.createElement("button");
-    editBtn.className = "edit-btn";
-    editBtn.textContent = "Editar";
-    editBtn.onclick = () => openEditRowModal(r);
-    editTd.appendChild(editBtn);
-    tr.appendChild(editTd);
-
-    tbody.appendChild(tr);
-  });
-}
-
-
-// EDIT ROW -----------------------------------------------------------
-const editRowModal = document.getElementById("editRowModal");
-const editRowTableBody = document.querySelector("#editRowTable tbody");
-let editingRow = null;
-
-function openEditRowModal(row) {
-  editingRow = row;
-  editRowTableBody.innerHTML = "";
-
-  allDogs.forEach(dog => {
-    editRowTableBody.innerHTML += `
-      <tr>
-        <td>${dog}</td>
-        <td><input type="number" value="${row.services[dog] || 0}" min="0"></td>
-      </tr>`;
-  });
-
-  editRowModal.style.display = "flex";
-}
-
-document.getElementById("closeEditRow").onclick = () => {
-  editRowModal.style.display = "none";
-};
-
-document.getElementById("saveEditRow").onclick = () => {
-  const inputs = editRowTableBody.querySelectorAll("input");
-
-  allDogs.forEach((dog, i) => {
-    const val = parseFloat(inputs[i].value) || 0;
-    if (val === 0) delete editingRow.services[dog];
-    else editingRow.services[dog] = val;
-  });
-
-  editingRow.Total = Object.values(editingRow.services).reduce((a,b)=>a+b,0);
-
-  saveData();
-  updateTotals();
-  buildTable();
-  editRowModal.style.display = "none";
-};
-
-
-// RATES MODAL --------------------------------------------------------
-const ratesModal = document.getElementById("ratesModal");
-const ratesTableBody = document.querySelector("#ratesTable tbody");
-
-document.getElementById("ratesBtn").onclick = () => {
-  buildRatesTable();
-  ratesModal.style.display = "flex";
-};
-
-document.getElementById("closeRates").onclick = () => {
-  ratesModal.style.display = "none";
-};
-
-function buildRatesTable() {
-  ratesTableBody.innerHTML = "";
-
-  allDogs.forEach(dog => {
-    const r = rates[dog];
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${dog}</td>
-      <td><input type="number" value="${r.daycare}"></td>
-      <td><input type="number" value="${r.weekend}"></td>
-      <td><input type="number" value="${r.overnight}"></td>
-      <td><input type="number" value="${r.walk}"></td>
-      <td><button class="deleteDogBtn">Delete</button></td>
-    `;
-
-    ratesTableBody.appendChild(tr);
-
-    tr.querySelector(".deleteDogBtn").onclick = () => {
-      delete rates[dog];
-      allDogs = allDogs.filter(x => x !== dog);
-      buildRatesTable();
-      createServiceDropdowns();
-      buildTable();
-      saveData();
-    };
-  });
-}
-
-document.getElementById("saveRates").onclick = () => {
-  [...ratesTableBody.querySelectorAll("tr")].forEach(tr => {
-    const dog = tr.children[0].textContent;
-    const inputs = tr.querySelectorAll("input");
-
-    rates[dog] = {
-      daycare: parseFloat(inputs[0].value) || 0,
-      weekend: parseFloat(inputs[1].value) || 0,
-      overnight: parseFloat(inputs[2].value) || 0,
-      walk: parseFloat(inputs[3].value) || 0
-    };
-  });
-
-  saveData();
-  ratesModal.style.display = "none";
-};
-
-document.getElementById("addDogRateBtn").onclick = () => {
-  const newDog = prompt("Enter dog name:");
-  if (!newDog) return;
-  if (rates[newDog]) return alert("Dog already exists!");
-
-  rates[newDog] = { daycare:10, weekend:12, overnight:20, walk:5 };
-  allDogs.push(newDog);
-
-  buildRatesTable();
-  createServiceDropdowns();
-  buildTable();
-  saveData();
-};
-
-
-// RESTORE BUTTON STATE ----------------------------------------------
 function restoreSelections() {
   const dateStr = formatDate(currentDate);
 
@@ -467,8 +265,7 @@ function restoreSelections() {
   });
 }
 
-
-// DATE CONTROLS ------------------------------------------------------
+// DATE NAVIGATION
 document.getElementById("prevDay").onclick = () => {
   currentDate.setDate(currentDate.getDate() - 1);
   updateDateBtn();
@@ -495,13 +292,85 @@ dateBtn.onclick = () => {
   };
 };
 
+// RATES MODAL
+const ratesBtn = document.getElementById("ratesBtn");
+const ratesModal = document.getElementById("ratesModal");
+const ratesTableBody = document.querySelector("#ratesTable tbody");
 
-// INIT --------------------------------------------------------------
+ratesBtn.onclick = () => {
+  buildRatesTable();
+  ratesModal.style.display = "flex";
+};
+
+document.getElementById("closeRates").onclick = () => {
+  ratesModal.style.display = "none";
+};
+
+function buildRatesTable() {
+  ratesTableBody.innerHTML = '';
+
+  allDogs.forEach(dog => {
+    const r = rates[dog];
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${dog}</td>
+      <td><input type="number" value="${r.daycare}"></td>
+      <td><input type="number" value="${r.weekend}"></td>
+      <td><input type="number" value="${r.overnight}"></td>
+      <td><input type="number" value="${r.walk}"></td>
+      <td><button class="deleteDogBtn">Delete</button></td>
+    `;
+
+    ratesTableBody.appendChild(tr);
+
+    tr.querySelector(".deleteDogBtn").onclick = () => {
+      delete rates[dog];
+      allDogs = allDogs.filter(d => d !== dog);
+      buildRatesTable();
+      createServiceDropdowns();
+      saveData();
+    };
+  });
+}
+
+document.getElementById("saveRates").onclick = () => {
+  [...ratesTableBody.querySelectorAll("tr")].forEach(tr => {
+    const dog = tr.children[0].textContent;
+    const inputs = tr.querySelectorAll("input");
+
+    rates[dog] = {
+      daycare: parseFloat(inputs[0].value) || 0,
+      weekend: parseFloat(inputs[1].value) || 0,
+      overnight: parseFloat(inputs[2].value) || 0,
+      walk: parseFloat(inputs[3].value) || 0
+    };
+  });
+
+  saveData();
+  ratesModal.style.display = "none";
+};
+
+document.getElementById("addDogRateBtn").onclick = () => {
+  const newDog = prompt("Enter dog name:");
+  if (!newDog) return;
+  if (rates[newDog]) return alert("Dog exists!");
+
+  rates[newDog] = { daycare:10, weekend:12, overnight:20, walk:5 };
+  allDogs.push(newDog);
+
+  buildRatesTable();
+  createServiceDropdowns();
+  saveData();
+};
+
+// INITIALIZE
+document.getElementById("viewTableBtn").onclick = () => {
+  window.location.href = "table.html";
+};
+
 updateDateBtn();
 createServiceDropdowns();
-buildTable();
-
 </script>
-
 </body>
 </html>
