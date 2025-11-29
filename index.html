@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -11,6 +11,7 @@
   .date-controls {display: flex; align-items: center; gap: 10px; margin-bottom: 20px;}
   .date-btn, .date-nav, #ratesBtn {padding: 10px 18px; font-size: 16px; cursor: pointer; border-radius:6px; border:1px solid #ccc; background:#fff; transition:0.2s;}
   .date-btn:hover, .date-nav:hover, #ratesBtn:hover {background:#f0f4f8;}
+  .daily-total {margin-left:20px; font-weight:bold; font-size:18px; color:green;}
   .dropdowns {display:flex; gap:20px; margin-bottom:20px;}
   .dropdown {position: relative; display: inline-block;}
   .dropdown button {width: 160px; text-align:left; border:1px solid #ccc; border-radius:6px; background:#fff; padding:10px;}
@@ -31,6 +32,8 @@
   #ratesModalContent th, #ratesModalContent td {border:1px solid #ccc; padding:8px; text-align:center;}
   #ratesModalContent input {width:60px;}
   #ratesModalContent button {margin-top:10px; margin-right:5px; padding:8px 12px; cursor:pointer;}
+  .edit-btn {background:#f0ad4e; color:#fff; border:none; border-radius:5px; cursor:pointer; padding:5px 10px;}
+  .edit-btn:hover {background:#ec971f;}
 </style>
 </head>
 <body>
@@ -41,6 +44,7 @@
     <button id="prevDay" class="date-nav">&lt;</button>
     <button id="dateBtn" class="date-btn"></button>
     <button id="nextDay" class="date-nav">&gt;</button>
+    <span class="daily-total" id="dailyTotal">Total: 0 €</span>
     <button id="ratesBtn">Rates</button>
   </div>
 
@@ -49,10 +53,9 @@
   <table id="paymentTable">
     <thead>
       <tr>
-        <th>Fecha</th>
         <th>Día</th>
+        <th>Fecha</th>
         <th>Total (€)</th>
-        <!-- Dog columns -->
       </tr>
     </thead>
     <tbody id="tableBody"></tbody>
@@ -83,6 +86,8 @@
 </div>
 
 <script>
+const spanishDays = ['Dom.','Lun.','Mar.','Mié.','Jue.','Vie.','Sáb.'];
+
 let dogNames = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
 let allDogs = [...dogNames];
 let rows = [];
@@ -94,11 +99,17 @@ let currentDate = new Date();
 const dateBtn=document.getElementById('dateBtn');
 const tbody=document.getElementById('tableBody');
 const serviceDropdowns=document.getElementById('serviceDropdowns');
+const dailyTotalSpan = document.getElementById('dailyTotal');
 
-// Format date & weekday
 function formatDate(d){ const dd=String(d.getDate()).padStart(2,'0'); const mm=String(d.getMonth()+1).padStart(2,'0'); const yyyy=d.getFullYear(); return `${dd}/${mm}/${yyyy}`; }
-function getWeekday(d){ return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]; }
-function updateDateBtn(){ dateBtn.textContent=formatDate(currentDate); }
+function getWeekday(d){ return spanishDays[d.getDay()]; }
+function updateDateBtn(){ dateBtn.textContent=formatDate(currentDate); updateDailyTotal(); }
+
+function updateDailyTotal(){
+  const dateStr=formatDate(currentDate);
+  const row = rows.find(r=>r.Fecha===dateStr);
+  dailyTotalSpan.textContent = 'Total: '+(row?row.Total.toFixed(2):'0')+' €';
+}
 
 // Create service dropdowns
 function createServiceDropdowns(){
@@ -111,8 +122,8 @@ function createServiceDropdowns(){
     const content=document.createElement('div'); content.classList.add('dropdown-content');
     allDogs.forEach(dog=>{
       const dogBtn=document.createElement('button'); dogBtn.textContent=dog;
-      dogBtn.addEventListener('click', (e)=>{
-        e.stopPropagation(); // prevent dropdown from closing
+      dogBtn.addEventListener('click', e=>{
+        e.stopPropagation();
         toggleDogSelection(dog,service,dogBtn);
       });
       content.appendChild(dogBtn);
@@ -120,8 +131,7 @@ function createServiceDropdowns(){
     div.appendChild(content);
     serviceDropdowns.appendChild(div);
 
-    // Toggle dropdown on service button click
-    btn.addEventListener('click', (e)=>{
+    btn.addEventListener('click', e=>{
       e.stopPropagation();
       const isVisible = content.style.display==='block';
       closeAllDropdowns();
@@ -130,24 +140,21 @@ function createServiceDropdowns(){
   });
 }
 
-// Close all dropdowns when clicking elsewhere
 function closeAllDropdowns(){
   document.querySelectorAll('.dropdown-content').forEach(dc=> dc.style.display='none');
 }
 document.addEventListener('click', closeAllDropdowns);
 
-// Toggle dog selection
 function toggleDogSelection(dog,service,btn){
-  const dateStr = formatDate(currentDate);
+  const dateStr=formatDate(currentDate);
   if(!selections[dateStr]) selections[dateStr]={};
   const key=`${dog}_${service}`;
-  const selected = !selections[dateStr][key];
-  selections[dateStr][key] = selected;
+  const selected=!selections[dateStr][key];
+  selections[dateStr][key]=selected;
   btn.classList.toggle('selected',selected);
   updateDogPayment(dog,service,selected);
 }
 
-// Update payment table
 function updateDogPayment(dog,service,add=true){
   const dateStr=formatDate(currentDate);
   let row = rows.find(r=>r.Fecha===dateStr);
@@ -160,15 +167,16 @@ function updateDogPayment(dog,service,add=true){
   if(service==='Daycare' && (currentDate.getDay()===0 || currentDate.getDay()===6)) rate=rates[dog].weekend;
   row.services[dog] = add ? row.services[dog]+rate : Math.max(0,row.services[dog]-rate);
   row.Total=Object.values(row.services).reduce((a,b)=>a+b,0);
+  updateDailyTotal();
   buildTable();
 }
 
-// Build main table
 function buildTable(){
   tbody.innerHTML='';
   const tableHead=document.querySelector('#paymentTable thead tr');
-  tableHead.innerHTML=`<th>Fecha</th><th>Día</th><th>Total (€)</th>`;
+  tableHead.innerHTML=`<th>Día</th><th>Fecha</th><th>Total (€)</th>`;
   allDogs.forEach(d=>{ const th=document.createElement('th'); th.textContent=d; tableHead.appendChild(th); });
+  tableHead.appendChild(document.createElement('th')).textContent='Editar';
 
   rows.sort((a,b)=>new Date(a.Fecha.split('/').reverse().join('-'))-new Date(b.Fecha.split('/').reverse().join('-')));
   rows.forEach(r=>{
@@ -176,25 +184,35 @@ function buildTable(){
     const dateParts=r.Fecha.split('/'); 
     const rowDate=new Date(dateParts[2],dateParts[1]-1,dateParts[0]);
     if(rowDate.getDay()===0 || rowDate.getDay()===6) tr.classList.add('weekend');
-    tr.innerHTML=`<td>${r.Fecha}</td><td>${r.Día}</td><td>${r.Total.toFixed(2)}</td>`;
+    tr.innerHTML=`<td class="weekday">${r.Día}</td><td>${r.Fecha}</td><td>${r.Total.toFixed(2)}</td>`;
     allDogs.forEach(d=>{ 
       const td=document.createElement('td'); 
       td.textContent=(r.services[d]||''); 
       td.classList.add('currency'); 
       tr.appendChild(td); 
     });
+    // Edit button
+    const tdEdit = document.createElement('td');
+    const editBtn = document.createElement('button');
+    editBtn.classList.add('edit-btn');
+    editBtn.textContent='Editar';
+    editBtn.onclick = ()=>editRow(r);
+    tdEdit.appendChild(editBtn);
+    tr.appendChild(tdEdit);
     tbody.appendChild(tr);
   });
 }
 
-// Date controls
+// Edit row function
+function editRow(row){
+  currentDate = new Date(row.Fecha.split('/').reverse().join('-'));
+  updateDateBtn();
+  restoreSelections();
+}
+
 updateDateBtn();
-document.getElementById('prevDay').addEventListener('click',()=>{
-  currentDate.setDate(currentDate.getDate()-1); updateDateBtn(); restoreSelections(); 
-});
-document.getElementById('nextDay').addEventListener('click',()=>{
-  currentDate.setDate(currentDate.getDate()+1); updateDateBtn(); restoreSelections(); 
-});
+createServiceDropdowns();
+buildTable();
 
 // Restore selections
 function restoreSelections(){
@@ -207,7 +225,15 @@ function restoreSelections(){
   });
 }
 
-// Rates modal
+// Date controls
+document.getElementById('prevDay').addEventListener('click',()=>{
+  currentDate.setDate(currentDate.getDate()-1); updateDateBtn(); restoreSelections();
+});
+document.getElementById('nextDay').addEventListener('click',()=>{
+  currentDate.setDate(currentDate.getDate()+1); updateDateBtn(); restoreSelections();
+});
+
+// Rates modal (unchanged from before)
 const ratesModal=document.getElementById('ratesModal');
 const ratesTableBody=document.querySelector('#ratesTable tbody');
 
@@ -257,9 +283,6 @@ document.getElementById('addDogRateBtn').addEventListener('click',()=>{
     buildTable();
   }
 });
-
-createServiceDropdowns();
-buildTable();
 </script>
 </body>
 </html>
