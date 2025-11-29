@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8" />
@@ -75,17 +75,17 @@
   </div>
 
   <div class="services">
-    <div class="service-btn" data-service="Daycare">
-      <img src="icons/daycare.svg" alt="Daycare">
-      Daycare
+    <div class="service-btn" data-service="Guardería">
+      <img src="icons/guardería.svg" alt="guardería">
+      Guardería
     </div>
-    <div class="service-btn" data-service="Walk">
-      <img src="icons/walk.svg" alt="Walk">
-      Walk
+    <div class="service-btn" data-service="Paseo">
+      <img src="icons/paseo.svg" alt="Paseo">
+      Paseo
     </div>
-    <div class="service-btn" data-service="Overnight">
-      <img src="icons/overnight.svg" alt="Overnight">
-      Overnight
+    <div class="service-btn" data-service="Noche">
+      <img src="icons/noche.svg" alt="Noche">
+      Noche
     </div>
     <div class="service-btn" data-service="Extra">
       <img src="icons/extra.svg" alt="Extra">
@@ -152,7 +152,7 @@ let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
 let selections = JSON.parse(localStorage.getItem('selections')) || {};
 let rows = JSON.parse(localStorage.getItem('rows')) || {};
 let rates = JSON.parse(localStorage.getItem('rates')) || {};
-if(!Object.keys(rates).length) allDogs.forEach(d=>rates[d]={daycare:10,weekend:12,overnight:20,walk:5,extra:5});
+if(!Object.keys(rates).length) allDogs.forEach(d=>rates[d]={guardería:10,weekend:12,noche:20,paseo:5,extra:5});
 
 let currentDate = new Date();
 function formatDate(d){return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
@@ -166,7 +166,7 @@ const serviceIcon = document.getElementById('serviceIcon');
 let currentService = '';
 
 const serviceIcons = {
-  Daycare:'icons/guarderia.svg',
+  guardería:'icons/guarderia.svg',
   Walk:'icons/paseo.svg',
   Overnight:'icons/noche.svg',
   Extra:'icons/extra.svg'
@@ -213,7 +213,7 @@ document.getElementById('saveSelections').onclick=()=>{
     if(selections[dateKey][k]){
       const dog = k.split('_')[0]; const service = k.split('_')[1];
       let rate = rates[dog][service.toLowerCase()] || 0;
-      if(service==='Daycare' && (currentDate.getDay()===0||currentDate.getDay()===6)) rate=rates[dog].weekend || rate;
+      if(service==='guardería' && (currentDate.getDay()===0||currentDate.getDay()===6)) rate=rates[dog].weekend || rate;
       rows[dateKey].services[dog]=(rows[dateKey].services[dog]||0)+rate;
     }
   });
@@ -268,7 +268,7 @@ function updateServiceSummary(){
   const dateKey=formatDate(currentDate);
   const sel=selections[dateKey]||{};
   let summary=[];
-  ["Daycare","Walk","Overnight","Extra"].forEach(s=>{
+  ["guardería","Walk","Overnight","Extra"].forEach(s=>{
     const count = Object.keys(sel).filter(k=>k.endsWith(s)&&sel[k]).length;
     if(count) summary.push(`${s}: ${count}`);
   });
@@ -289,10 +289,10 @@ function buildRatesTable(){
     const tr=document.createElement("tr");
     tr.innerHTML=`
       <td>${dog}</td>
-      <td><input type="number" value="${r.daycare||0}"></td>
+      <td><input type="number" value="${r.guardería||0}"></td>
       <td><input type="number" value="${r.weekend||0}"></td>
-      <td><input type="number" value="${r.overnight||0}"></td>
-      <td><input type="number" value="${r.walk||0}"></td>
+      <td><input type="number" value="${r.noche||0}"></td>
+      <td><input type="number" value="${r.paseo||0}"></td>
       <td><button class="deleteDogBtn">Delete</button></td>
     `;
     ratesTableBody.appendChild(tr);
@@ -304,12 +304,12 @@ function buildRatesTable(){
 document.getElementById("saveRates").onclick=()=>{
   [...ratesTableBody.querySelectorAll("tr")].forEach(tr=>{
     const dog=tr.children[0].textContent; const inputs=tr.querySelectorAll("input");
-    rates[dog]={daycare:parseFloat(inputs[0].value)||0, weekend:parseFloat(inputs[1].value)||0, overnight:parseFloat(inputs[2].value)||0, walk:parseFloat(inputs[3].value)||0};
+    rates[dog]={guardería:parseFloat(inputs[0].value)||0, weekend:parseFloat(inputs[1].value)||0, noche:parseFloat(inputs[2].value)||0, paseo:parseFloat(inputs[3].value)||0};
   }); saveData(); ratesModal.style.display='none';
 };
 document.getElementById("addDogRateBtn").onclick=()=>{
   const newDog=prompt("Enter dog name:"); if(!newDog) return; if(rates[newDog]) return alert("Dog exists!");
-  rates[newDog]={daycare:10, weekend:12, overnight:20, walk:5, extra:5}; allDogs.push(newDog);
+  rates[newDog]={guardería:10, weekend:12, noche:20, paseo:5, extra:5}; allDogs.push(newDog);
   buildRatesTable(); saveData();
 };
 
