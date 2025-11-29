@@ -1,103 +1,97 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dog Services Dashboard</title>
 <style>
-  body {font-family: Arial, sans-serif; padding: 20px; background: #f4f6f8;}
-  .container {max-width: 1500px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.06);}
-  h1 {margin-bottom: 15px;}
-  .date-controls {display: flex; align-items: center; gap: 10px; margin-bottom: 18px;}
-  .date-btn, .date-nav, #ratesBtn {padding: 10px 18px; font-size: 16px; cursor: pointer;}
-  .dropdown {position: relative; display: inline-block; margin-bottom: 18px; margin-right: 20px;}
-  .dropdown button {padding: 10px 18px; cursor: pointer;}
-  .dropdown-content {display: none; position: absolute; background-color: #f9f9f9; min-width: 180px; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 1; border-radius: 8px; max-height: 300px; overflow-y: auto;}
-  .dropdown-content button {display: block; width: 100%; border: none; background: none; padding: 8px 12px; text-align: left; cursor: pointer; border-radius: 5px;}
-  .dropdown-content button.active {background: #2b6cb0; color: #fff;}
-  .service-label {margin-bottom: 5px; font-weight: bold;}
-  table {width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px;}
-  th, td {padding: 8px; border: 1px solid #ddd; text-align: right;}
-  th {background: #f1f5f9; text-align: left;}
-  td.currency {white-space: nowrap;}
-  .weekend {background-color: #fff3e0;}
-  .totals {margin-top:15px; font-size:16px;}
-  .totals span {margin-right: 15px; font-weight:bold;}
-  .totals .daily {color:green;}
-  /* Modal */
-  .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;}
-  .modal-content {background:#fff; padding:20px; border-radius:10px; max-width:800px; max-height:90%; overflow-y:auto;}
-  .modal-content table {width:100%; border-collapse:collapse;}
-  .modal-content th, .modal-content td {border:1px solid #ccc; padding:6px; text-align:left;}
-  .modal-content input {width:60px;}
-  .modal-content button {margin-top:10px; margin-right:5px;}
+body {font-family: Arial,sans-serif; padding:20px; background:#f4f6f8;}
+.container {max-width:1500px; margin:0 auto; background:#fff; padding:30px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+h1 {margin-bottom:15px;}
+.date-controls {display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+.date-btn, .date-nav, #ratesBtn {padding:10px 18px; font-size:16px; cursor:pointer;}
+.dropdown {position:relative; display:inline-block; margin-bottom:18px; margin-right:20px;}
+.dropdown button {padding:10px 18px; cursor:pointer;}
+.dropdown-content {display:none; position:absolute; background-color:#f9f9f9; min-width:180px; box-shadow:0px 8px 16px rgba(0,0,0,0.2); z-index:1; border-radius:8px; max-height:300px; overflow-y:auto;}
+.dropdown-content button {display:block; width:100%; border:none; background:none; padding:8px 12px; text-align:left; cursor:pointer; border-radius:5px;}
+.dropdown-content button.active {background:#2b6cb0; color:#fff;}
+.service-label {margin-bottom:5px; font-weight:bold;}
+table {width:100%; border-collapse:collapse; margin-top:20px; font-size:14px;}
+th, td {padding:8px; border:1px solid #ddd; text-align:right;}
+th {background:#f1f5f9; text-align:left;}
+td.currency {white-space:nowrap;}
+.weekend {background-color:#fff3e0;}
+.totals {margin-top:15px; font-size:16px;}
+.totals span {margin-right:15px; font-weight:bold;}
+.totals .daily {color:green;}
+.modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;}
+.modal-content {background:#fff; padding:20px; border-radius:10px; max-width:800px; max-height:90%; overflow-y:auto;}
+.modal-content table {width:100%; border-collapse:collapse;}
+.modal-content th, .modal-content td {border:1px solid #ccc; padding:6px; text-align:left;}
+.modal-content input {width:60px;}
+.modal-content button {margin-top:10px; margin-right:5px;}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Dog Services Dashboard</h1>
+<h1>Dog Services Dashboard</h1>
 
-  <div class="date-controls">
-    <button id="prevDay" class="date-nav">&lt;</button>
-    <button id="dateBtn" class="date-btn"></button>
-    <button id="nextDay" class="date-nav">&gt;</button>
-    <input type="date" id="dateInput" style="display:none; margin-left:10px;" />
-    <button id="ratesBtn">Rates</button>
-  </div>
+<div class="date-controls">
+<button id="prevDay" class="date-nav">&lt;</button>
+<button id="dateBtn" class="date-btn"></button>
+<button id="nextDay" class="date-nav">&gt;</button>
+<input type="date" id="dateInput" style="display:none; margin-left:10px;">
+<button id="ratesBtn">Rates</button>
+</div>
 
-  <div id="serviceDropdowns"></div>
+<div id="serviceDropdowns"></div>
 
-  <table id="paymentTable">
-    <thead>
-      <tr id="tableHeader"></tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
+<table id="paymentTable">
+<thead><tr id="tableHeader"></tr></thead>
+<tbody id="tableBody"></tbody>
+</table>
 
-  <div class="totals">
-    <div id="todayLabel"></div>
-    <span class="daily" id="dailyTotal">Daily: 0 €</span>
-    <span id="weeklyTotal">Weekly: 0 €</span>
-    <span id="monthlyTotal">Monthly: 0 €</span>
-  </div>
+<div class="totals">
+<div id="todayLabel"></div>
+<span class="daily" id="dailyTotal">Daily: 0 €</span>
+<span id="weeklyTotal">Weekly: 0 €</span>
+<span id="monthlyTotal">Monthly: 0 €</span>
+</div>
 </div>
 
 <!-- Rates Modal -->
 <div id="ratesModal" class="modal">
-  <div class="modal-content">
-    <h2>Dog Rates (€)</h2>
-    <table id="ratesTable">
-      <thead>
-        <tr>
-          <th>Dog</th><th>Daycare</th><th>Weekend</th><th>Overnight</th><th>Walk</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <button id="addDog">Add Dog</button>
-    <button id="saveRates">Save</button>
-    <button id="closeRates">Close</button>
-  </div>
+<div class="modal-content">
+<h2>Dog Rates (€)</h2>
+<table id="ratesTable">
+<thead>
+<tr><th>Dog</th><th>Daycare</th><th>Weekend</th><th>Overnight</th><th>Walk</th><th>Actions</th></tr>
+</thead>
+<tbody></tbody>
+</table>
+<button id="addDog">Add Dog</button>
+<button id="saveRates">Save</button>
+<button id="closeRates">Close</button>
+</div>
 </div>
 
 <!-- Edit Day Modal -->
 <div id="editModal" class="modal">
-  <div class="modal-content">
-    <h2>Edit Day</h2>
-    <table id="editTable"></table>
-    <button id="clearDay">Clear Day</button>
-    <button id="closeEdit">Close</button>
-  </div>
+<div class="modal-content">
+<h2>Edit Day</h2>
+<table id="editTable"></table>
+<button id="clearDay">Clear Day</button>
+<button id="closeEdit">Close</button>
+</div>
 </div>
 
 <script>
-// === DATA ===
 let dogNames = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
 let allDogs = [...dogNames, "CHUFI","LUPE","CUSCO"];
 let rates = {}; allDogs.forEach(d=>rates[d]={daycare:10,weekend:12,overnight:20,walk:5});
 let rows=[]; let selections={}; let currentDate=new Date();
 
-// === DOM ===
+// DOM
 const dateBtn=document.getElementById('dateBtn');
 const dateInput=document.getElementById('dateInput');
 const serviceDropdowns=document.getElementById('serviceDropdowns');
@@ -113,18 +107,18 @@ const editModal=document.getElementById('editModal');
 const editTable=document.getElementById('editTable');
 const clearDayBtn=document.getElementById('clearDay');
 
-// Spanish day abbreviations
+// Spanish days
 const dayAbbr=['Dom.','Lun.','Mar.','Mié.','Jue.','Vie.','Sáb.'];
 
-// === UTILITIES ===
+// UTIL
 function formatDate(d){return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();}
 function dayOfWeek(d){return dayAbbr[d.getDay()];}
 
-// === LOCAL STORAGE ===
+// LOCAL STORAGE
 function saveData(){localStorage.setItem('dogDashboard',JSON.stringify({rows,rates}));}
 function loadData(){const data=localStorage.getItem('dogDashboard');if(data){const parsed=JSON.parse(data);rows=parsed.rows||[];rates=parsed.rates||rates;}}
 
-// === DATE & TOTALS ===
+// DATE & TOTALS
 function updateDateBtn(){dateBtn.textContent=formatDate(currentDate);}
 function updateTotals(){
   const today=new Date(); const todayStr=formatDate(today);
@@ -132,24 +126,27 @@ function updateTotals(){
   const todayRow=rows.find(r=>r.Fecha===todayStr);
   dailyTotalSpan.textContent='Daily: '+(todayRow?todayRow.Total.toFixed(2):'0')+' €';
 
-  // Weekly total
   let startWeek=new Date(today); startWeek.setDate(today.getDate()-((today.getDay()+6)%7));
   let endWeek=new Date(startWeek); endWeek.setDate(startWeek.getDate()+6);
-  let weekSum=rows.reduce((sum,r)=>{const d=r.Fecha.split('/'); const rd=new Date(d[2],d[1]-1,d[0]); return (rd>=startWeek && rd<=endWeek)?sum+r.Total:sum;},0);
+  let weekSum = rows.reduce((sum,r)=>{
+    const d=r.Fecha.split('/'); const rd=new Date(d[2],d[1]-1,d[0]);
+    return rd>=startWeek&&rd<=endWeek?sum+r.Total:sum;
+  },0);
   weeklyTotalSpan.textContent='Weekly: '+weekSum.toFixed(2)+' €';
 
-  // Monthly total
-  let startMonth=new Date(today.getFullYear(), today.getMonth(),1);
-  let endMonth=new Date(today.getFullYear(), today.getMonth()+1,0);
-  let monthSum=rows.reduce((sum,r)=>{const d=r.Fecha.split('/'); const rd=new Date(d[2],d[1]-1,d[0]); return (rd>=startMonth && rd<=endMonth)?sum+r.Total:sum;},0);
+  const startMonth=new Date(today.getFullYear(), today.getMonth(),1);
+  const endMonth=new Date(today.getFullYear(), today.getMonth()+1,0);
+  let monthSum = rows.reduce((sum,r)=>{
+    const d=r.Fecha.split('/'); const rd=new Date(d[2],d[1]-1,d[0]);
+    return rd>=startMonth&&rd<=endMonth?sum+r.Total:sum;
+  },0);
   monthlyTotalSpan.textContent='Monthly: '+monthSum.toFixed(2)+' €';
 }
 
-// === TABLE ===
+// TABLE
 function buildTable(){
-  tableHeader.innerHTML=''; 
-  const headerCells=['Día','Fecha','Total',...allDogs];
-  headerCells.forEach(h=>{const th=document.createElement('th');th.textContent=h;tableHeader.appendChild(th);});
+  tableHeader.innerHTML=''; const headerCells=['Día','Fecha','Total',...allDogs];
+  headerCells.forEach(h=>{const th=document.createElement('th'); th.textContent=h; tableHeader.appendChild(th);});
   tbody.innerHTML='';
   rows.sort((a,b)=>new Date(a.Fecha.split('/').reverse().join('-'))-new Date(b.Fecha.split('/').reverse().join('-')));
   rows.forEach(r=>{
@@ -157,14 +154,15 @@ function buildTable(){
     const d=r.Fecha.split('/'); const rowDate=new Date(d[2],d[1]-1,d[0]);
     if(rowDate.getDay()===0||rowDate.getDay()===6) tr.classList.add('weekend');
     tr.innerHTML='<td>'+dayOfWeek(rowDate)+'</td><td>'+r.Fecha+'</td><td>'+r.Total.toFixed(2)+' €</td>';
-    allDogs.forEach(dog){const val=r[dog]||0; tr.innerHTML+='<td>'+(val?val:'')+'</td>';});
+    allDogs.forEach(dog){const val=r[dog]||0; tr.innerHTML+='<td>'+ (val?val:'') +'</td>';});
     tr.addEventListener('click',()=>openEditModal(r));
     tbody.appendChild(tr);
   });
   updateTotals();
+  restoreHighlights();
 }
 
-// === SERVICE DROPDOWNS ===
+// SERVICE DROPDOWNS
 function createServiceDropdowns(){
   ['Daycare','Walk','Overnight'].forEach(service=>{
     const div=document.createElement('div'); div.classList.add('dropdown');
@@ -186,17 +184,15 @@ function createServiceDropdowns(){
   document.addEventListener('click',()=>{document.querySelectorAll('.dropdown-content').forEach(c=>c.style.display='none');});
 }
 
-// === TOGGLE DOG ===
+// TOGGLE DOG
 function toggleDog(dog,service,btn){
-  const dateStr=formatDate(currentDate); 
-  if(!selections[dateStr]) selections[dateStr]={};
-  const key=dog+'_'+service; 
-  selections[dateStr][key]=!selections[dateStr][key];
+  const dateStr=formatDate(currentDate); if(!selections[dateStr]) selections[dateStr]={};
+  const key=dog+'_'+service; selections[dateStr][key]=!selections[dateStr][key];
   btn.classList.toggle('active',selections[dateStr][key]);
   updateDogPayment(dog,service,selections[dateStr][key]);
 }
 
-// === UPDATE PAYMENT ===
+// UPDATE PAYMENT
 function findRow(dateStr){return rows.find(r=>r.Fecha===dateStr);}
 function updateDogPayment(dog,service,add){
   const dateStr=formatDate(currentDate);
@@ -208,7 +204,18 @@ function updateDogPayment(dog,service,add){
   row.Total=Math.max(0,row.Total); saveData(); buildTable();
 }
 
-// === RATES MODAL ===
+// HIGHLIGHTS
+function restoreHighlights(){
+  const dateStr=formatDate(currentDate);
+  document.querySelectorAll('.dropdown-content button').forEach(btn=>{
+    const dog=btn.textContent;
+    const service=btn.closest('.dropdown').querySelector('.service-label').textContent;
+    const key=dog+'_'+service;
+    btn.classList.toggle('active',selections[dateStr] && selections[dateStr][key]);
+  });
+}
+
+// RATES MODAL
 function populateRatesModal(){
   ratesTableBody.innerHTML='';
   allDogs.forEach(d=>{
@@ -231,7 +238,7 @@ document.getElementById('saveRates').addEventListener('click',()=>{
 document.getElementById('addDog').addEventListener('click',()=>{const newDog=prompt("Enter new dog name:"); if(newDog&&!allDogs.includes(newDog)){allDogs.push(newDog); rates[newDog]={daycare:10,weekend:12,overnight:20,walk:5}; populateRatesModal(); buildTable(); saveData();}});
 function deleteDog(d){delete rates[d]; allDogs=allDogs.filter(x=>x!==d); populateRatesModal(); buildTable(); saveData();}
 
-// === EDIT DAY MODAL ===
+// EDIT DAY MODAL
 function openEditModal(row){
   editModal.style.display='flex'; editTable.innerHTML='';
   const header=document.createElement('tr'); header.innerHTML='<th>Dog</th><th>Daycare</th><th>Walk</th><th>Overnight</th>'; editTable.appendChild(header);
@@ -247,13 +254,13 @@ function openEditModal(row){
   document.getElementById('closeEdit').onclick=()=>{editModal.style.display='none';};
 }
 
-// === DATE CONTROLS ===
+// DATE CONTROLS
 dateBtn.addEventListener('click',()=>{ dateInput.valueAsDate=currentDate; dateInput.style.display='inline-block'; });
-dateInput.addEventListener('change',e=>{currentDate=new Date(e.target.value); updateDateBtn(); dateInput.style.display='none'; buildTable();});
+dateInput.addEventListener('change',e=>{currentDate=new Date(e.target.value); updateDateBtn(); buildTable(); dateInput.style.display='none';});
 document.getElementById('prevDay').addEventListener('click',()=>{currentDate.setDate(currentDate.getDate()-1); updateDateBtn(); buildTable();});
 document.getElementById('nextDay').addEventListener('click',()=>{currentDate.setDate(currentDate.getDate()+1); updateDateBtn(); buildTable();});
 
-// === INIT ===
+// INIT
 loadData(); updateDateBtn(); createServiceDropdowns(); buildTable();
 </script>
 </body>
