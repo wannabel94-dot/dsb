@@ -52,6 +52,7 @@
         <th>Fecha</th>
         <th>Día</th>
         <th>Total (€)</th>
+        <!-- Dog columns -->
       </tr>
     </thead>
     <tbody id="tableBody"></tbody>
@@ -110,7 +111,10 @@ function createServiceDropdowns(){
     const content=document.createElement('div'); content.classList.add('dropdown-content');
     allDogs.forEach(dog=>{
       const dogBtn=document.createElement('button'); dogBtn.textContent=dog;
-      dogBtn.addEventListener('click',()=>{ toggleDogSelection(dog,service,dogBtn); });
+      dogBtn.addEventListener('click', (e)=>{
+        e.stopPropagation(); // prevent dropdown from closing
+        toggleDogSelection(dog,service,dogBtn);
+      });
       content.appendChild(dogBtn);
     });
     div.appendChild(content);
@@ -119,8 +123,9 @@ function createServiceDropdowns(){
     // Toggle dropdown on service button click
     btn.addEventListener('click', (e)=>{
       e.stopPropagation();
+      const isVisible = content.style.display==='block';
       closeAllDropdowns();
-      content.style.display = content.style.display === 'block' ? 'none' : 'block';
+      content.style.display = isVisible ? 'none':'block';
     });
   });
 }
@@ -146,7 +151,10 @@ function toggleDogSelection(dog,service,btn){
 function updateDogPayment(dog,service,add=true){
   const dateStr=formatDate(currentDate);
   let row = rows.find(r=>r.Fecha===dateStr);
-  if(!row){ row={Fecha:dateStr,Día:getWeekday(currentDate),Total:0,services:{}}; rows.push(row); }
+  if(!row){ 
+    row={Fecha:dateStr,Día:getWeekday(currentDate),Total:0,services:{}};
+    rows.push(row);
+  }
   if(!row.services[dog]) row.services[dog]=0;
   let rate = rates[dog][service.toLowerCase()];
   if(service==='Daycare' && (currentDate.getDay()===0 || currentDate.getDay()===6)) rate=rates[dog].weekend;
@@ -158,24 +166,35 @@ function updateDogPayment(dog,service,add=true){
 // Build main table
 function buildTable(){
   tbody.innerHTML='';
+  const tableHead=document.querySelector('#paymentTable thead tr');
+  tableHead.innerHTML=`<th>Fecha</th><th>Día</th><th>Total (€)</th>`;
+  allDogs.forEach(d=>{ const th=document.createElement('th'); th.textContent=d; tableHead.appendChild(th); });
+
   rows.sort((a,b)=>new Date(a.Fecha.split('/').reverse().join('-'))-new Date(b.Fecha.split('/').reverse().join('-')));
   rows.forEach(r=>{
     const tr=document.createElement('tr');
     const dateParts=r.Fecha.split('/'); 
     const rowDate=new Date(dateParts[2],dateParts[1]-1,dateParts[0]);
     if(rowDate.getDay()===0 || rowDate.getDay()===6) tr.classList.add('weekend');
-    const tdDate=document.createElement('td'); tdDate.textContent=r.Fecha; tr.appendChild(tdDate);
-    const tdWeek=document.createElement('td'); tdWeek.textContent=r.Día; tdWeek.classList.add('weekday'); tr.appendChild(tdWeek);
-    const tdTotal=document.createElement('td'); tdTotal.textContent=r.Total.toFixed(2); tdTotal.classList.add('currency'); tr.appendChild(tdTotal);
+    tr.innerHTML=`<td>${r.Fecha}</td><td>${r.Día}</td><td>${r.Total.toFixed(2)}</td>`;
+    allDogs.forEach(d=>{ 
+      const td=document.createElement('td'); 
+      td.textContent=(r.services[d]||''); 
+      td.classList.add('currency'); 
+      tr.appendChild(td); 
+    });
     tbody.appendChild(tr);
   });
 }
 
 // Date controls
 updateDateBtn();
-document.getElementById('prevDay').addEventListener('click',()=>{ currentDate.setDate(currentDate.getDate()-1); updateDateBtn(); restoreSelections(); });
-document.getElementById('nextDay').addEventListener('click',()=>{ currentDate.setDate(currentDate.getDate()+1); updateDateBtn(); restoreSelections(); });
-dateBtn.addEventListener('click',()=>{});
+document.getElementById('prevDay').addEventListener('click',()=>{
+  currentDate.setDate(currentDate.getDate()-1); updateDateBtn(); restoreSelections(); 
+});
+document.getElementById('nextDay').addEventListener('click',()=>{
+  currentDate.setDate(currentDate.getDate()+1); updateDateBtn(); restoreSelections(); 
+});
 
 // Restore selections
 function restoreSelections(){
@@ -212,6 +231,7 @@ function deleteDog(d){
     delete rates[d];
     createServiceDropdowns();
     populateRatesModal();
+    buildTable();
   }
 }
 
@@ -234,6 +254,7 @@ document.getElementById('addDogRateBtn').addEventListener('click',()=>{
     rates[name]={daycare:10, weekend:12, overnight:20, walk:5};
     createServiceDropdowns();
     populateRatesModal();
+    buildTable();
   }
 });
 
