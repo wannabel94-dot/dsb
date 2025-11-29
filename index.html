@@ -515,7 +515,7 @@ h1 {
 <body>
 
 <div class="container">
-  <h1>🐕 Dog Services – Data Entry</h1>
+  <h1>🐕 Hola Lucas</h1>
 
   <div class="date-controls">
     <button id="prevDay" class="date-nav">&lt;</button>
@@ -526,15 +526,15 @@ h1 {
   <div class="services">
     <div class="service-btn" data-service="Daycare">
       <img src="daycare.svg" width="32" alt="Daycare">
-      <span>Daycare</span>
+      <span>Guardería</span>
     </div>
     <div class="service-btn" data-service="Walk">
       <img src="walk.svg" width="32" alt="Walk">
-      <span>Walk</span>
+      <span>Paseo</span>
     </div>
     <div class="service-btn" data-service="Overnight">
       <img src="overnight.svg" width="32" alt="Overnight">
-      <span>Overnight</span>
+      <span>Noche</span>
     </div>
     <div class="service-btn" data-service="Extra">
       <img src="extra.svg" width="32" alt="Extra">
@@ -554,8 +554,8 @@ h1 {
 
   <div class="totals">
     <span id="dailyTotal">Hoy: 0 €</span>
-    <span id="weeklyTotal">Semana: 0 €</span>
-    <span id="monthlyTotal">Mes: 0 €</span>
+    <span id="weeklyTotal">Este semana: 0 €</span>
+    <span id="monthlyTotal">Este mes: 0 €</span>
   </div>
 </div>
 
@@ -574,22 +574,23 @@ h1 {
 <!-- Rates Modal -->
 <div id="ratesModal" class="modal">
   <div class="modal-content">
-    <h2>🐾 Tarifas de Perros (€)</h2>
+    <h2>🐾 Tarifas (€)</h2>
     <table id="ratesTable">
       <thead>
         <tr>
           <th>Nombre</th>
-          <th>Guardería</th>
-          <th>Fin de semana</th>
+          <th>Día</th>
+          <th>Noche</th>
+          <th>Finde</th>
           <th>Noche</th>
           <th>Paseo</th>
-          <th>Acciones</th>
+          <th></th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
     <div class="modal-buttons">
-      <button id="addDogRateBtn">+ Añadir Perro</button>
+      <button id="addDogRateBtn">+ Nuevo Perro</button>
       <button id="saveRates">Guardar</button>
       <button id="closeRates" class="close-modal">Cerrar</button>
     </div>
