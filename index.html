@@ -1,927 +1,204 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Servicios</title>
-
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#c1802a">
-<link rel="icon" href="icons/dog-192.png" sizes="192x192" type="image/png">
-
-<style>
-* { 
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: #373e2e;
-  padding: 20px;
-  min-height: 100vh;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  background: #e3ddb4;
-  padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-h1 { 
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 30px;
-  text-align: center;
-  color: #373e2e;
-  letter-spacing: -0.5px;
-}
-
-.date-controls { 
-  display: flex;
-  gap: 11px;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: none;
-  margin-bottom: 30px;
-  padding: 20px;
-  background: linear-gradient(135deg, #8a8252 0%, #736e4e 100%);
-  border-radius: 12px;
-}
-
-.date-btn, .date-nav, #ratesBtn, #viewTableBtn {
-  padding: 12px 24px;
-  cursor: pointer;
-  border-radius: 10px;
-  border: none;
-  font-weight: 600;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.date-btn { 
-  background: linear-gradient(135deg, #c1802a 0%, #a86d1f 100%);
-  color: white;
-  min-width: 180px;
-}
-
-.date-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(193, 128, 42, 0.4);
-}
-
-.date-nav { 
-  background: white;
-  color: #c1802a;
-  border: 2px solid #c1802a;
-  font-size: 20px;
-  width: 45px;
-  height: 45px;
-  padding: 0;
-  font-weight: bold;
-}
-
-.date-nav:hover { 
-  background: #c1802a;
-  color: white;
-  transform: scale(1.05);
-}
-
-#ratesBtn, #viewTableBtn { 
-  background: linear-gradient(135deg, #8a8252 0%, #736e4e 100%);
-  color: white;
-}
-
-#ratesBtn:hover, #viewTableBtn:hover { 
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(138, 130, 82, 0.4);
-}
-
-.services { 
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 20px;
-  margin-top: 30px;
-  margin-bottom: 30px;
-}
-
-.service-btn { 
-  padding: 30px 20px;
-  background: linear-gradient(135deg, #d4cba8 0%, #c9bf9a 100%);
-  border-radius: 16px;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.3s ease;
-  border: 2px solid #8a8252;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  color: #373e2e;
-}
-
-.service-btn:hover { 
-  background: linear-gradient(135deg, #c1802a 0%, #a86d1f 100%);
-  color: white;
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(193, 128, 42, 0.3);
-  border-color: #c1802a;
-}
-
-.service-btn img {
-  width: 40px;
-  height: 40px;
-  filter: opacity(0.7);
-  transition: filter 0.3s ease;
-}
-
-.service-btn:hover img {
-  filter: brightness(0) invert(1);
-}
-
-.totals { 
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  font-weight: 600;
-  margin-top: 30px;
-  flex-wrap: wrap;
-}
-
-.totals span { 
-  padding: 12px 20px;
-  background: #d4cba8;
-  border-radius: 10px;
-  color: #373e2e;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  font-size: 15px;
-  transition: transform 0.2s ease;
-  border: 2px solid #8a8252;
-}
-
-.totals span:hover {
-  transform: scale(1.05);
-}
-
-.summary { 
-  margin-top: 30px;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-  background: linear-gradient(135deg, #d4cba8 0%, #c9bf9a 100%);
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border: 2px solid #8a8252;
-}
-
-.summary h3 { 
-  margin-top: 0;
-  margin-bottom: 15px;
-  color: #373e2e;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-#summaryContent {
-  color: #373e2e;
-  line-height: 1.8;
-  font-size: 15px;
-}
-
-#summaryContent strong {
-  color: #c1802a;
-  font-weight: 700;
-}
-
-.modal { 
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  justify-content: center;
-  align-items: center;
-  z-index: 50;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.modal-content { 
-  background: white;
-  max-width: 550px;
-  width: 90%;
-  max-height: 85vh;
-  overflow-y: auto;
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-  from { 
-    transform: translateY(30px);
-    opacity: 0;
-  }
-  to { 
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.modal-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.modal-content::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 10px;
-}
-
-.modal-content::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-.modal-content h2 { 
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: #373e2e;
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.dog-list { 
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  max-height: 350px;
-  overflow-y: auto;
-  margin-bottom: 20px;
-  gap: 10px;
-  padding: 5px;
-}
-
-.dog-list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.dog-list::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 10px;
-}
-
-.dog-list::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-
-.dog-list button { 
-  padding: 14px 16px;
-  border: 2px solid #8a8252;
-  border-radius: 10px;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.3s ease;
-  background: white;
-  font-weight: 600;
-  color: #373e2e;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.dog-list button:hover {
-  border-color: #c1802a;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(193, 128, 42, 0.2);
-}
-
-.dog-list button.selected { 
-  background: linear-gradient(135deg, #c1802a 0%, #a86d1f 100%);
-  color: white;
-  border-color: #c1802a;
-  transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(193, 128, 42, 0.3);
-}
-
-.modal-buttons { 
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.modal-buttons button { 
-  padding: 12px 24px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 15px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.close-modal { 
-  background: #e2e8f0;
-  color: #475569;
-}
-
-.close-modal:hover {
-  background: #cbd5e1;
-  transform: translateY(-2px);
-}
-
-.save-modal { 
-  background: linear-gradient(135deg, #8a8252 0%, #736e4e 100%);
-  color: white;
-}
-
-.save-modal:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(138, 130, 82, 0.4);
-}
-
-/* Rates Table Styling */
-#ratesTable {
-  width: 100%;
-  margin-bottom: 20px;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-#ratesTable th {
-  background: linear-gradient(135deg, #c1802a 0%, #a86d1f 100%);
-  color: white;
-  padding: 12px 8px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 14px;
-  border: none;
-}
-
-#ratesTable th:first-child {
-  border-top-left-radius: 10px;
-}
-
-#ratesTable th:last-child {
-  border-top-right-radius: 10px;
-}
-
-#ratesTable td {
-  border: 1px solid #8a8252;
-  padding: 10px 8px;
-  text-align: center;
-  background: white;
-  font-size: 14px;
-}
-
-#ratesTable tr:last-child td:first-child {
-  border-bottom-left-radius: 10px;
-}
-
-#ratesTable tr:last-child td:last-child {
-  border-bottom-right-radius: 10px;
-}
-
-#ratesTable input {
-  width: 60px;
-  padding: 6px 8px;
-  border: 2px solid #8a8252;
-  border-radius: 6px;
-  text-align: center;
-  font-size: 14px;
-  transition: border-color 0.2s;
-}
-
-#ratesTable input:focus {
-  outline: none;
-  border-color: #c1802a;
-}
-
-.deleteDogBtn {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-  padding: 6px 12px;
-  font-size: 13px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.deleteDogBtn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-}
-
-#addDogRateBtn {
-  background: linear-gradient(135deg, #8a8252 0%, #736e4e 100%);
-  color: white;
-}
-
-#addDogRateBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(138, 130, 82, 0.4);
-}
-
-#saveRates {
-  background: linear-gradient(135deg, #c1802a 0%, #a86d1f 100%);
-  color: white;
-}
-
-#saveRates:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(193, 128, 42, 0.4);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .container {
-    padding: 25px;
-  }
-
-  h1 {
-    font-size: 26px;
-    margin-bottom: 20px;
-  }
-
-  .date-controls {
-    padding: 15px;
-  }
-
-  .services {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-  }
-
-  .service-btn {
-    padding: 20px 15px;
-  }
-
-  .totals {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .totals span {
-    width: 100%;
-    text-align: center;
-  }
-
-  .dog-list {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-buttons {
-    flex-direction: column;
-  }
-
-  .modal-buttons button {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .services {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Servicios</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#c1802a" />
+  <link rel="icon" href="icons/dog-192.png" sizes="192x192" type="image/png" />
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background:#373e2e; padding:20px; min-height:100vh; }
+    .container{max-width:1200px;margin:0 auto;background:#e3ddb4;padding:40px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}    
+    h1{text-align:center;margin-bottom:20px;color:#373e2e;}
+
+    .date-controls{display:flex;justify-content:center;gap:10px;margin-bottom:25px;}
+    .date-btn,.date-nav{padding:12px 20px;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
+    .date-btn{background:#c1802a;color:white;}
+    .date-nav{background:white;color:#c1802a;border:2px solid #c1802a;}
+
+    .services{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px;margin:20px 0;}
+    .service-btn{padding:25px;background:#d4cba8;border-radius:16px;border:2px solid #8a8252;cursor:pointer;text-align:center;transition:0.3s;}
+    .service-btn:hover{background:#c1802a;color:white;transform:translateY(-4px);}    
+
+    .summary{background:#d4cba8;padding:20px;border-radius:16px;border:2px solid #8a8252;margin-top:30px;}
+    #summaryContent{line-height:1.6;}
+
+    .totals{display:flex;justify-content:center;gap:15px;margin-top:25px;}
+    .totals span{background:#d4cba8;padding:12px 20px;border-radius:10px;border:2px solid #8a8252;}
+
+    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
+    .modal-content{background:white;padding:25px;border-radius:16px;max-width:500px;width:90%;max-height:80vh;overflow:auto;}
+    .dog-list{display:flex;flex-direction:column;gap:10px;}
+
+    .dog-box{display:flex;flex-direction:column;gap:6px;padding:10px;border:2px solid #8a8252;border-radius:10px;background:white;}
+    .dog-box.selected{border-color:#c1802a;background:#f7e4c2;}
+
+    .modal-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:15px;}
+
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>🐕 Hola Lucas</h1>
 
-<div class="container">
-  <h1>🐕 Hola Lucas</h1>
-
-  <div class="date-controls">
-    <button id="prevDay" class="date-nav">&lt;</button>
-    <button id="dateBtn" class="date-btn"></button>
-    <button id="nextDay" class="date-nav">&gt;</button>
-  </div>
-
-  <div class="services">
-    <div class="service-btn" data-service="Daycare">
-      <img src="icons/day.svg" width="32" alt="Daycare">
-      <span>Guardería</span>
+    <div class="date-controls">
+      <button id="prevDay" class="date-nav">&lt;</button>
+      <button id="dateBtn" class="date-btn"></button>
+      <button id="nextDay" class="date-nav">&gt;</button>
     </div>
-    <div class="service-btn" data-service="Walk">
-      <img src="icons/walk.svg" width="32" alt="Walk">
-      <span>Paseo</span>
+
+    <div class="services">
+      <div class="service-btn" data-service="Daycare">Guardería</div>
+      <div class="service-btn" data-service="Walk">Paseo</div>
+      <div class="service-btn" data-service="Overnight">Noche</div>
+      <div class="service-btn" data-service="Extra">Extra</div>
     </div>
-    <div class="service-btn" data-service="Overnight">
-      <img src="icons/night.svg" width="32" alt="Overnight">
-      <span>Noche</span>
-    </div>
-    <div class="service-btn" data-service="Extra">
-      <img src="icons/extra.svg" width="32" alt="Extra">
-      <span>Extra</span>
-    </div>
+
+    <div style="text-align:center;"><button id="ratesBtn">Tarifas</button> <button id="viewTableBtn">Ver Tabla</button></div>
+
+    <div class="summary"><h3>📋 Resumen:</h3><div id="summaryContent">No hay servicios seleccionados.</div></div>
+    <div class="totals"><span id="dailyTotal">Hoy: 0 €</span><span id="weeklyTotal">Semana: 0 €</span><span id="monthlyTotal">Mes: 0 €</span></div>
   </div>
 
-  <div style="text-align:center; margin-top:20px;">
-    <button id="ratesBtn">Tarifas</button>
-    <button id="viewTableBtn">Ver Tabla</button>
-  </div>
-
-  <div class="summary" id="dailySummary">
-    <h3>📋 Resumen de hoy:</h3>
-    <div id="summaryContent">No hay servicios seleccionados.</div>
-  </div>
-
-  <div class="totals">
-    <span id="dailyTotal">Hoy: 0 €</span>
-    <span id="weeklyTotal">Este semana: 0 €</span>
-    <span id="monthlyTotal">Este mes: 0 €</span>
-  </div>
-</div>
-
-<!-- Dog Modal -->
-<div id="dogModal" class="modal">
-  <div class="modal-content">
-    <h2 id="serviceTitle"><img src="" width="28" alt=""> Service</h2>
-    <div class="dog-list" id="dogList"></div>
-    <div class="modal-buttons">
-       <button class="save-modal" id="saveDogSelection">Guardar</button>
-      <button class="close-modal" id="closeDogModal">Cerrar</button>
+  <!-- Dog Modal -->
+  <div id="dogModal" class="modal">
+    <div class="modal-content">
+      <h2 id="serviceTitle">Servicio</h2>
+      <div id="dogList" class="dog-list"></div>
+      <div class="modal-buttons"><button id="saveDogSelection">Guardar</button><button id="closeDogModal">Cerrar</button></div>
     </div>
   </div>
-</div>
 
-<!-- Rates Modal -->
-<div id="ratesModal" class="modal">
-  <div class="modal-content">
-    <h2>🐾 Tarifas (€)</h2>
-    <table id="ratesTable">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Día</th>
-          <th>Noche</th>
-          <th>Finde</th>
-          <th>Noche</th>
-          <th>Paseo</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div class="modal-buttons">
-      <button id="addDogRateBtn">+ Nuevo Perro</button>
-      <button id="saveRates">Guardar</button>
-      <button id="closeRates" class="close-modal">Cerrar</button>
+  <!-- Time Modal -->
+  <div id="timeModal" class="modal">
+    <div class="modal-content" style="max-width:320px;">
+      <h2>Horario</h2>
+      <label>Inicio:</label>
+      <input id="startTimeInput" type="time" />
+      <label>Fin:</label>
+      <input id="endTimeInput" type="time" />
+      <div class="modal-buttons"><button id="saveTimeBtn">Guardar</button><button id="closeTimeModal">Cancelar</button></div>
     </div>
   </div>
-</div>
-
-<!-- Time Modal -->
-<div id="timeModal" class="modal">
-  <div class="modal-content" style="max-width:320px;">
-    <h2>🕒 Horario</h2>
-
-    <label>Hora de inicio:</label>
-    <input id="startTimeInput" type="time">
-
-    <label>Hora de fin:</label>
-    <input id="endTimeInput" type="time">
-
-    <div class="modal-buttons">
-      <button id="saveTimeBtn" class="save-modal">Guardar</button>
-      <button id="closeTimeModal" class="close-modal">Cancelar</button>
-    </div>
-  </div>
-</div>
 
 <script>
+/* === DATA === */
 const defaultDogs = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
-let rates = JSON.parse(localStorage.getItem('rates')) || {};
 let selections = JSON.parse(localStorage.getItem('selections')) || {};
-let rows = JSON.parse(localStorage.getItem('rows')) || {};
-if(!Object.keys(rates).length) allDogs.forEach(d=>rates[d]={daycare:10,weekend:12,overnight:20,walk:5,extra:0});
 
+/* === DATE === */
 let currentDate = new Date();
-function formatDate(d){return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
-function updateDateBtn(){document.getElementById("dateBtn").textContent=formatDate(currentDate);}
-updateDateBtn();
+const formatDate = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+function updateDate(){ document.getElementById('dateBtn').textContent = formatDate(currentDate); }
+updateDate();
 
-/* Date Nav */
-document.getElementById('prevDay').onclick=()=>{currentDate.setDate(currentDate.getDate()-1); updateDateBtn(); updateSummary();}
-document.getElementById('nextDay').onclick=()=>{currentDate.setDate(currentDate.getDate()+1); updateDateBtn(); updateSummary();}
-document.getElementById('dateBtn').onclick=()=>{
-  const input=document.createElement('input'); input.type='date'; input.style.display='none';
-  document.body.appendChild(input); input.valueAsDate=currentDate; input.click();
-  input.onchange=()=>{currentDate=new Date(input.value); updateDateBtn(); updateSummary(); input.remove();};
+prevDay.onclick = ()=>{ currentDate.setDate(currentDate.getDate()-1); updateDate(); updateSummary(); };
+nextDay.onclick = ()=>{ currentDate.setDate(currentDate.getDate()+1); updateDate(); updateSummary(); };
+
+dateBtn.onclick = ()=>{
+  const input=document.createElement('input'); input.type='date'; input.style.display='none'; document.body.appendChild(input);
+  input.valueAsDate=currentDate; input.click();
+  input.onchange=()=>{ currentDate=new Date(input.value); updateDate(); updateSummary(); input.remove(); };
 };
 
-/* Service Modals */
+/* === SERVICE MODAL === */
+let currentService = "";
 const dogModal = document.getElementById('dogModal');
 const dogList = document.getElementById('dogList');
-const serviceTitle = document.getElementById('serviceTitle');
-let currentService = '';
 
-document.querySelectorAll('.service-btn').forEach(btn=>{
-  btn.onclick=()=>{
-    currentService=btn.dataset.service;
-    const img = btn.querySelector('img');
-    serviceTitle.innerHTML=`<img src="${img.src}" width="28" alt=""> ${currentService}`;
-    dogList.innerHTML='';
-    const dateKey=formatDate(currentDate);
-    allDogs.forEach(dog=>{
-      const key = `${dog}_${currentService}`;
-const b = document.createElement('button');
-b.textContent = dog;
-b.classList.add("dog-select");
+function openDogModal(service) {
+  currentService = service;
+  dogList.innerHTML = "";
+  const dateKey = formatDate(currentDate);
 
-// Pre-select if saved
-if (selections[dateKey]?.[key]?.selected) {
-    b.classList.add("selected");
+  allDogs.forEach(dog => {
+    const key = `${dog}_${service}`;
+
+    const box = document.createElement("div");
+    box.className = "dog-box";
+
+    const title = document.createElement("div");
+    title.textContent = dog;
+    title.style.fontWeight = "600";
+
+    const start = document.createElement("input"); start.type = "time";
+    const end = document.createElement("input"); end.type = "time";
+
+    if (selections[dateKey]?.[key]) {
+      box.classList.add("selected");
+      start.value = selections[dateKey][key].start || "";
+      end.value = selections[dateKey][key].end || "";
+    }
+
+    start.onchange = end.onchange = ()=>{
+      if (!selections[dateKey]) selections[dateKey] = {};
+      selections[dateKey][key] = { selected:true, start:start.value, end:end.value };
+      box.classList.add("selected");
+      updateSummary();
+    };
+
+    title.onclick = ()=>{
+      if (box.classList.contains("selected")) {
+        box.classList.remove("selected");
+        delete selections[dateKey][key];
+      } else {
+        box.classList.add("selected");
+        selections[dateKey][key] = { selected:true, start:"", end:"" };
+      }
+      updateSummary();
+    };
+
+    box.appendChild(title);
+    box.appendChild(start);
+    box.appendChild(end);
+    dogList.appendChild(box);
+  });
+
+  dogModal.style.display = "flex";
 }
 
-b.onclick = () => {
-    // Open the time modal only when selecting
-    if (!b.classList.contains("selected")) {
-        openTimeModal(dog, key);
-    } else {
-        // Deselect
-        b.classList.remove("selected");
-        delete selections[dateKey][key];
-        updateSummary();
-    }
-};
+closeDogModal.onclick = ()=> dogModal.style.display="none";
+saveDogSelection.onclick = ()=>{ dogModal.style.display="none"; localStorage.setItem('selections',JSON.stringify(selections)); updateSummary(); };
 
-dogList.appendChild(b);
-
-// Time input
-const timeInput = document.createElement("input");
-timeInput.type = "time";
-timeInput.style.padding = "6px";
-timeInput.style.border = "1px solid #8a8252";
-timeInput.style.borderRadius = "8px";
-timeInput.style.width = "100%";
-
-// Restore previous value
-if (selections[dateKey]?.[key]?.selected) {
-    b.classList.add("selected");
-    timeInput.value = selections[dateKey][key].time || "";
-}
-
-b.onclick = () => {
-    b.classList.toggle("selected");
-
-    if (!selections[dateKey]) selections[dateKey] = {};
-
-    if (b.classList.contains("selected")) {
-        selections[dateKey][key] = {
-            selected: true,
-            time: timeInput.value
-        };
-    } else {
-        delete selections[dateKey][key];
-    }
-};
-
-timeInput.onchange = () => {
-    if (!selections[dateKey]) selections[dateKey] = {};
-    if (!selections[dateKey][key]) selections[dateKey][key] = { selected: true };
-    selections[dateKey][key].time = timeInput.value;
-};
-
-wrapper.appendChild(b);
-wrapper.appendChild(timeInput);
-dogList.appendChild(wrapper);
-    });
-    dogModal.style.display='flex';
-  }
+/* === SERVICE CLICK === */
+document.querySelectorAll('.service-btn').forEach(btn => {
+  btn.onclick = ()=> openDogModal(btn.dataset.service);
 });
 
-document.getElementById('closeDogModal').onclick=()=>{dogModal.style.display='none';};
-document.getElementById('saveDogSelection').onclick=()=>{
-  dogModal.style.display='none';
-  updateSummary();
-  saveSelections();
-};
-
-/* Save Selections */
-function saveSelections(){
-  const dateKey=formatDate(currentDate);
-  if(!rows[dateKey]) rows[dateKey]={Total:0,services:{}};
-  rows[dateKey].services={};
-  Object.keys(selections[dateKey]||{}).forEach(k=>{
-    if(selections[dateKey][k]?.selected){
-      const dog=k.split('_')[0]; const service=k.split('_')[1];
-      let rate=rates[dog][service.toLowerCase()]||0;
-      if(service==='Daycare' && (currentDate.getDay()===0||currentDate.getDay()===6)) rate=rates[dog].weekend;
-      rows[dateKey].services[dog]=(rows[dateKey].services[dog]||0)+rate;
-    }
-  });
-  rows[dateKey].Total=Object.values(rows[dateKey].services).reduce((a,b)=>a+b,0);
-  localStorage.setItem('rows',JSON.stringify(rows));
-  localStorage.setItem('selections',JSON.stringify(selections));
-  updateTotals();
-}
-
-/* Daily Summary */
+/* === SUMMARY === */
 function updateSummary() {
-    const dateKey = formatDate(currentDate);
-    const summaryDiv = document.getElementById('summaryContent');
+  const dateKey = formatDate(currentDate);
+  const div = document.getElementById('summaryContent');
 
-    if (!selections[dateKey]) {
-        summaryDiv.textContent = "No hay servicios seleccionados.";
-        return;
-    }
+  if (!selections[dateKey]) { div.textContent = "No hay servicios seleccionados."; return; }
 
-    const services = {};
+  let html = "";
+  const groups = {};
 
-    Object.keys(selections[dateKey]).forEach(k => {
-        const entry = selections[dateKey][k];
-        if (entry.selected) {
-            const [dog, service] = k.split('_');
-            if (!services[service]) services[service] = [];
-            services[service].push({
-                dog,
-                start: entry.start || "--:--",
-                end: entry.end || "--:--"
-            });
-        }
-    });
-
-    let html = '';
-    for (let s in services) {
-        html += `<strong>${s}:</strong><br>`;
-        services[s].forEach(e => {
-            html += `• ${e.dog} — ${e.start} → ${e.end}<br>`;
-        });
-        html += `<br>`;
-    }
-
-    summaryDiv.innerHTML = html || "No hay servicios seleccionados.";
-}
-
-
-/* Totals */
-function updateTotals(){
-  const now=new Date();
-  const todayStr=formatDate(now);
-  const dailySpan=document.getElementById("dailyTotal");
-  const weeklySpan=document.getElementById("weeklyTotal");
-  const monthlySpan=document.getElementById("monthlyTotal");
-  const row=rows[todayStr];
-  dailySpan.textContent="Hoy: "+(row?row.Total.toFixed(2):"0")+" €";
-
-  const monday=new Date(now); const diff=(monday.getDay()+6)%7; monday.setDate(now.getDate()-diff);
-  const sunday=new Date(monday); sunday.setDate(monday.getDate()+6);
-  let weekSum=0; Object.keys(rows).forEach(d=>{
-    const [dd,mm,yy]=d.split('/'); const dt=new Date(yy,mm-1,dd);
-    if(dt>=monday && dt<=sunday) weekSum+=rows[d].Total;
+  Object.entries(selections[dateKey]).forEach(([key,val]) => {
+    if (!val.selected) return;
+    const [dog, service] = key.split('_');
+    if (!groups[service]) groups[service] = [];
+    groups[service].push(val.start + " → " + val.end + " — " + dog);
   });
-  weeklySpan.textContent="Semana: "+weekSum.toFixed(2)+" €";
 
-  const firstDay=new Date(now.getFullYear(),now.getMonth(),1); const lastDay=new Date(now.getFullYear(),now.getMonth()+1,0);
-  let monthSum=0; Object.keys(rows).forEach(d=>{
-    const [dd,mm,yy]=d.split('/'); const dt=new Date(yy,mm-1,dd);
-    if(dt>=firstDay && dt<=lastDay) monthSum+=rows[d].Total;
-  });
-  monthlySpan.textContent="Mes: "+monthSum.toFixed(2)+" €";
+  for (let s in groups) {
+    html += `<strong>${s}</strong><br>`;
+    groups[s].forEach(t => html += `• ${t}<br>`);
+    html += `<br>`;
+  }
+
+  div.innerHTML = html || "No hay servicios seleccionados.";
 }
-updateTotals();
+updateSummary();
 
-/* Rates Modal */
-const ratesModal = document.getElementById('ratesModal');
-const ratesTableBody = document.querySelector("#ratesTable tbody");
+/* VIEW TABLE */
+viewTableBtn.onclick = ()=> location.href = "table.html";
 
-document.getElementById('ratesBtn').onclick=()=>{ buildRatesTable(); ratesModal.style.display='flex'; };
-document.getElementById('closeRates').onclick=()=>{ ratesModal.style.display='none'; };
-
-function buildRatesTable(){
-  ratesTableBody.innerHTML='';
-  allDogs.forEach(dog=>{
-    const key = `${dog}_${currentService}`;
-    const b = document.createElement('button');
-    b.textContent = dog;
-    b.classList.add("dog-select");
-
-    if (selections[dateKey]?.[key]?.selected) {
-        b.classList.add("selected");
-    }
-
-    b.onclick = () => {
-        if (!b.classList.contains("selected")) {
-            openTimeModal(dog, key);
-        } else {
-            b.classList.remove("selected");
-            delete selections[dateKey][key];
-            updateSummary();
-        }
-    };
-
-    dogList.appendChild(b);
-});
- localStorage.setItem('allDogs',JSON.stringify(allDogs));
-      buildRatesTable();
-    };
-  });
-}
-
-document.getElementById('saveRates').onclick=()=>{
-  [...ratesTableBody.querySelectorAll("tr")].forEach(tr=>{
-    const dog=tr.children[0].textContent; const inputs=tr.querySelectorAll("input");
-    rates[dog]={daycare:parseFloat(inputs[0].value)||0, weekend:parseFloat(inputs[1].value)||0, overnight:parseFloat(inputs[2].value)||0, walk:parseFloat(inputs[3].value)||0};
-  });
-  localStorage.setItem('rates',JSON.stringify(rates));
-  ratesModal.style.display='none';
-};
-
-document.getElementById('addDogRateBtn').onclick=()=>{
-  const newDog = prompt("Introduce el nombre del perro:"); if(!newDog) return; if(rates[newDog]) return alert("¡El perro ya existe!");
-  rates[newDog]={daycare:10, weekend:12, overnight:20, walk:5, extra:0}; allDogs.push(newDog);
-  localStorage.setItem('allDogs',JSON.stringify(allDogs));
-  buildRatesTable();
-};
-
-// Time Modal Logic
-const timeModal = document.getElementById("timeModal");
-let activeDogKey = "";
-let activeDogName = "";
-
-function openTimeModal(dog, key) {
-    activeDogName = dog;
-    activeDogKey = key;
-
-    const dateKey = formatDate(currentDate);
-
-    // Load previous values if any
-    const prev = selections[dateKey]?.[key];
-    document.getElementById("startTimeInput").value = prev?.start || "";
-    document.getElementById("endTimeInput").value = prev?.end || "";
-
-    timeModal.style.display = "flex";
-}
-
-document.getElementById("closeTimeModal").onclick = () => {
-    timeModal.style.display = "none";
-};
-
-document.getElementById("saveTimeBtn").onclick = () => {
-    const start = document.getElementById("startTimeInput").value;
-    const end = document.getElementById("endTimeInput").value;
-
-    if (!start || !end) {
-        alert("Por favor introduce ambas horas.");
-        return;
-    }
-    const dateKey = formatDate(currentDate);
-    if (!selections[dateKey]) selections[dateKey] = {};
-
-    selections[dateKey][activeDogKey] = {
-        selected: true,
-        start,
-        end
-    };
-
-    // Mark dog as selected visually
-    [...dogList.querySelectorAll("button")].forEach(btn => {
-        if (btn.textContent === activeDogName) {
-            btn.classList.add("selected");
-        }
-    });
-
-    timeModal.style.display = "none";
-    updateSummary();
-};
-
-
-/* View Table */
-document.getElementById('viewTableBtn').onclick=()=>{ window.location.href='table.html'; };
-
-/* PWA Service Worker */
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{ navigator.serviceWorker.register('service-worker.js'); });
-}
 </script>
 </body>
 </html>
