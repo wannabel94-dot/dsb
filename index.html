@@ -37,7 +37,6 @@
     .dog-box.selected{border-color:#c1802a;background:#f7e4c2;}
 
     .modal-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:15px;}
-
   </style>
 </head>
 <body>
@@ -125,11 +124,18 @@ function openDogModal(service) {
     title.textContent = dog;
     title.style.fontWeight = "600";
 
-    const start = document.createElement("input"); start.type = "time";
-    const end = document.createElement("input"); end.type = "time";
+    const start = document.createElement("input"); 
+    start.type = "time"; 
+    start.style.display = "none";
+
+    const end = document.createElement("input"); 
+    end.type = "time"; 
+    end.style.display = "none";
 
     if (selections[dateKey]?.[key]) {
       box.classList.add("selected");
+      start.style.display = "block";
+      end.style.display = "block";
       start.value = selections[dateKey][key].start || "";
       end.value = selections[dateKey][key].end || "";
     }
@@ -144,10 +150,15 @@ function openDogModal(service) {
     title.onclick = ()=>{
       if (box.classList.contains("selected")) {
         box.classList.remove("selected");
+        start.style.display = "none";
+        end.style.display = "none";
         delete selections[dateKey][key];
       } else {
         box.classList.add("selected");
-        selections[dateKey][key] = { selected:true, start:"", end:"" };
+        start.style.display = "block";
+        end.style.display = "block";
+        if (!selections[dateKey]) selections[dateKey] = {};
+        selections[dateKey][key] = { selected:true, start:start.value, end:end.value };
       }
       updateSummary();
     };
