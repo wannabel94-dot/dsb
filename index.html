@@ -192,6 +192,28 @@ input[type="time"]{
 .footer-nav .switch-btn img { width:22px; height:22px; opacity:0.9; filter:invert(1); }
 .footer-nav .switch-btn span { color:#fff; font-weight:600; }
 .footer-nav .switch-btn.active span { color:#8d4585; font-weight:700; }
+/* Slide-up tarifas sheet */
+.slide-sheet {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  height: 70%;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  transition: bottom 0.35s ease;
+  z-index: 9999;
+}
+
+/* Inner box */
+.sheet-inner {
+  background: #ffffff;
+  width: 100%;
+  padding: 22px;
+  border-radius: 20px 20px
 
 </style>
 </head>
@@ -250,6 +272,33 @@ input[type="time"]{
   </div>
 </footer>
 <button class="floating-center-btn" id="centralBtn">+</button>
+
+<!-- TARIFAS SLIDE-UP SHEET -->
+<div id="tarifasSheet" class="slide-sheet">
+  <div class="sheet-inner">
+
+    <h2 class="sheet-title">Tarifas</h2>
+
+    <table class="tarifas-table">
+      <thead>
+        <tr>
+          <th>Perro</th>
+          <th>Día</th>
+          <th>Noche</th>
+          <th>Paseo</th>
+        </tr>
+      </thead>
+      <tbody id="tarifasTableBody"></tbody>
+    </table>
+
+    <div class="sheet-buttons">
+      <button id="addDogTarifaBtn">Añadir Perro</button>
+      <button id="saveTarifasBtn">Guardar</button>
+      <button id="cancelTarifasBtn" class="cancel">Cancelar</button>
+    </div>
+
+  </div>
+</div>
 
 <script>
 const defaultDogs = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
@@ -350,6 +399,74 @@ function updateSummary(){
   div.innerHTML=html||'No hay servicios seleccionados.';
 }
 updateSummary();
+
+/* ---------------------- TARIFAS POPUP ---------------------- */
+
+const tarifasBtn = document.getElementById("tarifsBtn");
+const tarifasSheet = document.getElementById("tarifasSheet");
+const tarifasTableBody = document.getElementById("tarifasTableBody");
+
+let tarifas = JSON.parse(localStorage.getItem("tarifas")) || {};
+
+function openTarifas() {
+  renderTarifasTable();
+  tarifasSheet.style.bottom = "0";
+}
+
+function closeTarifas() {
+  tarifasSheet.style.bottom = "-100%";
+}
+
+tarifasBtn.onclick = openTarifas;
+document.getElementById("cancelTarifasBtn").onclick = closeTarifas;
+
+/* Build table rows */
+function renderTarifasTable() {
+  tarifasTableBody.innerHTML = "";
+
+  allDogs.forEach(dog => {
+    if (!tarifas[dog]) tarifas[dog] = { day: "", overnight: "", walk: "" };
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${dog}</td>
+      <td><input type="number" value="${tarifas[dog].day}" data-dog="${dog}" data-type="day"></td>
+      <td><input type="number" value="${tarifas[dog].overnight}" data-dog="${dog}" data-type="overnight"></td>
+      <td><input type="number" value="${tarifas[dog].walk}" data-dog="${dog}" data-type="walk"></td>
+    `;
+
+    tarifasTableBody.appendChild(row);
+  });
+}
+
+/* Live update */
+tarifasTableBody.addEventListener("input", e => {
+  const dog = e.target.dataset.dog;
+  const type = e.target.dataset.type;
+  tarifas[dog][type] = e.target.value;
+});
+
+/* Save */
+document.getElementById("saveTarifasBtn").onclick = () => {
+  localStorage.setItem("tarifas", JSON.stringify(tarifas));
+  closeTarifas();
+};
+
+/* Add new dog */
+document.getElementById("addDogTarifaBtn").onclick = () => {
+  const name = prompt("Nombre del perro:");
+  if (!name) return;
+  if (allDogs.includes(name)) return alert("Ese perro ya existe.");
+
+  allDogs.push(name);
+  tarifas[name] = { day: "", overnight: "", walk: "" };
+
+  localStorage.setItem("allDogs", JSON.stringify(allDogs));
+  localStorage.setItem("tarifas", JSON.stringify(tarifas));
+
+  renderTarifasTable();
+};
+
 </script>
 </body>
 </html>
