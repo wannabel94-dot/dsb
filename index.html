@@ -4,28 +4,17 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Servicios</title>
-<link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#c1802a" />
 <link rel="icon" href="icons/dog-192.png" sizes="192x192" type="image/png" />
-
 <style>
-/* -------------------------------------------
-   GLOBAL + PALETTE
-   Colors: #061400 #303021 #a53200 #33712d #b8a162 #c6d197
-------------------------------------------- */
+/* ================= GLOBAL ================= */
 * { box-sizing: border-box; margin:0; padding:0; }
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
-    background:#c6d197;
-    padding:10px;
-    min-height:100vh;
-}
-.container { max-width:800px; margin:0; padding:30px; }
-h1 { text-align:center; margin-bottom:20px; color:#373e2e; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto; background:#c6d197; padding:10px; min-height:100vh; }
+.container{max-width:800px;margin:0 auto;padding:30px;}
+h1{text-align:center;margin-bottom:20px;color:#373e2e;}
+button{cursor:pointer;}
 
-/* -------------------------------------------
-   DATE CONTROLS
-------------------------------------------- */
+/* ================= DATE CONTROLS ================= */
 .date-controls{
     display:flex;
     justify-content:center;
@@ -52,20 +41,32 @@ h1 { text-align:center; margin-bottom:20px; color:#373e2e; }
     box-shadow:0 6px 14px rgba(0,0,0,0.3);
 }
 
-/* -------------------------------------------
-   AGENDA SUMMARY
-------------------------------------------- */
-.summary{
-    background:#d4cba8;
-    padding:20px;
-    border-radius:16px;
-    margin-top:20px;
+/* ================= FLOATING CENTER BUTTON ================= */
+.floating-center-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #a53200;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 36px;
+  font-weight: 700;
+  color: #c6d197;
+  cursor: pointer;
+  z-index: 130;
 }
-#summaryContent { line-height:1.6; }
 
-/* -------------------------------------------
-   MODALS
-------------------------------------------- */
+/* ================= SUMMARY ================= */
+.summary{background:#d4cba8;padding:20px;border-radius:16px;margin-top:20px;}
+#summaryContent{line-height:1.6;}
+
+/* ================= MODALS ================= */
 .modal{
     display:none;
     position:fixed;
@@ -79,7 +80,7 @@ h1 { text-align:center; margin-bottom:20px; color:#373e2e; }
 }
 .modal-content{
     background:#ffffff;
-    padding:30px 25px;
+    padding:25px 20px;
     border-radius:22px;
     width:92%;
     max-width:420px;
@@ -93,8 +94,11 @@ h1 { text-align:center; margin-bottom:20px; color:#373e2e; }
     to{opacity:1; transform:translateY(0);}
 }
 
+/* Inputs */
 select,
-input[type="time"]{
+input[type="time"],
+input[type="number"],
+input[type="text"]{
     width:100%;
     padding:12px 14px;
     margin-top:8px;
@@ -105,13 +109,13 @@ input[type="time"]{
     color:#303021;
 }
 
+/* Modal Buttons */
 .modal-buttons{
     display:flex;
     justify-content:flex-end;
     gap:12px;
     margin-top:18px;
 }
-
 .modal-buttons button{
     padding:10px 18px;
     border:none;
@@ -128,9 +132,15 @@ input[type="time"]{
     background:#8a2b00;
 }
 
-/* -------------------------------------------
-   FOOTER NAV + CENTER BUTTON
-------------------------------------------- */
+/* Next / Cancel / Continue Buttons dynamically added */
+.action-btn{padding:10px 18px; border-radius:10px; background:#a53200; color:#f9e9ca; font-weight:600; margin-top:10px; display:inline-block; cursor:pointer;}
+.action-btn:hover{background:#8a2b00; transform:scale(1.03);}
+.cancel-btn{padding:10px 18px; border-radius:10px; background:#303021; color:#c6d197; font-weight:600; margin-top:10px; display:inline-block; cursor:pointer;}
+.cancel-btn:hover{background:#505040; transform:scale(1.03);}
+.primary-btn{padding:10px 18px; border-radius:10px; background:#a53200; color:#f9e9ca; font-weight:600; margin-top:10px; display:inline-block; cursor:pointer;}
+.primary-btn:hover{background:#8a2b00; transform:scale(1.03);}
+
+/* ================= FOOTER NAV ================= */
 .footer-nav {
   position: fixed;
   bottom: 0;
@@ -142,183 +152,37 @@ input[type="time"]{
   justify-content: space-between;
   align-items: center;
   padding: 0 25px;
-  z-index: 120;
 }
-
 .left-group, .right-group {
   display: flex;
   justify-content: space-between;
   width: 120px;
+  gap:0;
 }
+.footer-nav .switch-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:6px 0; width: 50px; background:transparent; border:none; cursor:pointer; border-radius:12px; }
+.footer-nav .switch-btn img { width:22px; height:22px; opacity:0.9; filter:invert(1); }
+.footer-nav .switch-btn span { color:#fff; font-weight:600; font-size:12px; }
+.footer-nav .switch-btn.active span { color:#8d4585; font-weight:700; }
 
-.footer-nav::before {
-  content:'';
-  position:absolute;
-  top:-25px;
-  left:50%;
-  transform:translateX(-50%);
-  width:70px;
-  height:70px;
-  background:#c6d197;
-  border-radius:50%;
-  z-index:130;
-}
-
-.floating-center-btn {
-  position:fixed;
-  bottom:30px;
-  left:50%;
-  transform:translateX(-50%);
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  background:#a53200;
-  border:none;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:36px;
-  font-weight:700;
-  color:#c6d197;
-  cursor:pointer;
-  z-index:140;
-}
-
-.footer-nav .switch-btn {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:4px;
-  padding:6px 0;
-  width:50px;
-  background:transparent;
-  border:none;
-  cursor:pointer;
-  border-radius:12px;
-}
-.footer-nav .switch-btn img {
-  width:22px;
-  height:22px;
-  opacity:0.9;
-  filter:invert(1);
-}
-.footer-nav .switch-btn span {
-  color:#fff;
-  font-weight:600;
-}
-
-/* -------------------------------------------
-   TARIFAS SLIDE-UP (mobile optimized)
-------------------------------------------- */
-.slide-sheet {
-    position: fixed;
-    left: 0;
-    bottom: -100%;
-    width: 100%;
-    height: 75%;
-    background: rgba(0,0,0,0.45);
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    z-index: 9999;
-    transition: bottom 0.35s ease;
-}
-.sheet-content {
-    background:#fcf9f1;
-    width:100%;
-    padding:18px 20px;
-    border-radius:20px 20px 0 0;
-    box-shadow:0 -8px 20px rgba(0,0,0,0.25);
-    height:100%;
-    overflow-y:auto;
-}
-
-.sheet-content h2 {
-    text-align:center;
-    margin-top:6px;
-    margin-bottom:18px;
-    font-size:24px;
-    font-weight:700;
-    color:#303021;
-}
-
-.tarifas-table {
-    width:100%;
-    border-collapse:collapse;
-    background:white;
-    border-radius:14px;
-    overflow:hidden;
-}
-
-.tarifas-table th {
-    background:#303021;
-    color:#c6d197;
-    padding:12px 6px;
-    font-size:14px;
-    font-weight:700;
-}
-
-.tarifas-table td {
-    padding:10px 6px;
-    text-align:center;
-    border-bottom:1px solid #e0dbc7;
-}
-
-.tarifas-table input {
-    width:70px;
-    padding:6px;
-    font-size:15px;
-    border-radius:10px;
-    border:2px solid #8a8252;
-    background:#fcf9f1;
-    color:#303021;
-}
-
-.sheet-buttons {
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    margin-top:20px;
-}
-
-.sheet-buttons button {
-    padding:14px;
-    border:none;
-    border-radius:12px;
-    font-size:18px;
-    font-weight:700;
-    cursor:pointer;
-    transition:0.2s ease;
-}
-
-#addDogBtn {
-    background:#33712d;
-    color:#fcf9f1;
-}
-#saveTarifasBtn {
-    background:#a53200;
-    color:#f9e9ca;
-}
-#closeTarifasBtn {
-    background:#303021;
-    color:#c6d197;
-}
-
+/* ================= TARIFS TABLE ================= */
+#tarifsSheet table { width:100%; border-collapse: collapse; margin-top:10px; }
+#tarifsSheet th, #tarifsSheet td { border:1px solid #8a8252; padding:8px; text-align:center; font-size:16px; }
+#tarifsSheet th { background:#303021; color:#c6d197; font-weight:700; }
+#tarifsSheet input[type="number"]{width:60px; text-align:center;}
+#tarifsSheet .addDogRow{display:flex; gap:10px; margin-top:10px;}
+#tarifsSheet .addDogRow input{flex:1;}
+#tarifsSheet .addDogRow button{flex:none;}
 </style>
 </head>
-
 <body>
-<div class="container">
-<h1>Buen dia!</h1>
 
+<div class="container">
+<h1>Buen día!</h1>
 <div class="date-controls">
   <button id="prevDay" class="date-nav">&lt;</button>
   <button id="dateBtn" class="date-btn"></button>
   <button id="nextDay" class="date-nav">&gt;</button>
 </div>
-
 <div class="summary">
   <h3>Agenda:</h3>
   <div id="summaryContent">No hay servicios seleccionados.</div>
@@ -330,7 +194,7 @@ input[type="time"]{
   <div class="modal-content" id="modalContent">
     <h2>Seleccionar Perro</h2>
     <select id="dogSelect"></select>
-    <div class="modal-buttons">
+    <div class="modal-buttons" id="serviceModalButtons">
       <button id="nextStepBtn">Siguiente</button>
       <button id="closeModalBtn">Cancelar</button>
     </div>
@@ -352,13 +216,33 @@ input[type="time"]{
   </div>
 </div>
 
-<!-- FOOTER -->
+<!-- TARIFS MODAL -->
+<div id="tarifsSheet" class="modal">
+  <div class="modal-content">
+    <h2>Tarifas por Perro (€)</h2>
+    <table id="tarifsTable">
+      <thead>
+        <tr><th>Perro</th><th>Día</th><th>Noche</th><th>Paseo</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="addDogRow">
+      <input type="text" placeholder="Nombre del perro" id="newDogName"/>
+      <button class="primary-btn" id="addDogBtn">Añadir Perro</button>
+    </div>
+    <div class="modal-buttons">
+      <button id="saveTarifsBtn">Guardar</button>
+      <button id="closeTarifsBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER NAV -->
 <footer class="footer-nav">
   <div class="left-group">
     <button class="switch-btn tarifs" id="tarifsBtn"><img src="icons/tarifs.svg"><span>Tarifas</span></button>
     <button class="switch-btn accounts" id="accountsBtn"><img src="icons/accounts.svg"><span>Cuentas</span></button>
   </div>
-
   <div class="right-group">
     <button class="switch-btn profile" id="profileBtn"><img src="icons/profile.svg"><span>Perfiles</span></button>
     <button class="switch-btn blank" id="blankBtn"><img src="icons/blank.svg"><span>Blank</span></button>
@@ -367,112 +251,80 @@ input[type="time"]{
 
 <button class="floating-center-btn" id="centralBtn">+</button>
 
-<!-- TARIFAS SLIDE-UP -->
-<div id="tarifasSheet" class="slide-sheet">
-  <div class="sheet-content">
-    <h2>Tarifas</h2>
-
-    <table class="tarifas-table">
-      <thead>
-        <tr>
-          <th>Perro</th>
-          <th>Día</th>
-          <th>Noche</th>
-          <th>Paseo</th>
-        </tr>
-      </thead>
-      <tbody id="tarifasTableBody"></tbody>
-    </table>
-
-    <div class="sheet-buttons">
-      <button id="addDogBtn">Añadir Perro</button>
-      <button id="saveTarifasBtn">Guardar</button>
-      <button id="closeTarifasBtn">Cancelar</button>
-    </div>
-
-  </div>
-</div>
-
 <script>
-/* --- Your full JS stays unchanged — only one change: centralBtn now opens Add Service --- */
-
-const defaultDogs=["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
-let allDogs=JSON.parse(localStorage.getItem('allDogs'))||defaultDogs;
-let selections=JSON.parse(localStorage.getItem('selections'))||{};
-let currentDate=new Date();
-
-const formatDate=d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-
-function updateDate(){document.getElementById('dateBtn').textContent=formatDate(currentDate);}
+// ======== INITIAL DATA ========
+const defaultDogs = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
+let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
+let selections = JSON.parse(localStorage.getItem('selections')) || {};
+let tarifs = JSON.parse(localStorage.getItem('tarifs')) || {};
+const formatDate = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+let currentDate = new Date();
+function updateDate(){ document.getElementById('dateBtn').textContent = formatDate(currentDate); }
 updateDate();
 
-prevDay.onclick=()=>{currentDate.setDate(currentDate.getDate()-1);updateDate();updateSummary();};
-nextDay.onclick=()=>{currentDate.setDate(currentDate.getDate()+1);updateDate();updateSummary();};
-
-dateBtn.onclick=()=>{
-  const input=document.createElement('input');
-  input.type='date';
-  input.style.display='none';
-  document.body.appendChild(input);
-  input.valueAsDate=currentDate;
-  input.click();
-  input.onchange=()=>{currentDate=new Date(input.value);updateDate();updateSummary();input.remove();};
+// ======== DATE NAV ========
+document.getElementById('prevDay').onclick = ()=>{ currentDate.setDate(currentDate.getDate()-1); updateDate(); updateSummary(); };
+document.getElementById('nextDay').onclick = ()=>{ currentDate.setDate(currentDate.getDate()+1); updateDate(); updateSummary(); };
+document.getElementById('dateBtn').onclick = ()=>{
+  const input=document.createElement('input'); input.type='date'; input.style.display='none'; document.body.appendChild(input);
+  input.valueAsDate=currentDate; input.click();
+  input.onchange=()=>{ currentDate=new Date(input.value); updateDate(); updateSummary(); input.remove(); };
 };
 
-/* --- CENTRAL BUTTON TRIGGERS ADD SERVICE --- */
-centralBtn.onclick = () => {
+// ======== SERVICE MODAL ========
+const serviceModal = document.getElementById('serviceModal');
+const dogSelect = document.getElementById('dogSelect');
+const serviceModalButtons = document.getElementById('serviceModalButtons');
+let tempSelection = {dog:null,services:[],start:'',end:''};
+
+document.getElementById('centralBtn').onclick = ()=>{
   dogSelect.innerHTML='';
   allDogs.forEach(d=>{
-    const opt=document.createElement('option'); opt.value=d; opt.textContent=d;
-    dogSelect.appendChild(opt);
+    const opt=document.createElement('option'); opt.value=d; opt.textContent=d; dogSelect.appendChild(opt);
   });
   document.querySelector('#modalContent h2').textContent='Seleccionar Perro';
+  document.getElementById('nextStepBtn').style.display='inline';
   dogSelect.style.display='block';
-  nextStepBtn.style.display='inline';
   serviceModal.style.display='flex';
 };
 
-/* --- SERVICE CREATION WORKFLOW --- */
-const serviceModal=document.getElementById('serviceModal');
-const dogSelect=document.getElementById('dogSelect');
-
-let tempSelection={dog:null,services:[],start:'',end:''};
-
-nextStepBtn.onclick=()=>{
-  tempSelection.dog=dogSelect.value;
+document.getElementById('nextStepBtn').onclick = ()=>{
+  tempSelection.dog = dogSelect.value;
   document.querySelector('#modalContent h2').textContent='Seleccionar Servicios';
   dogSelect.style.display='none';
-  nextStepBtn.style.display='none';
+  document.getElementById('nextStepBtn').style.display='none';
+  document.querySelectorAll('#modalContent label,.continueBtn').forEach(e=>e.remove());
 
-  document.querySelectorAll('#modalContent label, #modalContent .continueBtn').forEach(e=>e.remove());
-
-  ['Daycare','Overnight','Walk'].forEach(s=>{
-    const label=document.createElement('label');
+  const services = ['Daycare','Overnight','Walk'];
+  services.forEach(s=>{
+    const label = document.createElement('label');
     label.innerHTML=`<input type='checkbox' value='${s}'> ${s}`;
     document.querySelector('#modalContent').appendChild(label);
   });
 
-  const continueBtn=document.createElement('button');
+  const continueBtn = document.createElement('button');
   continueBtn.textContent='Siguiente';
-  continueBtn.classList.add('continueBtn');
+  continueBtn.className='action-btn continueBtn';
   continueBtn.onclick=()=>{
-    const selected=[...document.querySelectorAll('#modalContent input[type=checkbox]:checked')].map(i=>i.value);
-    if(!selected.length){alert('Selecciona al menos un servicio');return;}
-    tempSelection.services=selected;
+    const selected = [...document.querySelectorAll('#modalContent input[type=checkbox]:checked')].map(i=>i.value);
+    if(selected.length===0){alert('Selecciona al menos un servicio'); return;}
+    tempSelection.services = selected;
     serviceModal.style.display='none';
+    document.getElementById('startTimeInput').value='';
+    document.getElementById('endTimeInput').value='';
     timeModal.style.display='flex';
   };
   document.querySelector('#modalContent').appendChild(continueBtn);
 };
+document.getElementById('closeModalBtn').onclick = ()=>{serviceModal.style.display='none';};
 
-closeModalBtn.onclick=()=>serviceModal.style.display='none';
-
-/* --- TIME MODAL --- */
-saveTimeBtn.onclick=()=>{
-  tempSelection.start=startTimeInput.value;
-  tempSelection.end=endTimeInput.value;
+// ======== TIME MODAL ========
+const timeModal = document.getElementById('timeModal');
+document.getElementById('saveTimeBtn').onclick=()=>{
+  tempSelection.start=document.getElementById('startTimeInput').value;
+  tempSelection.end=document.getElementById('endTimeInput').value;
   const dateKey=formatDate(currentDate);
-  if(!selections[dateKey])selections[dateKey]={};
+  if(!selections[dateKey]) selections[dateKey]={};
   tempSelection.services.forEach(s=>{
     selections[dateKey][`${tempSelection.dog}_${s}`]={selected:true,start:tempSelection.start,end:tempSelection.end};
   });
@@ -480,36 +332,74 @@ saveTimeBtn.onclick=()=>{
   timeModal.style.display='none';
   updateSummary();
 };
+document.getElementById('closeTimeModal').onclick=()=>{timeModal.style.display='none';};
 
-closeTimeModal.onclick=()=>timeModal.style.display='none';
-
-/* --- SUMMARY DISPLAY --- */
+// ======== UPDATE SUMMARY ========
 function updateSummary(){
   const dateKey=formatDate(currentDate);
   const div=document.getElementById('summaryContent');
-  if(!selections[dateKey]){div.textContent='No hay servicios seleccionados.';return;}
+  if(!selections[dateKey]){div.textContent='No hay servicios seleccionados.'; return;}
   let html='';
   const groups={};
   Object.entries(selections[dateKey]).forEach(([key,val])=>{
-    if(!val.selected)return;
+    if(!val.selected) return;
     const [dog,service]=key.split('_');
-    if(!groups[dog])groups[dog]=[];
+    if(!groups[dog]) groups[dog]=[];
     groups[dog].push(`${service}: ${val.start} → ${val.end}`);
   });
   for(let dog in groups){
     html+=`<strong>${dog}</strong><br>`;
-    groups[dog].forEach(s=>html+=`• ${s}<br>`);
+    groups[dog].forEach(s=>{html+=`• ${s}<br>`;});
     html+='<br>';
   }
   div.innerHTML=html||'No hay servicios seleccionados.';
 }
 updateSummary();
 
-/* --- TARIFAS POPUP OPEN/CLOSE --- */
-const tarifasSheet=document.getElementById('tarifasSheet');
-tarifsBtn.onclick=()=>tarifasSheet.style.bottom="0";
-closeTarifasBtn.onclick=()=>tarifasSheet.style.bottom="-100%";
+// ======== TARIFS MODAL ========
+const tarifsSheet = document.getElementById('tarifsSheet');
+const tarifsTableBody = document.querySelector('#tarifsTable tbody');
 
+function loadTarifs(){
+  tarifsTableBody.innerHTML='';
+  allDogs.forEach(d=>{
+    if(!tarifs[d]) tarifs[d]={day:10,night:10,walk:10};
+    const row = document.createElement('tr');
+    row.innerHTML=`<td>${d}</td>
+      <td><input type="number" min="0" value="${tarifs[d].day}"></td>
+      <td><input type="number" min="0" value="${tarifs[d].night}"></td>
+      <td><input type="number" min="0" value="${tarifs[d].walk}"></td>`;
+    tarifsTableBody.appendChild(row);
+  });
+}
+loadTarifs();
+
+document.getElementById('tarifsBtn').onclick=()=>{tarifsSheet.style.display='flex';};
+document.getElementById('closeTarifsBtn').onclick=()=>{tarifsSheet.style.display='none';};
+document.getElementById('saveTarifsBtn').onclick=()=>{
+  [...tarifsTableBody.querySelectorAll('tr')].forEach(tr=>{
+    const dog = tr.children[0].textContent;
+    tarifs[dog] = {
+      day: Number(tr.children[1].querySelector('input').value),
+      night: Number(tr.children[2].querySelector('input').value),
+      walk: Number(tr.children[3].querySelector('input').value)
+    };
+  });
+  localStorage.setItem('tarifs',JSON.stringify(tarifs));
+  tarifsSheet.style.display='none';
+};
+
+// ADD DOG FUNCTIONALITY
+document.getElementById('addDogBtn').onclick=()=>{
+  const newDog = document.getElementById('newDogName').value.trim();
+  if(!newDog){alert('Introduce un nombre'); return;}
+  if(allDogs.includes(newDog)){alert('Perro ya existe'); return;}
+  allDogs.push(newDog);
+  localStorage.setItem('allDogs',JSON.stringify(allDogs));
+  if(!tarifs[newDog]) tarifs[newDog]={day:10,night:10,walk:10};
+  document.getElementById('newDogName').value='';
+  loadTarifs();
+};
 </script>
 </body>
 </html>
