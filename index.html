@@ -15,20 +15,34 @@
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background:#c6d197; padding: 10px; min-height:100vh; }
 .container{max-width:800px;margin:0;padding:30px;}
 h1{text-align:center;margin-bottom:20px;color:#373e2e;}
-.date-controls{display:flex;justify-content:center;gap:10px;margin-bottom:20px;}
-.date-btn,.date-nav{padding:12px 20px;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
-.date-btn{background:#303021;color:#c6d197;}
-.date-nav{background:#303021;color:#c6d197;}
-  #addServiceBtn {
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 12px;
-  border: none;
-  background: #a53200;
-  color: #b8a162;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(193, 128, 42, 0.3);
+.date-controls{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:18px;
+    margin-bottom:25px;
+}
+
+.date-btn,
+.date-nav{
+    padding:18px 28px;
+    font-size:22px;
+    font-weight:700;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+    background:#303021;
+    color:#c6d197;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+    transition:0.2s ease;
+}
+
+.date-btn:hover,
+.date-nav:hover{
+    transform:scale(1.05);
+    box-shadow:0 6px 14px rgba(0,0,0,0.3);
+}
+
   transition: all 0.3s ease;
 }
 #addServiceBtn:hover {
@@ -39,11 +53,76 @@ h1{text-align:center;margin-bottom:20px;color:#373e2e;}
 button{cursor:pointer;}
 .summary{background:#d4cba8;padding:20px;border-radius:16px;margin-top:20px;}
 #summaryContent{line-height:1.6;}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
-.modal-content{background:white;padding:25px;border-radius:16px;max-width:400px;width:90%;max-height:80vh;overflow:auto;}
-.modal-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:15px;}
-label{display:block;margin-top:10px;}
-select,multi-select,input{width:100%;padding:8px;margin-top:5px;border-radius:6px;border:1px solid #8a8252;}
+/* Modal background */
+.modal{
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.55);
+    backdrop-filter:blur(4px);
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+/* Popup window */
+.modal-content{
+    background:#ffffff;
+    padding:30px 25px;
+    border-radius:22px;
+    width:92%;
+    max-width:420px;
+    max-height:80vh;
+    overflow-y:auto;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    animation:popupFade 0.25s ease;
+}
+
+/* Smooth popup animation */
+@keyframes popupFade{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+/* Inputs */
+select,
+input[type="time"]{
+    width:100%;
+    padding:12px 14px;
+    margin-top:8px;
+    border-radius:10px;
+    border:2px solid #8a8252;
+    background:#fcf9f1;
+    font-size:16px;
+    color:#303021;
+}
+
+/* Buttons inside modals */
+.modal-buttons{
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+    margin-top:18px;
+}
+
+.modal-buttons button{
+    padding:10px 18px;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    background:#a53200;
+    color:#f9e9ca;
+    transition:0.2s;
+}
+
+.modal-buttons button:hover{
+    transform:scale(1.04);
+    background:#8a2b00;
+}
+
 </style>
 </head>
 <body>
