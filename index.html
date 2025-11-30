@@ -598,6 +598,24 @@ h1 {
   </div>
 </div>
 
+<!-- Time Modal -->
+<div id="timeModal" class="modal">
+  <div class="modal-content" style="max-width:320px;">
+    <h2>🕒 Horario</h2>
+
+    <label>Hora de inicio:</label>
+    <input id="startTimeInput" type="time">
+
+    <label>Hora de fin:</label>
+    <input id="endTimeInput" type="time">
+
+    <div class="modal-buttons">
+      <button id="saveTimeBtn" class="save-modal">Guardar</button>
+      <button id="closeTimeModal" class="close-modal">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const defaultDogs = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
@@ -634,15 +652,29 @@ document.querySelectorAll('.service-btn').forEach(btn=>{
     dogList.innerHTML='';
     const dateKey=formatDate(currentDate);
     allDogs.forEach(dog=>{
-      const wrapper = document.createElement('div');
-wrapper.style.display = "flex";
-wrapper.style.flexDirection = "column";
-wrapper.style.gap = "5px";
-
+      const key = `${dog}_${currentService}`;
 const b = document.createElement('button');
 b.textContent = dog;
 b.classList.add("dog-select");
-const key = `${dog}_${currentService}`;
+
+// Pre-select if saved
+if (selections[dateKey]?.[key]?.selected) {
+    b.classList.add("selected");
+}
+
+b.onclick = () => {
+    // Open the time modal only when selecting
+    if (!b.classList.contains("selected")) {
+        openTimeModal(dog, key);
+    } else {
+        // Deselect
+        b.classList.remove("selected");
+        delete selections[dateKey][key];
+        updateSummary();
+    }
+};
+
+dogList.appendChild(b);
 
 // Time input
 const timeInput = document.createElement("input");
@@ -730,16 +762,18 @@ function updateSummary(){
     if (entry.selected) {
       const [dog, service] = k.split('_');
       if (!services[service]) services[service] = [];
-      services[service].push({ dog, time: entry.time || "--:--" });
-    }
-  });
+      services[service].push({ 
+    dog, 
+    start: entry.start || "--:--", 
+    end: entry.end || "--:--" 
+});
+
 
   let html = '';
   for (let s in services) {
     html += `<strong>${s}:</strong><br>`;
     services[s].forEach(e => {
-      html += `• ${e.dog} — ${e.time}<br>`;
-    });
+      html += `• ${e.dog} — ${e.start} → ${e.end}<br>`;
     html += `<br>`;
   }
 
@@ -816,6 +850,58 @@ document.getElementById('addDogRateBtn').onclick=()=>{
   localStorage.setItem('allDogs',JSON.stringify(allDogs));
   buildRatesTable();
 };
+
+// Time Modal Logic
+const timeModal = document.getElementById("timeModal");
+let activeDogKey = "";
+let activeDogName = "";
+
+function openTimeModal(dog, key) {
+    activeDogName = dog;
+    activeDogKey = key;
+
+    const dateKey = formatDate(currentDate);
+
+    // Load previous values if any
+    const prev = selections[dateKey]?.[key];
+    document.getElementById("startTimeInput").value = prev?.start || "";
+    document.getElementById("endTimeInput").value = prev?.end || "";
+
+    timeModal.style.display = "flex";
+}
+
+document.getElementById("closeTimeModal").onclick = () => {
+    timeModal.style.display = "none";
+};
+
+document.getElementById("saveTimeBtn").onclick = () => {
+    const start = document.getElementById("startTimeInput").value;
+    const end = document.getElementById("endTimeInput").value;
+
+    if (!start || !end) {
+        alert("Por favor introduce ambas horas.");
+        return;
+    }
+    const dateKey = formatDate(currentDate);
+    if (!selections[dateKey]) selections[dateKey] = {};
+
+    selections[dateKey][activeDogKey] = {
+        selected: true,
+        start,
+        end
+    };
+
+    // Mark dog as selected visually
+    [...dogList.querySelectorAll("button")].forEach(btn => {
+        if (btn.textContent === activeDogName) {
+            btn.classList.add("selected");
+        }
+    });
+
+    timeModal.style.display = "none";
+    updateSummary();
+};
+
 
 /* View Table */
 document.getElementById('viewTableBtn').onclick=()=>{ window.location.href='table.html'; };
