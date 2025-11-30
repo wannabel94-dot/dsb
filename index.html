@@ -634,11 +634,54 @@ document.querySelectorAll('.service-btn').forEach(btn=>{
     dogList.innerHTML='';
     const dateKey=formatDate(currentDate);
     allDogs.forEach(dog=>{
-      const b=document.createElement('button'); b.textContent=dog;
-      const key=`${dog}_${currentService}`;
-      if(selections[dateKey]?.[key]) b.classList.add('selected');
-      b.onclick=()=>{b.classList.toggle('selected'); if(!selections[dateKey]) selections[dateKey]={}; selections[dateKey][key]=b.classList.contains('selected');};
-      dogList.appendChild(b);
+      const wrapper = document.createElement('div');
+wrapper.style.display = "flex";
+wrapper.style.flexDirection = "column";
+wrapper.style.gap = "5px";
+
+const b = document.createElement('button');
+b.textContent = dog;
+b.classList.add("dog-select");
+const key = `${dog}_${currentService}`;
+
+// Time input
+const timeInput = document.createElement("input");
+timeInput.type = "time";
+timeInput.style.padding = "6px";
+timeInput.style.border = "1px solid #8a8252";
+timeInput.style.borderRadius = "8px";
+timeInput.style.width = "100%";
+
+// Restore previous value
+if (selections[dateKey]?.[key]?.selected) {
+    b.classList.add("selected");
+    timeInput.value = selections[dateKey][key].time || "";
+}
+
+b.onclick = () => {
+    b.classList.toggle("selected");
+
+    if (!selections[dateKey]) selections[dateKey] = {};
+
+    if (b.classList.contains("selected")) {
+        selections[dateKey][key] = {
+            selected: true,
+            time: timeInput.value
+        };
+    } else {
+        delete selections[dateKey][key];
+    }
+};
+
+timeInput.onchange = () => {
+    if (!selections[dateKey]) selections[dateKey] = {};
+    if (!selections[dateKey][key]) selections[dateKey][key] = { selected: true };
+    selections[dateKey][key].time = timeInput.value;
+};
+
+wrapper.appendChild(b);
+wrapper.appendChild(timeInput);
+dogList.appendChild(wrapper);
     });
     dogModal.style.display='flex';
   }
@@ -657,7 +700,7 @@ function saveSelections(){
   if(!rows[dateKey]) rows[dateKey]={Total:0,services:{}};
   rows[dateKey].services={};
   Object.keys(selections[dateKey]||{}).forEach(k=>{
-    if(selections[dateKey][k]){
+    if(selections[dateKey][k]?.selected){
       const dog=k.split('_')[0]; const service=k.split('_')[1];
       let rate=rates[dog][service.toLowerCase()]||0;
       if(service==='Daycare' && (currentDate.getDay()===0||currentDate.getDay()===6)) rate=rates[dog].weekend;
@@ -672,22 +715,37 @@ function saveSelections(){
 
 /* Daily Summary */
 function updateSummary(){
-  const dateKey=formatDate(currentDate);
-  const summaryDiv=document.getElementById('summaryContent');
-  if(!selections[dateKey]){ summaryDiv.textContent="No hay servicios seleccionados."; return; }
+  const dateKey = formatDate(currentDate);
+  const summaryDiv = document.getElementById('summaryContent');
+
+  if (!selections[dateKey]) {
+    summaryDiv.textContent = "No hay servicios seleccionados.";
+    return;
+  }
+
   const services = {};
-  Object.keys(selections[dateKey]).forEach(k=>{
-    if(selections[dateKey][k]){
-      const [dog,service] = k.split('_');
-      if(!services[service]) services[service]=[];
-      services[service].push(dog);
+
+  Object.keys(selections[dateKey]).forEach(k => {
+    const entry = selections[dateKey][k];
+    if (entry.selected) {
+      const [dog, service] = k.split('_');
+      if (!services[service]) services[service] = [];
+      services[service].push({ dog, time: entry.time || "--:--" });
     }
   });
-  let html='';
-  for(let s in services) html+=`<strong>${s}:</strong> ${services[s].join(', ')}<br>`;
+
+  let html = '';
+  for (let s in services) {
+    html += `<strong>${s}:</strong><br>`;
+    services[s].forEach(e => {
+      html += `• ${e.dog} — ${e.time}<br>`;
+    });
+    html += `<br>`;
+  }
+
   summaryDiv.innerHTML = html || "No hay servicios seleccionados.";
 }
-updateSummary();
+
 
 /* Totals */
 function updateTotals(){
