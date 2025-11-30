@@ -1,215 +1,175 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Servicios</title>
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#c1802a" />
-  <link rel="icon" href="icons/dog-192.png" sizes="192x192" type="image/png" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Servicios</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#c1802a" />
+<link rel="icon" href="icons/dog-192.png" sizes="192x192" type="image/png" />
 
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background:#373e2e; padding:20px; min-height:100vh; }
-    .container{max-width:1200px;margin:0 auto;background:#e3ddb4;padding:40px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}    
-    h1{text-align:center;margin-bottom:20px;color:#373e2e;}
-
-    .date-controls{display:flex;justify-content:center;gap:10px;margin-bottom:25px;}
-    .date-btn,.date-nav{padding:12px 20px;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
-    .date-btn{background:#c1802a;color:white;}
-    .date-nav{background:white;color:#c1802a;border:2px solid #c1802a;}
-
-    .services{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px;margin:20px 0;}
-    .service-btn{padding:25px;background:#d4cba8;border-radius:16px;border:2px solid #8a8252;cursor:pointer;text-align:center;transition:0.3s;}
-    .service-btn:hover{background:#c1802a;color:white;transform:translateY(-4px);}    
-
-    .summary{background:#d4cba8;padding:20px;border-radius:16px;border:2px solid #8a8252;margin-top:30px;}
-    #summaryContent{line-height:1.6;}
-
-    .totals{display:flex;justify-content:center;gap:15px;margin-top:25px;}
-    .totals span{background:#d4cba8;padding:12px 20px;border-radius:10px;border:2px solid #8a8252;}
-
-    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
-    .modal-content{background:white;padding:25px;border-radius:16px;max-width:500px;width:90%;max-height:80vh;overflow:auto;}
-    .dog-list{display:flex;flex-direction:column;gap:10px;}
-
-    .dog-box{display:flex;flex-direction:column;gap:6px;padding:10px;border:2px solid #8a8252;border-radius:10px;background:white;}
-    .dog-box.selected{border-color:#c1802a;background:#f7e4c2;}
-
-    .modal-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:15px;}
-  </style>
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background:#373e2e; padding:20px; min-height:100vh; }
+.container{max-width:800px;margin:0 auto;background:#e3ddb4;padding:30px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+h1{text-align:center;margin-bottom:20px;color:#373e2e;}
+.date-controls{display:flex;justify-content:center;gap:10px;margin-bottom:20px;}
+.date-btn,.date-nav{padding:12px 20px;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
+.date-btn{background:#c1802a;color:white;}
+.date-nav{background:white;color:#c1802a;border:2px solid #c1802a;}
+button{cursor:pointer;}
+.summary{background:#d4cba8;padding:20px;border-radius:16px;border:2px solid #8a8252;margin-top:20px;}
+#summaryContent{line-height:1.6;}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
+.modal-content{background:white;padding:25px;border-radius:16px;max-width:400px;width:90%;max-height:80vh;overflow:auto;}
+.modal-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:15px;}
+label{display:block;margin-top:10px;}
+select,multi-select,input{width:100%;padding:8px;margin-top:5px;border-radius:6px;border:1px solid #8a8252;}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>🐕 Hola Lucas</h1>
+<div class="container">
+<h1>🐕 Hola Lucas</h1>
+<div class="date-controls">
+  <button id="prevDay" class="date-nav">&lt;</button>
+  <button id="dateBtn" class="date-btn"></button>
+  <button id="nextDay" class="date-nav">&gt;</button>
+</div>
+<div style="text-align:center;margin-bottom:15px;">
+  <button id="addServiceBtn">+ Añadir Servicio</button>
+</div>
+<div class="summary">
+  <h3>📋 Resumen:</h3>
+  <div id="summaryContent">No hay servicios seleccionados.</div>
+</div>
+</div>
 
-    <div class="date-controls">
-      <button id="prevDay" class="date-nav">&lt;</button>
-      <button id="dateBtn" class="date-btn"></button>
-      <button id="nextDay" class="date-nav">&gt;</button>
-    </div>
-
-    <div class="services">
-      <div class="service-btn" data-service="Daycare">Guardería</div>
-      <div class="service-btn" data-service="Walk">Paseo</div>
-      <div class="service-btn" data-service="Overnight">Noche</div>
-      <div class="service-btn" data-service="Extra">Extra</div>
-    </div>
-
-    <div style="text-align:center;"><button id="ratesBtn">Tarifas</button> <button id="viewTableBtn">Ver Tabla</button></div>
-
-    <div class="summary"><h3>📋 Resumen:</h3><div id="summaryContent">No hay servicios seleccionados.</div></div>
-    <div class="totals"><span id="dailyTotal">Hoy: 0 €</span><span id="weeklyTotal">Semana: 0 €</span><span id="monthlyTotal">Mes: 0 €</span></div>
-  </div>
-
-  <!-- Dog Modal -->
-  <div id="dogModal" class="modal">
-    <div class="modal-content">
-      <h2 id="serviceTitle">Servicio</h2>
-      <div id="dogList" class="dog-list"></div>
-      <div class="modal-buttons"><button id="saveDogSelection">Guardar</button><button id="closeDogModal">Cerrar</button></div>
+<!-- Modal -->
+<div id="serviceModal" class="modal">
+  <div class="modal-content" id="modalContent">
+    <h2>Seleccionar Perro</h2>
+    <select id="dogSelect"></select>
+    <div class="modal-buttons" id="serviceModalButtons">
+      <button id="nextStepBtn">Siguiente</button>
+      <button id="closeModalBtn">Cancelar</button>
     </div>
   </div>
+</div>
 
-  <!-- Time Modal -->
-  <div id="timeModal" class="modal">
-    <div class="modal-content" style="max-width:320px;">
-      <h2>Horario</h2>
-      <label>Inicio:</label>
-      <input id="startTimeInput" type="time" />
-      <label>Fin:</label>
-      <input id="endTimeInput" type="time" />
-      <div class="modal-buttons"><button id="saveTimeBtn">Guardar</button><button id="closeTimeModal">Cancelar</button></div>
+<!-- Time Modal -->
+<div id="timeModal" class="modal">
+  <div class="modal-content">
+    <h2>Horario</h2>
+    <label>Inicio:</label>
+    <input id="startTimeInput" type="time" />
+    <label>Fin:</label>
+    <input id="endTimeInput" type="time" />
+    <div class="modal-buttons">
+      <button id="saveTimeBtn">Guardar</button>
+      <button id="closeTimeModal">Cancelar</button>
     </div>
   </div>
+</div>
 
 <script>
-/* === DATA === */
 const defaultDogs = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
 let selections = JSON.parse(localStorage.getItem('selections')) || {};
-
-/* === DATE === */
 let currentDate = new Date();
 const formatDate = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 function updateDate(){ document.getElementById('dateBtn').textContent = formatDate(currentDate); }
 updateDate();
-
 prevDay.onclick = ()=>{ currentDate.setDate(currentDate.getDate()-1); updateDate(); updateSummary(); };
 nextDay.onclick = ()=>{ currentDate.setDate(currentDate.getDate()+1); updateDate(); updateSummary(); };
-
 dateBtn.onclick = ()=>{
   const input=document.createElement('input'); input.type='date'; input.style.display='none'; document.body.appendChild(input);
   input.valueAsDate=currentDate; input.click();
   input.onchange=()=>{ currentDate=new Date(input.value); updateDate(); updateSummary(); input.remove(); };
 };
 
-/* === SERVICE MODAL === */
-let currentService = "";
-const dogModal = document.getElementById('dogModal');
-const dogList = document.getElementById('dogList');
+const serviceModal = document.getElementById('serviceModal');
+const dogSelect = document.getElementById('dogSelect');
+const serviceModalButtons = document.getElementById('serviceModalButtons');
+let tempSelection = {dog:null,services:[],start:'',end:''};
 
-function openDogModal(service) {
-  currentService = service;
-  dogList.innerHTML = "";
-  const dateKey = formatDate(currentDate);
+addServiceBtn.onclick = ()=>{
+  dogSelect.innerHTML='';
+  allDogs.forEach(d=>{
+    const opt=document.createElement('option'); opt.value=d; opt.textContent=d; dogSelect.appendChild(opt);
+  });
+  document.querySelector('#modalContent h2').textContent='Seleccionar Perro';
+  document.getElementById('nextStepBtn').style.display='inline';
+  serviceModal.style.display='flex';
+};
 
-  allDogs.forEach(dog => {
-    const key = `${dog}_${service}`;
+nextStepBtn.onclick = ()=>{
+  tempSelection.dog = dogSelect.value;
+  document.querySelector('#modalContent h2').textContent='Seleccionar Servicios';
+  dogSelect.style.display='none';
+  nextStepBtn.style.display='none';
 
-    const box = document.createElement("div");
-    box.className = "dog-box";
+  // Remove previous checkboxes or continue buttons
+  document.querySelectorAll('#modalContent label, #modalContent .continueBtn').forEach(e=>e.remove());
 
-    const title = document.createElement("div");
-    title.textContent = dog;
-    title.style.fontWeight = "600";
-
-    const start = document.createElement("input"); 
-    start.type = "time"; 
-    start.style.display = "none";
-
-    const end = document.createElement("input"); 
-    end.type = "time"; 
-    end.style.display = "none";
-
-    if (selections[dateKey]?.[key]) {
-      box.classList.add("selected");
-      start.style.display = "block";
-      end.style.display = "block";
-      start.value = selections[dateKey][key].start || "";
-      end.value = selections[dateKey][key].end || "";
-    }
-
-    start.onchange = end.onchange = ()=>{
-      if (!selections[dateKey]) selections[dateKey] = {};
-      selections[dateKey][key] = { selected:true, start:start.value, end:end.value };
-      box.classList.add("selected");
-      updateSummary();
-    };
-
-    title.onclick = ()=>{
-      if (box.classList.contains("selected")) {
-        box.classList.remove("selected");
-        start.style.display = "none";
-        end.style.display = "none";
-        delete selections[dateKey][key];
-      } else {
-        box.classList.add("selected");
-        start.style.display = "block";
-        end.style.display = "block";
-        if (!selections[dateKey]) selections[dateKey] = {};
-        selections[dateKey][key] = { selected:true, start:start.value, end:end.value };
-      }
-      updateSummary();
-    };
-
-    box.appendChild(title);
-    box.appendChild(start);
-    box.appendChild(end);
-    dogList.appendChild(box);
+  const services = ['Daycare','Overnight','Walk'];
+  services.forEach(s=>{
+    const label = document.createElement('label');
+    label.innerHTML=`<input type='checkbox' value='${s}'> ${s}`;
+    document.querySelector('#modalContent').appendChild(label);
   });
 
-  dogModal.style.display = "flex";
-}
+  const continueBtn = document.createElement('button');
+  continueBtn.textContent='Siguiente';
+  continueBtn.classList.add('continueBtn');
+  continueBtn.onclick=()=>{
+    const selected = [...document.querySelectorAll('#modalContent input[type=checkbox]:checked')].map(i=>i.value);
+    if(selected.length===0){alert('Selecciona al menos un servicio'); return;}
+    tempSelection.services = selected;
+    serviceModal.style.display='none';
+    document.getElementById('startTimeInput').value='';
+    document.getElementById('endTimeInput').value='';
+    timeModal.style.display='flex';
+  };
+  document.querySelector('#modalContent').appendChild(continueBtn);
+};
 
-closeDogModal.onclick = ()=> dogModal.style.display="none";
-saveDogSelection.onclick = ()=>{ dogModal.style.display="none"; localStorage.setItem('selections',JSON.stringify(selections)); updateSummary(); };
+closeModalBtn.onclick = ()=>{serviceModal.style.display='none';};
 
-/* === SERVICE CLICK === */
-document.querySelectorAll('.service-btn').forEach(btn => {
-  btn.onclick = ()=> openDogModal(btn.dataset.service);
-});
-
-/* === SUMMARY === */
-function updateSummary() {
-  const dateKey = formatDate(currentDate);
-  const div = document.getElementById('summaryContent');
-
-  if (!selections[dateKey]) { div.textContent = "No hay servicios seleccionados."; return; }
-
-  let html = "";
-  const groups = {};
-
-  Object.entries(selections[dateKey]).forEach(([key,val]) => {
-    if (!val.selected) return;
-    const [dog, service] = key.split('_');
-    if (!groups[service]) groups[service] = [];
-    groups[service].push(val.start + " → " + val.end + " — " + dog);
+saveTimeBtn.onclick=()=>{
+  tempSelection.start=document.getElementById('startTimeInput').value;
+  tempSelection.end=document.getElementById('endTimeInput').value;
+  const dateKey=formatDate(currentDate);
+  if(!selections[dateKey]) selections[dateKey]={};
+  tempSelection.services.forEach(s=>{
+    selections[dateKey][`${tempSelection.dog}_${s}`]={selected:true,start:tempSelection.start,end:tempSelection.end};
   });
+  localStorage.setItem('selections',JSON.stringify(selections));
+  timeModal.style.display='none';
+  updateSummary();
+};
 
-  for (let s in groups) {
-    html += `<strong>${s}</strong><br>`;
-    groups[s].forEach(t => html += `• ${t}<br>`);
-    html += `<br>`;
+closeTimeModal.onclick=()=>{timeModal.style.display='none';};
+
+function updateSummary(){
+  const dateKey=formatDate(currentDate);
+  const div=document.getElementById('summaryContent');
+  if(!selections[dateKey]){div.textContent='No hay servicios seleccionados.'; return;}
+  let html='';
+  const groups={};
+  Object.entries(selections[dateKey]).forEach(([key,val])=>{
+    if(!val.selected) return;
+    const [dog,service]=key.split('_');
+    if(!groups[dog]) groups[dog]=[];
+    groups[dog].push(`${service}: ${val.start} → ${val.end}`);
+  });
+  for(let dog in groups){
+    html+=`<strong>${dog}</strong><br>`;
+    groups[dog].forEach(s=>{html+=`• ${s}<br>`;});
+    html+='<br>';
   }
-
-  div.innerHTML = html || "No hay servicios seleccionados.";
+  div.innerHTML=html||'No hay servicios seleccionados.';
 }
 updateSummary();
-
-/* VIEW TABLE */
-viewTableBtn.onclick = ()=> location.href = "table.html";
-
 </script>
 </body>
 </html>
