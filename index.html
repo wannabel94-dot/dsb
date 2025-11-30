@@ -746,38 +746,40 @@ function saveSelections(){
 }
 
 /* Daily Summary */
-function updateSummary(){
-  const dateKey = formatDate(currentDate);
-  const summaryDiv = document.getElementById('summaryContent');
+function updateSummary() {
+    const dateKey = formatDate(currentDate);
+    const summaryDiv = document.getElementById('summaryContent');
 
-  if (!selections[dateKey]) {
-    summaryDiv.textContent = "No hay servicios seleccionados.";
-    return;
-  }
+    if (!selections[dateKey]) {
+        summaryDiv.textContent = "No hay servicios seleccionados.";
+        return;
+    }
 
-  const services = {};
+    const services = {};
 
-  Object.keys(selections[dateKey]).forEach(k => {
-    const entry = selections[dateKey][k];
-    if (entry.selected) {
-      const [dog, service] = k.split('_');
-      if (!services[service]) services[service] = [];
-      services[service].push({ 
-    dog, 
-    start: entry.start || "--:--", 
-    end: entry.end || "--:--" 
-});
+    Object.keys(selections[dateKey]).forEach(k => {
+        const entry = selections[dateKey][k];
+        if (entry.selected) {
+            const [dog, service] = k.split('_');
+            if (!services[service]) services[service] = [];
+            services[service].push({
+                dog,
+                start: entry.start || "--:--",
+                end: entry.end || "--:--"
+            });
+        }
+    });
 
+    let html = '';
+    for (let s in services) {
+        html += `<strong>${s}:</strong><br>`;
+        services[s].forEach(e => {
+            html += `• ${e.dog} — ${e.start} → ${e.end}<br>`;
+        });
+        html += `<br>`;
+    }
 
-  let html = '';
-  for (let s in services) {
-    html += `<strong>${s}:</strong><br>`;
-    services[s].forEach(e => {
-      html += `• ${e.dog} — ${e.start} → ${e.end}<br>`;
-    html += `<br>`;
-  }
-
-  summaryDiv.innerHTML = html || "No hay servicios seleccionados.";
+    summaryDiv.innerHTML = html || "No hay servicios seleccionados.";
 }
 
 
@@ -818,18 +820,28 @@ document.getElementById('closeRates').onclick=()=>{ ratesModal.style.display='no
 function buildRatesTable(){
   ratesTableBody.innerHTML='';
   allDogs.forEach(dog=>{
-    const r=rates[dog]; const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${dog}</td>
-      <td><input type="number" value="${r.daycare}"></td>
-      <td><input type="number" value="${r.weekend}"></td>
-      <td><input type="number" value="${r.overnight}"></td>
-      <td><input type="number" value="${r.walk}"></td>
-      <td><button class="deleteDogBtn">Eliminar</button></td>`;
-    ratesTableBody.appendChild(tr);
-    tr.querySelector(".deleteDogBtn").onclick=()=>{
-      delete rates[dog];
-      allDogs = allDogs.filter(d=>d!==dog);
-      localStorage.setItem('allDogs',JSON.stringify(allDogs));
+    const key = `${dog}_${currentService}`;
+    const b = document.createElement('button');
+    b.textContent = dog;
+    b.classList.add("dog-select");
+
+    if (selections[dateKey]?.[key]?.selected) {
+        b.classList.add("selected");
+    }
+
+    b.onclick = () => {
+        if (!b.classList.contains("selected")) {
+            openTimeModal(dog, key);
+        } else {
+            b.classList.remove("selected");
+            delete selections[dateKey][key];
+            updateSummary();
+        }
+    };
+
+    dogList.appendChild(b);
+});
+ localStorage.setItem('allDogs',JSON.stringify(allDogs));
       buildRatesTable();
     };
   });
