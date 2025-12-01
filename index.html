@@ -272,7 +272,7 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
 <button class="floating-center-btn" id="centralBtn">+</button>
 
 <script>
-let currentDate = new Date();   // ← MUST COME FIRST
+let currentDate = new Date(); // initial selected date
 
 function updateMonthHeader(date) {
     const monthNames = [
@@ -290,13 +290,14 @@ function buildDateStrip(selectedDate = new Date()) {
     dateStrip.innerHTML = "";
 
     const start = new Date(selectedDate);
-    start.setDate(selectedDate.getDate() - 3);
+    start.setDate(selectedDate.getDate() - 3); // show 3 days before
+
+    const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
     for (let i = 0; i < 7; i++) {
         const d = new Date(start);
         d.setDate(start.getDate() + i);
 
-        const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
         const div = document.createElement("div");
         div.className = "date-item";
 
@@ -309,18 +310,63 @@ function buildDateStrip(selectedDate = new Date()) {
             <div class="circle">${d.getDate()}</div>
         `;
 
-        div.onclick = () => {
-            currentDate = d;
-            buildDateStrip(currentDate);
-            updateSummary();
-        };
-
         dateStrip.appendChild(div);
+    }
+
+    // Scroll to center the selected date
+    const active = dateStrip.querySelector(".date-item.active");
+    if (active) {
+        const stripRect = dateStrip.getBoundingClientRect();
+        const activeRect = active.getBoundingClientRect();
+        const offset = activeRect.left - stripRect.left - (stripRect.width / 2) + (activeRect.width / 2);
+        dateStrip.scrollLeft += offset;
     }
 }
 
+// Call initially
 buildDateStrip(currentDate);
+updateSummary();
 
+// ---- Scroll-driven date selection ----
+const dateStrip = document.getElementById("dateStrip");
+
+let isScrolling;
+dateStrip.addEventListener('scroll', () => {
+    window.clearTimeout(isScrolling);
+
+    // Use a timeout to update only after scroll stops
+    isScrolling = setTimeout(() => {
+        const stripRect = dateStrip.getBoundingClientRect();
+        const stripCenter = stripRect.left + stripRect.width / 2;
+
+        let closest = null;
+        let closestDistance = Infinity;
+
+        document.querySelectorAll('.date-item').forEach(item => {
+            const itemRect = item.getBoundingClientRect();
+            const itemCenter = itemRect.left + itemRect.width / 2;
+            const distance = Math.abs(stripCenter - itemCenter);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closest = item;
+            }
+        });
+
+        if (closest) {
+            document.querySelectorAll('.date-item').forEach(d => d.classList.remove('active'));
+            closest.classList.add('active');
+
+            // Update currentDate
+            const day = parseInt(closest.querySelector('.circle').textContent);
+            const [monthName, yearStr] = document.getElementById('monthHeader').textContent.split(' ');
+            const month = new Date(`${monthName} 1, ${yearStr}`).getMonth();
+            const year = parseInt(yearStr);
+
+            currentDate = new Date(year, month, day);
+            updateSummary();
+        }
+    }, 100); // adjust delay for responsiveness
+});
 
 const defaultDogs = ["Nina","Carmela", "Pancho", "Pablo","Lili","Jugnia","Leo","India","Kimchi","Cuatri","Tristona y Belona","Neo","Briso","Zaspi","R&H"];
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
