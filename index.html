@@ -290,61 +290,93 @@ const formatDate = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMo
 // ===== DATE STRIP =====
 const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const dateStrip = document.getElementById("dateStrip");
+const DAYS_TO_SHOW = 365; // forward/back from today
+let allDates = [];
 
+// Generate full year of dates
+function generateDates(centerDate = new Date()){
+    allDates = [];
+    for(let i=-DAYS_TO_SHOW;i<=DAYS_TO_SHOW;i++){
+        const d = new Date(centerDate);
+        d.setDate(centerDate.getDate() + i);
+        allDates.push(d);
+    }
+}
+
+// Build full scrollable strip
+function buildFullDateStrip(centerDate = new Date()){
+    generateDates(centerDate);
+    dateStrip.innerHTML = '';
+    dateStrip.style.scrollSnapType = "x mandatory";
+
+    allDates.forEach(d=>{
+        const div = document.createElement("div");
+        div.className = "date-item";
+        if(d.toDateString() === centerDate.toDateString()) div.classList.add("active");
+        div.innerHTML = `
+            <span class="dayname">${dayNames[d.getDay()]}</span>
+            <div class="circle">${d.getDate()}</div>
+        `;
+        dateStrip.appendChild(div);
+    });
+
+    // Scroll to center
+    setTimeout(()=>scrollToDate(centerDate),50);
+}
+
+// Scroll to a specific date
+function scrollToDate(targetDate){
+    const items = dateStrip.querySelectorAll(".date-item");
+    for(let i=0;i<allDates.length;i++){
+        if(allDates[i].toDateString() === targetDate.toDateString()){
+            const item = items[i];
+            dateStrip.scrollLeft = item.offsetLeft - dateStrip.offsetWidth/2 + item.offsetWidth/2;
+            break;
+        }
+    }
+}
+
+// Update month header
 function updateMonthHeader(date){
     document.getElementById("monthHeader").textContent = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-// ===== FULL CALENDAR STRIP =====
-const dateStrip = document.getElementById("dateStrip");
+// ===== SCROLL LISTENER =====
 let scrollTimeout;
-
-dateStrip.addEventListener('scroll', () => {
-    window.clearTimeout(scrollTimeout);
-
-    scrollTimeout = setTimeout(() => {
+dateStrip.addEventListener('scroll', ()=>{
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(()=>{
         const stripRect = dateStrip.getBoundingClientRect();
-        const stripCenter = stripRect.left + stripRect.width / 2;
+        const stripCenter = stripRect.left + stripRect.width/2;
 
         let closest = null;
         let closestDistance = Infinity;
 
-        document.querySelectorAll('.date-item').forEach(item => {
+        document.querySelectorAll('.date-item').forEach(item=>{
             const itemRect = item.getBoundingClientRect();
-            const itemCenter = itemRect.left + itemRect.width / 2;
+            const itemCenter = itemRect.left + itemRect.width/2;
             const distance = Math.abs(stripCenter - itemCenter);
-
-            if (distance < closestDistance) {
+            if(distance < closestDistance){
                 closestDistance = distance;
                 closest = item;
             }
         });
 
-        if (closest) {
-            // Update active class
-            document.querySelectorAll('.date-item').forEach(d => d.classList.remove('active'));
+        if(closest){
+            document.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active'));
             closest.classList.add('active');
 
-            // Read day from the circle
-            const day = parseInt(closest.querySelector('.circle').textContent);
-            
-            // Calculate the date relative to the first date in the strip
-            const firstItemDateText = dateStrip.querySelector('.date-item .circle').textContent;
-            const firstItemDate = new Date(currentDate);
-            firstItemDate.setDate(currentDate.getDate() - 3); // match buildDateStrip
-
-            const newDate = new Date(firstItemDate);
             const idx = Array.from(dateStrip.children).indexOf(closest);
-            newDate.setDate(firstItemDate.getDate() + idx);
-
-            currentDate = newDate;
+            currentDate = allDates[idx];
             updateMonthHeader(currentDate);
             updateSummary();
         }
-    }, 50); // lower timeout for smoother updates
+    },50);
 });
 
-function setDimmed(isDimmed) {
+// ===== DIMMING FUNCTION FOR NEW DOG SELECTION =====
+function setDimmed(isDimmed){
     if(isDimmed){
         addedDogsContainer.classList.add('dimmed');
         document.querySelector('.modal-buttons').classList.add('dimmed');
@@ -353,83 +385,6 @@ function setDimmed(isDimmed) {
         document.querySelector('.modal-buttons').classList.remove('dimmed');
     }
 }
-
-// When a dog is selected from the dropdown
-dogSelect.onchange = ()=>{
-  if(dogSelect.value){
-    currentDogSelection.dog = dogSelect.value;
-    renderServiceButtons();
-    setDimmed(true);  // Dim the existing cards/buttons
-  } else {
-    setDimmed(false);
-  }
-}
-
-// When a new dog is added
-document.getElementById('addDogBtn').onclick = ()=>{
-  if(!currentDogSelection.dog || currentDogSelection.services.length === 0){
-    alert('Selecciona un perro y al menos un servicio');
-    return;
-  }
-
-  const hasNonOvernight = currentDogSelection.services.some(s => s !== 'Overnight');
-  if(hasNonOvernight && (!document.getElementById('startTimeInput').value || !document.getElementById('endTimeInput').value)){
-    alert('Introduce horario de inicio y fin');
-    return;
-  }
-
-  currentDogSelection.start = document.getElementById('startTimeInput').value || '';
-  currentDogSelection.end = document.getElementById('endTimeInput').value || '';
-
-  tempDogs.push({...currentDogSelection});
-  renderAddedDogs();
-
-  // Reset form
-  currentDogSelection = {dog:null, services:[], start:'', end:''};
-  dogSelect.value = '';
-  serviceButtonsContainer.innerHTML='';
-  timeInputsContainer.style.display='none';
-  document.getElementById('startTimeInput').value='';
-  document.getElementById('endTimeInput').value='';
-
-  setDimmed(false);  // Restore visibility
-}
-
-// Cancel button should also restore visibility
-document.getElementById('closeModalBtn').onclick = ()=>{
-  setDimmed(false);
-  serviceModal.style.display='none';
-}
-
-// Scroll listener
-dateStrip.addEventListener('scroll', ()=>{
-    clearTimeout(isScrolling);
-    isScrolling = setTimeout(()=>{
-        const stripCenter = dateStrip.offsetWidth/2;
-        let closestIdx = 0;
-        let minDist = Infinity;
-
-        allDates.forEach((d,i)=>{
-            const item = dateStrip.children[i];
-            const itemCenter = item.offsetLeft + item.offsetWidth/2 - dateStrip.scrollLeft;
-            const dist = Math.abs(stripCenter - itemCenter);
-            if(dist < minDist){ minDist = dist; closestIdx = i; }
-        });
-
-        // Update active
-        document.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active'));
-        const activeItem = dateStrip.children[closestIdx];
-        activeItem.classList.add('active');
-
-        // Update current date
-        currentDate = allDates[closestIdx];
-        updateMonthHeader(currentDate);
-        updateSummary();
-    }, 50);
-});
-
-// Initial call
-buildFullDateStrip(currentDate);
 
 // ===== SERVICE MODAL =====
 const serviceModal = document.getElementById('serviceModal');
@@ -442,26 +397,34 @@ document.getElementById('centralBtn').onclick = ()=>{
     tempDogs = [];
     currentDogSelection = { dog: null, services: [], start: '', end: '' };
     dogSelect.innerHTML = '<option value="">Seleccionar Perro</option>';
-    allDogs.forEach(d=>{ const opt=document.createElement('option'); opt.value=d; opt.textContent=d; dogSelect.appendChild(opt); });
-    serviceButtonsContainer.innerHTML = '';
-    timeInputsContainer.style.display = 'none';
-    addedDogsContainer.innerHTML = '';
-    serviceModal.style.display = 'flex';
+    allDogs.forEach(d=>{
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        dogSelect.appendChild(opt);
+    });
+    serviceButtonsContainer.innerHTML='';
+    timeInputsContainer.style.display='none';
+    addedDogsContainer.innerHTML='';
+    serviceModal.style.display='flex';
+    setDimmed(false);
 };
 
+// Dog selection change
 dogSelect.onchange = ()=>{
     currentDogSelection.dog = dogSelect.value || null;
     renderServiceButtons();
+    setDimmed(!!currentDogSelection.dog);
 };
 
+// Render service buttons
 function renderServiceButtons(){
-    serviceButtonsContainer.innerHTML = '';
+    serviceButtonsContainer.innerHTML='';
     if(!currentDogSelection.dog) return;
-
     const services = ['Daycare','Overnight','Walk'];
     services.forEach(s=>{
         const btn = document.createElement('button');
-        btn.className = 'service-btn';
+        btn.className='service-btn';
         btn.textContent = s;
         btn.onclick = ()=>{
             btn.classList.toggle('selected');
@@ -469,19 +432,19 @@ function renderServiceButtons(){
             if(idx > -1) currentDogSelection.services.splice(idx,1);
             else currentDogSelection.services.push(s);
 
-            const showTime = currentDogSelection.services.some(x => x !== 'Overnight');
+            const showTime = currentDogSelection.services.some(x=>x!=='Overnight');
             timeInputsContainer.style.display = showTime ? 'block' : 'none';
         }
         serviceButtonsContainer.appendChild(btn);
     });
 }
 
+// Add dog to temporary list
 document.getElementById('addDogBtn').onclick = ()=>{
     if(!currentDogSelection.dog || currentDogSelection.services.length===0){
         alert('Selecciona un perro y al menos un servicio');
         return;
     }
-
     const hasNonOvernight = currentDogSelection.services.some(s=>s!=='Overnight');
     const startVal = document.getElementById('startTimeInput').value;
     const endVal = document.getElementById('endTimeInput').value;
@@ -493,21 +456,24 @@ document.getElementById('addDogBtn').onclick = ()=>{
     currentDogSelection.start = startVal || '';
     currentDogSelection.end = endVal || '';
     tempDogs.push({...currentDogSelection});
-
     renderAddedDogs();
+
+    // Reset form
     currentDogSelection = { dog:null, services:[], start:'', end:'' };
     dogSelect.value='';
     serviceButtonsContainer.innerHTML='';
     timeInputsContainer.style.display='none';
     document.getElementById('startTimeInput').value='';
     document.getElementById('endTimeInput').value='';
-};
+    setDimmed(false);
+}
 
+// Render added dogs
 function renderAddedDogs(){
-    addedDogsContainer.innerHTML = '';
-    tempDogs.forEach((dog, idx)=>{
+    addedDogsContainer.innerHTML='';
+    tempDogs.forEach((dog,idx)=>{
         const card = document.createElement('div');
-        card.className = 'dog-entry';
+        card.className='dog-entry';
         const timeStr = dog.start && dog.end ? ` (${dog.start} → ${dog.end})` : '';
         card.innerHTML = `
             <h4>${dog.dog}</h4>
@@ -522,6 +488,7 @@ window.removeTempDog = (idx)=>{
     renderAddedDogs();
 };
 
+// Save all temporary dogs
 document.getElementById('saveAllBtn').onclick = ()=>{
     const dateKey = formatDate(currentDate);
     if(!selections[dateKey]) selections[dateKey]={};
@@ -534,7 +501,11 @@ document.getElementById('saveAllBtn').onclick = ()=>{
     serviceModal.style.display='none';
     updateSummary();
 };
-document.getElementById('closeModalBtn').onclick = ()=>{ serviceModal.style.display='none'; };
+
+document.getElementById('closeModalBtn').onclick = ()=>{
+    setDimmed(false);
+    serviceModal.style.display='none';
+};
 
 // ===== SUMMARY =====
 function updateSummary(){
@@ -651,9 +622,11 @@ function renderAgenda(){
 }
 
 // ===== INITIAL CALLS =====
-buildDateStrip(currentDate);
+buildFullDateStrip(currentDate);
+updateMonthHeader(currentDate);
 updateSummary();
 </script>
+
 
 </body>
 </html>
