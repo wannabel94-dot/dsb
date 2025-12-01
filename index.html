@@ -510,41 +510,44 @@ document.getElementById('agendaContent').style.animation = 'slideUp 0.25s ease-o
 }
 
 
-function renderAgenda(){
-agendaContainer.innerHTML='';
-const dateKeys = Object.keys(selections);
-if(dateKeys.length===0){ agendaContainer.innerHTML='<p>No hay servicios programados.</p>'; return; }
+function renderAgenda() {
+    agendaContainer.innerHTML = '';
+    const dateKeys = Object.keys(selections);
+    if(dateKeys.length === 0){
+        agendaContainer.innerHTML = '<p>No hay servicios programados.</p>';
+        return;
+    }
 
+    const now = new Date();
+    now.setHours(0,0,0,0);
 
-let todayBlock = null;
-const future = [];
-const now = new Date(); now.setHours(0,0,0,0);
+    let todayBlock = null;
+    const future = [];
 
+    dateKeys.forEach(k => {
+        const [da, ma, ya] = k.split('/').map(Number);
+        const dt = new Date(ya, ma-1, da);
+        if(dt.getTime() === now.getTime()) todayBlock = k;
+        else if(dt > now) future.push(k);
+    });
 
-dateKeys.forEach(k=>{
-const [da,ma,ya]=k.split('/').map(Number);
-const dt = new Date(ya,ma-1,da);
-if(dt.getTime() === now.getTime()) todayBlock = k;
-else if(dt > now) future.push(k);
-});
+    // Today's block
+    if(todayBlock){
+        const todaySection = document.createElement('div');
+        todaySection.className = 'agenda-block agenda-today';
+        const dayDiv = buildAgendaDay(todayBlock, false, true);
+        todaySection.appendChild(dayDiv);
+        agendaContainer.appendChild(todaySection);
+    }
 
-
-// Today's block
-if(todayBlock){
-const todaySection = document.createElement('div');
-todaySection.className = 'agenda-block agenda-today';
-const dayDiv = buildAgendaDay(todayBlock, false, true);
-todaySection.appendChild(dayDiv);
-agendaContainer.appendChild(todaySection);
-}
-
-
-// Future block
-if(future.length){
-const futureSection = document.createElement('div');
-futureSection.className = 'agenda-block';
-future.forEach(fk => {
-const dayDiv = buildAgendaDay(fk, false);
+    // Future block
+    future.forEach(fk => {
+        const futureSection = document.createElement('div');
+        futureSection.className = 'agenda-block';
+        const dayDiv = buildAgendaDay(fk, false);
+        futureSection.appendChild(dayDiv);
+        agendaContainer.appendChild(futureSection);
+    });
 }
 
 // ===== INITIAL CALLS =====
