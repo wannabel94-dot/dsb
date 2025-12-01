@@ -326,18 +326,11 @@ const defaultDogs = ["Nina","Carmela", "Pancho", "Pablo","Lili","Jugnia","Leo","
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
 let selections = JSON.parse(localStorage.getItem('selections')) || {};
 let tarifs = JSON.parse(localStorage.getItem('tarifs')) || {};
-let currentDate = new Date();
 const formatDate = d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 
 // Temporary storage for dogs being added
 let tempDogs = [];
 
-function updateDate(){ document.getElementById('dateBtn').textContent = formatDate(currentDate); }
-updateDate();
-
-document.getElementById('prevDay').onclick = ()=>{currentDate.setDate(currentDate.getDate()-1); updateDate(); updateSummary();}
-document.getElementById('nextDay').onclick = ()=>{currentDate.setDate(currentDate.getDate()+1); updateDate(); updateSummary();}
-document.getElementById('dateBtn').onclick = ()=>{
   const input=document.createElement('input'); input.type='date'; input.style.display='none'; document.body.appendChild(input);
   input.valueAsDate=currentDate; input.click();
   input.onchange=()=>{currentDate=new Date(input.value); updateDate(); updateSummary(); input.remove();}
