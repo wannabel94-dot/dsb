@@ -462,28 +462,47 @@ function renderAddedDogsForDate(dateKey){
 function refreshServiceModalForCurrentDate(){ const dateKey = formatDate(currentDate); renderAddedDogsForDate(dateKey); }
 
 // ===== SUMMARY =====
-function updateSummary(){
+function updateSummary() {
     const dateKey = formatDate(currentDate);
     const div = document.getElementById('summaryContent');
-    if(!selections[dateKey]){ div.textContent = 'No hay servicios seleccionados.'; return; }
+    if(!selections[dateKey]){
+        div.textContent = 'No hay servicios seleccionados.';
+        return;
+    }
 
-    const groups = {};
-    Object.entries(selections[dateKey]).forEach(([key,val])=>{
-        if(!val.selected) return;
-        const [dog, service] = key.split('_');
-        if(!groups[dog]) groups[dog]=[];
-        const timeStr = val.start || val.end ? ` (${val.start || ''}${val.start && val.end ? ' → ' : ''}${val.end || ''})` : '';
-        groups[dog].push(`${service}${service==='Overnight' ? ' 🌙' : ''}${timeStr}`);
+    // Collect entries
+    const entries = Object.entries(selections[dateKey])
+        .filter(([key,val]) => val.selected)
+        .map(([key,val]) => {
+            const [dog, service] = key.split('_');
+            const serviceStr = service === '+ Noche' ? 'Overnight 🌙' : service;
+            const startStr = val.start || '';
+            const endStr = val.end || '';
+            let timeStr = '';
+            if(startStr && endStr) timeStr = `${startStr} - ${endStr}`;
+            else if(startStr) timeStr = `${startStr} -`;
+            else if(endStr) timeStr = `- ${endStr}`;
+            else timeStr = ''; // no time
+
+            return { timeStr, dog, serviceStr };
+        });
+
+    // Sort by start time
+    entries.sort((a,b)=>{
+        if(!a.timeStr && !b.timeStr) return 0;
+        if(!a.timeStr) return 1;
+        if(!b.timeStr) return -1;
+        return a.timeStr.localeCompare(b.timeStr);
     });
 
-    let html='';
-    for(let dog in groups){
-        html += `<strong>${dog}</strong><br>`;
-        groups[dog].forEach(s=>{ html+=`• ${s}<br>`; });
-        html+='<br>';
-    }
-    div.innerHTML = html || 'No hay servicios seleccionados.';
+    // Build HTML with fixed-width time column using inline style
+    const lines = entries.map(e => 
+        `<span style="display:inline-block;width:90px;font-weight:600;">${e.timeStr}</span>${e.dog} ${e.serviceStr}`
+    );
+
+    div.innerHTML = lines.join('<br>') || 'No hay servicios seleccionados.';
 }
+
 
 // ===== TARIFS MODAL =====
 const tarifsSheet = document.getElementById('tarifsSheet');
