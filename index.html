@@ -470,7 +470,6 @@ function updateSummary() {
         return;
     }
 
-    // Collect entries
     const entries = Object.entries(selections[dateKey])
         .filter(([key,val]) => val.selected)
         .map(([key,val]) => {
@@ -482,7 +481,6 @@ function updateSummary() {
             if(startStr && endStr) timeStr = `${startStr} - ${endStr}`;
             else if(startStr) timeStr = `${startStr} -`;
             else if(endStr) timeStr = `- ${endStr}`;
-            else timeStr = ''; // no time
 
             return { timeStr, dog, serviceStr };
         });
@@ -495,13 +493,24 @@ function updateSummary() {
         return a.timeStr.localeCompare(b.timeStr);
     });
 
-    // Build HTML with fixed-width time column using inline style
-    const lines = entries.map(e => 
-        `<span style="display:inline-block;width:90px;font-weight:600;">${e.timeStr}</span>${e.dog} ${e.serviceStr}`
-    );
+    // Build responsive flex layout
+    div.innerHTML = '';
+    entries.forEach(e => {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.flexWrap = 'wrap';
+        row.style.alignItems = 'center';
+        row.style.gap = '8px';
+        row.innerHTML = `
+            <div style="flex: 0 0 90px; font-weight:600;">${e.timeStr}</div>
+            <div style="flex: 1 1 auto;">${e.dog} ${e.serviceStr}</div>
+        `;
+        div.appendChild(row);
+    });
 
-    div.innerHTML = lines.join('<br>') || 'No hay servicios seleccionados.';
+    if(entries.length === 0) div.textContent = 'No hay servicios seleccionados.';
 }
+
 
 
 // ===== TARIFS MODAL =====
