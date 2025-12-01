@@ -77,19 +77,34 @@ h1{text-align:center;margin-bottom:20px;color:#373e2e;}button{cursor:pointer;}
 
 /* SLIDE-UP PANEL (agenda) or SLIDE-IN PANEL (services) */
 .modal-content {
-  animation: slideUp 0.35s ease-out;
-
     background:white;
     width:100%;
-    max-height:90vh;
+    height: calc(100vh - 80px); /* leave room for footer */
+    max-height: none;
     border-radius:22px 22px 0 0;
     padding:18px;
     overflow-y:auto;
     box-shadow:0 4px 20px rgba(0,0,0,0.25);
+    position: absolute;
+    bottom: 0;
+    animation: slideUp 0.30s ease-out;
+}
+
+.back-bottom-btn {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    background: #f2f2f2;
+    padding: 16px 0;
+    text-align: center;
+    font-size: 18px;
+    border: none;
+    border-radius: 16px 16px 0 0;
+    margin-top: 20px;
 }
 
 /* Animations */
-@keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes slideDown { from { transform:translateY(-100%);} to { transform:translateY(0);} }
 
 /* small inputs */
@@ -159,10 +174,6 @@ select,input[type="time"],input[type="number"],input[type="text"]{ width:100%;pa
 /* moon icon style fallback */
 .moon{font-size:16px;margin-left:8px;}
 
-@keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
 </style>
 </head>
 <body>
@@ -204,13 +215,15 @@ select,input[type="time"],input[type="number"],input[type="text"]{ width:100%;pa
         <button id="cancelAddBtn" class="small-btn small-cancel">Cancelar</button>
       </div>
     </div>
-    
+
+    <!-- bottom back -->
+    <button id="modalBackBtn" class="back-bottom-btn">Volver</button>
   </div>
 </div>
 
 <!-- TARIFS MODAL -->
 <div id="tarifsSheet" class="modal">
-  <div class="modal-content">
+  <div class="modal-content" id="tarifsContent">
     <h2>Tarifas por Perro (€)</h2>
     <table id="tarifsTable">
       <thead>
@@ -338,22 +351,50 @@ document.getElementById('centralBtn').onclick = ()=>{
     timeInputsContainer.style.display='none';
     addedDogsContainer.innerHTML='';
     serviceModal.style.display='block';
+    refreshServiceModalForCurrentDate();
 };
 
-// back button closes popup
-document.getElementById('backBtn').onclick = ()=>{ serviceModal.style.display='none'; };
+// back buttons close popup (both top and bottom)
+const topBack = document.getElementById('backBtn');
+if(topBack) topBack.addEventListener('click', ()=>{ serviceModal.style.display='none'; });
+const bottomBack = document.getElementById('modalBackBtn');
+if(bottomBack) bottomBack.addEventListener('click', ()=>{ serviceModal.style.display='none'; });
 
 // Dog selection
 dogSelect.onchange = ()=>{ currentDogSelection.dog = dogSelect.value || null; renderServiceButtons(); };
 
-function renderServiceButtons(){ serviceButtonsContainer.innerHTML=''; if(!currentDogSelection.dog) return; const services = ['Daycare','Overnight','Walk']; services.forEach(s=>{ const btn = document.createElement('button'); btn.className='service-btn'; btn.textContent = (s==='Overnight'? '🌙' : s); btn.title = s; btn.onclick = ()=>{ btn.classList.toggle('selected'); const idx = currentDogSelection.services.indexOf(s); if(idx > -1) currentDogSelection.services.splice(idx,1); else currentDogSelection.services.push(s); const showTime = currentDogSelection.services.some(x=>x!=='Overnight'); timeInputsContainer.style.display = showTime ? 'block' : 'block'; // always show time inputs but optional
-        } serviceButtonsContainer.appendChild(btn); }); }
+function renderServiceButtons() {
+    serviceButtonsContainer.innerHTML = '';
+    if (!currentDogSelection.dog) return;
+
+    const services = ['Daycare', 'Overnight', 'Walk'];
+    services.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'service-btn';
+        btn.textContent = (s === 'Overnight' ? '🌙' : s);
+        btn.title = s;
+
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('selected');
+            const idx = currentDogSelection.services.indexOf(s);
+            if (idx > -1) currentDogSelection.services.splice(idx, 1);
+            else currentDogSelection.services.push(s);
+            // show time inputs if any non-overnight selected; time fields are optional
+            const showTime = currentDogSelection.services.some(x => x !== 'Overnight');
+            timeInputsContainer.style.display = showTime ? 'block' : 'block'; // keep visible (optional)
+        });
+
+        serviceButtonsContainer.appendChild(btn);
+    });
+}
 
 // cancel single add
-document.getElementById('cancelAddBtn').onclick = ()=>{ currentDogSelection = { dog:null, services:[], start:'', end:'' }; dogSelect.value=''; serviceButtonsContainer.innerHTML=''; document.getElementById('startTimeInput').value=''; document.getElementById('endTimeInput').value=''; };
+const cancelAddBtn = document.getElementById('cancelAddBtn');
+if(cancelAddBtn) cancelAddBtn.addEventListener('click', ()=>{ currentDogSelection = { dog:null, services:[], start:'', end:'' }; dogSelect.value=''; serviceButtonsContainer.innerHTML=''; document.getElementById('startTimeInput').value=''; document.getElementById('endTimeInput').value=''; });
 
 // add single dog immediately (no global save)
-document.getElementById('addDogBtn').onclick = ()=>{
+const addDogBtn = document.getElementById('addDogBtn');
+if(addDogBtn) addDogBtn.addEventListener('click', ()=>{
     if(!currentDogSelection.dog || currentDogSelection.services.length===0){ alert('Selecciona un perro y al menos un servicio'); return; }
     const startVal = document.getElementById('startTimeInput').value;
     const endVal = document.getElementById('endTimeInput').value;
@@ -377,29 +418,67 @@ document.getElementById('addDogBtn').onclick = ()=>{
     // reset form
     currentDogSelection = { dog:null, services:[], start:'', end:'' };
     dogSelect.value=''; serviceButtonsContainer.innerHTML=''; document.getElementById('startTimeInput').value=''; document.getElementById('endTimeInput').value='';
-};
+});
 
-function renderAddedDogsForDate(dateKey){ addedDogsContainer.innerHTML=''; const entries = selections[dateKey] || {}; Object.entries(entries).forEach(([k,v])=>{ if(!v.selected) return; const [dog, service] = k.split('_'); const timeStr = v.start || v.end ? ` ${v.start || ''}${v.start && v.end ? ' - ' : ''}${v.end || ''}` : '';
-    const card = document.createElement('div'); card.className = 'dog-entry'; card.innerHTML = `<div><strong>${dog}</strong><div class="services-list">${service}${timeStr}${service==='Overnight' ? ' 🌙' : ''}</div></div><div><button class="remove-btn">Eliminar</button></div>`;
-    card.querySelector('.remove-btn').onclick = ()=>{ delete selections[dateKey][k]; localStorage.setItem('selections', JSON.stringify(selections)); renderAddedDogsForDate(dateKey); updateSummary(); };
-    addedDogsContainer.appendChild(card);
-}); }
+function renderAddedDogsForDate(dateKey){
+    addedDogsContainer.innerHTML='';
+    const entries = selections[dateKey] || {};
+    Object.entries(entries).forEach(([k,v])=>{
+        if(!v.selected) return;
+        const [dog, service] = k.split('_');
+        const timeStr = v.start || v.end ? ` ${v.start || ''}${v.start && v.end ? ' - ' : ''}${v.end || ''}` : '';
+        const card = document.createElement('div');
+        card.className = 'dog-entry';
+        card.innerHTML = `<div><strong>${dog}</strong><div class="services-list">${service}${timeStr}${service==='Overnight' ? ' 🌙' : ''}</div></div><div><button class="remove-btn">Eliminar</button></div>`;
+        const removeBtn = card.querySelector('.remove-btn');
+        if(removeBtn) removeBtn.addEventListener('click', ()=>{ delete selections[dateKey][k]; localStorage.setItem('selections', JSON.stringify(selections)); renderAddedDogsForDate(dateKey); updateSummary(); });
+        addedDogsContainer.appendChild(card);
+    });
+}
 
 // show existing for current date when modal opens or date changes
-// when opening service modal we call this; also when date changes
 function refreshServiceModalForCurrentDate(){ const dateKey = formatDate(currentDate); renderAddedDogsForDate(dateKey); }
 
 // ===== SUMMARY =====
-function updateSummary(){ const dateKey = formatDate(currentDate); const div = document.getElementById('summaryContent'); if(!selections[dateKey]){ div.textContent = 'No hay servicios seleccionados.'; return; } const groups = {}; Object.entries(selections[dateKey]).forEach(([key,val])=>{ if(!val.selected) return; const [dog, service] = key.split('_'); if(!groups[dog]) groups[dog]=[]; const timeStr = val.start || val.end ? ` (${val.start || ''}${val.start && val.end ? ' → ' : ''}${val.end || ''})` : ''; groups[dog].push(`${service}${service==='Overnight' ? ' 🌙' : ''}${timeStr}`); }); let html=''; for(let dog in groups){ html += `<strong>${dog}</strong><br>`; groups[dog].forEach(s=>{ html+=`• ${s}<br>`; }); html+='<br>'; } div.innerHTML = html || 'No hay servicios seleccionados.'; }
+function updateSummary(){
+    const dateKey = formatDate(currentDate);
+    const div = document.getElementById('summaryContent');
+    if(!selections[dateKey]){ div.textContent = 'No hay servicios seleccionados.'; return; }
+
+    const groups = {};
+    Object.entries(selections[dateKey]).forEach(([key,val])=>{
+        if(!val.selected) return;
+        const [dog, service] = key.split('_');
+        if(!groups[dog]) groups[dog]=[];
+        const timeStr = val.start || val.end ? ` (${val.start || ''}${val.start && val.end ? ' → ' : ''}${val.end || ''})` : '';
+        groups[dog].push(`${service}${service==='Overnight' ? ' 🌙' : ''}${timeStr}`);
+    });
+
+    let html='';
+    for(let dog in groups){
+        html += `<strong>${dog}</strong><br>`;
+        groups[dog].forEach(s=>{ html+=`• ${s}<br>`; });
+        html+='<br>';
+    }
+    div.innerHTML = html || 'No hay servicios seleccionados.';
+}
 
 // ===== TARIFS MODAL =====
 const tarifsSheet = document.getElementById('tarifsSheet');
 const tarifsTableBody = document.querySelector('#tarifsTable tbody');
 
-function loadTarifs(){ tarifsTableBody.innerHTML=''; allDogs.forEach(d=>{ if(!tarifs[d]) tarifs[d]={day:10,night:10,walk:10}; const row = document.createElement('tr'); row.innerHTML = `<td>${d}</td> <td><input type="number" min="0" value="${tarifs[d].day}"></td> <td><input type="number" min="0" value="${tarifs[d].night}"></td> <td><input type="number" min="0" value="${tarifs[d].walk}"></td>`; tarifsTableBody.appendChild(row); }); }
+function loadTarifs(){
+    tarifsTableBody.innerHTML='';
+    allDogs.forEach(d=>{
+        if(!tarifs[d]) tarifs[d]={day:10,night:10,walk:10};
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${d}</td><td><input type="number" min="0" value="${tarifs[d].day}"></td><td><input type="number" min="0" value="${tarifs[d].night}"></td><td><input type="number" min="0" value="${tarifs[d].walk}"></td>`;
+        tarifsTableBody.appendChild(row);
+    });
+}
 loadTarifs();
 
-document.getElementById('tarifsBtn').onclick = ()=>{ tarifsSheet.style.display='block'; };
+document.getElementById('tarifsBtn').onclick = ()=>{ tarifsSheet.style.display='block'; document.getElementById('tarifsContent').style.animation = 'slideUp 0.30s ease-out'; };
 document.getElementById('closeTarifsBtn').onclick = ()=>{ tarifsSheet.style.display='none'; };
 document.getElementById('saveTarifsBtn').onclick = ()=>{ [...tarifsTableBody.querySelectorAll('tr')].forEach(tr=>{ const dog = tr.children[0].textContent; tarifs[dog] = { day: Number(tr.children[1].querySelector('input').value), night: Number(tr.children[2].querySelector('input').value), walk: Number(tr.children[3].querySelector('input').value) }; }); localStorage.setItem('tarifs',JSON.stringify(tarifs)); tarifsSheet.style.display='none'; };
 document.getElementById('addDogTarifBtn').onclick = ()=>{ const name = prompt("Introduce el nombre del perro:"); if(!name) return; if(allDogs.includes(name)){ alert("Perro ya existe."); return; } allDogs.push(name); localStorage.setItem('allDogs',JSON.stringify(allDogs)); tarifs[name] = {day:10, night:10, walk:10}; loadTarifs(); };
@@ -504,5 +583,3 @@ document.getElementById('calendarBtn').addEventListener('click', ()=>{ openAgend
 
 </body>
 </html>
-
-
