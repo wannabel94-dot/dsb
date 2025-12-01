@@ -15,12 +15,70 @@ h1{text-align:center;margin-bottom:20px;color:#373e2e;}
 button{cursor:pointer;}
 
 /* ===== DATE CONTROLS ===== */
-.date-controls{display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:25px;}
+/* ===== HORIZONTAL DATE STRIP ===== */
+.date-strip {
+    display: flex;
+    overflow-x: auto;
+    gap: 18px;
+    padding: 15px 5px 20px;
+    white-space: nowrap;
+    scroll-snap-type: x mandatory;
+    background: #e7e5d8;
+    border-radius: 20px;
+}
+
+.date-item {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    scroll-snap-align: center;
+}
+
+.date-item span.dayname {
+    font-size: 15px;
+    color: #303021;
+    font-weight: 500;
+}
+
+.date-item div.circle {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #303021;
+    border: 2px solid transparent;
+    transition: 0.2s ease;
+}
+
+/* Selected date */
+.date-item.active div.circle {
+    background: #c1802a; /* your yellow-orange */
+    color: #ffffff;
+}
+
+.date-strip::-webkit-scrollbar {
+    display: none;
+}
 .date-btn,.date-nav{
     padding:18px 28px;font-size:22px;font-weight:700;border:none;border-radius:14px;
     cursor:pointer;background:#303021;color:#c6d197;transition:0.2s ease;
 }
 .date-btn:hover,.date-nav:hover{transform:scale(1.05);box-shadow:0 6px 14px rgba(0,0,0,0.3);}
+    
+.month-header {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #303021;
+    margin-bottom: 10px;
+}
 
 /* ===== SUMMARY ===== */
 .summary{background:#d4cba8;padding:20px;border-radius:16px;margin-top:20px;margin-bottom:80px;}
@@ -132,11 +190,8 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
 <body>
 
 <div class="container">
-<div class="date-controls">
-  <button id="prevDay" class="date-nav">&lt;</button>
-  <button id="dateBtn" class="date-btn"></button>
-  <button id="nextDay" class="date-nav">&gt;</button>
-</div>
+<h2 id="monthHeader" class="month-header"></h2>
+<div class="date-strip" id="dateStrip"></div>
 <div class="summary">
   <h3>Agenda:</h3>
   <div id="summaryContent">No hay servicios seleccionados.</div>
@@ -217,6 +272,78 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
 <button class="floating-center-btn" id="centralBtn">+</button>
 
 <script>
+function buildDateStrip(selectedDate = new Date()) {
+    updateMonthHeader(selectedDate);  // ← ADD THIS LINE
+
+    const dateStrip = document.getElementById("dateStrip");
+    dateStrip.innerHTML = "";
+
+    const start = new Date(selectedDate);
+    start.setDate(selectedDate.getDate() - 3);
+
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+
+        const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+        const div = document.createElement("div");
+        div.className = "date-item";
+
+        if (d.toDateString() === selectedDate.toDateString()) {
+            div.classList.add("active");
+        }
+
+        div.innerHTML = `
+            <span class="dayname">${dayNames[d.getDay() === 0 ? 6 : d.getDay()-1]}</span>
+            <div class="circle">${d.getDate()}</div>
+        `;
+
+        div.onclick = () => {
+            currentDate = d;
+            buildDateStrip(currentDate);
+            updateSummary();
+        };
+
+        dateStrip.appendChild(div);
+    }
+}
+
+    function buildDateStrip(selectedDate = new Date()) {
+    const dateStrip = document.getElementById("dateStrip");
+    dateStrip.innerHTML = "";
+
+    const start = new Date(selectedDate);
+    start.setDate(selectedDate.getDate() - 3);
+
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+
+        const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+        const div = document.createElement("div");
+        div.className = "date-item";
+
+        if (d.toDateString() === selectedDate.toDateString()) {
+            div.classList.add("active");
+        }
+
+        div.innerHTML = `
+            <span class="dayname">${dayNames[d.getDay() === 0 ? 6 : d.getDay()-1]}</span>
+            <div class="circle">${d.getDate()}</div>
+        `;
+
+        div.onclick = () => {
+            currentDate = d;
+            buildDateStrip(currentDate);
+            updateSummary();
+        };
+
+        dateStrip.appendChild(div);
+    }
+}
+
+buildDateStrip(currentDate);
+
 const defaultDogs = ["Nina","Carmela", "Pancho", "Pablo","Lili","Jugnia","Leo","India","Kimchi","Cuatri","Tristona y Belona","Neo","Briso","Zaspi","R&H"];
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
 let selections = JSON.parse(localStorage.getItem('selections')) || {};
