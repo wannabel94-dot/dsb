@@ -87,11 +87,12 @@ select,input[type="time"],input[type="number"],input[type="text"]{
 .checkbox-wrapper label{margin:0;cursor:pointer;}
 
 /* ===== FOOTER ===== */
-.footer-nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:#303021;display:flex;justify-content:space-between;align-items:center;padding:0 25px; z-index:1500;}
+.footer-nav{position:fixed;bottom:0;left:0;right:0;height:60px;display:flex;justify-content:space-between;align-items:center;padding:0 25px; z-index:1500;}
 .left-group,.right-group{display:flex;justify-content:space-between;width:120px;gap:0;}
 .footer-nav .switch-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 0;width:50px;background:transparent;border:none;cursor:pointer;border-radius:12px;}
-.footer-nav .switch-btn img{width:22px;height:22px;opacity:0.9;filter:invert(1);}
-.footer-nav .switch-btn span{color:#fff;font-weight:600;font-size:12px;}
+.footer-nav .switch-btn img{width:22px;height:22px;opacity:0.9;filter: invert(16%) sepia(9%) saturate(840%) hue-rotate(43deg) brightness(93%) contrast(90%);
+;}
+.footer-nav .switch-btn span{color:#303021;font-weight:600;font-size:12px;}
 .footer-nav .switch-btn.active span{color:#8d4585;font-weight:700;}
 
 /* ===== FLOATING CENTER BUTTON ===== */
@@ -200,7 +201,7 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
 <button class="floating-center-btn" id="centralBtn">+</button>
 
 <script>
-const defaultDogs = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
+const defaultDogs = ["Nina","Carmela", "Pancho", "Pablo","Lili","Jugnia","Leo","India","Kimchi","Cuatri","Tristona y Belona","Neo","Briso","Zaspi","R&H"];
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
 let selections = JSON.parse(localStorage.getItem('selections')) || {};
 let tarifs = JSON.parse(localStorage.getItem('tarifs')) || {};
