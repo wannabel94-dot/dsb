@@ -340,8 +340,30 @@ document.getElementById('backBtn').onclick = ()=>{ serviceModal.style.display='n
 // Dog selection
 dogSelect.onchange = ()=>{ currentDogSelection.dog = dogSelect.value || null; renderServiceButtons(); };
 
-function renderServiceButtons(){ serviceButtonsContainer.innerHTML=''; if(!currentDogSelection.dog) return; const services = ['Daycare','Overnight','Walk']; services.forEach(s=>{ const btn = document.createElement('button'); btn.className='service-btn'; btn.textContent = (s==='Overnight'? '🌙' : s); btn.title = s; btn.onclick = ()=>{ btn.classList.toggle('selected'); const idx = currentDogSelection.services.indexOf(s); if(idx > -1) currentDogSelection.services.splice(idx,1); else currentDogSelection.services.push(s); const showTime = currentDogSelection.services.some(x=>x!=='Overnight'); timeInputsContainer.style.display = showTime ? 'block' : 'block'; // always show time inputs but optional
-        } serviceButtonsContainer.appendChild(btn); }); }
+function renderServiceButtons() {
+    serviceButtonsContainer.innerHTML = '';
+    if (!currentDogSelection.dog) return;
+
+    const services = ['Daycare', 'Overnight', 'Walk'];
+    services.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'service-btn';
+        btn.textContent = (s === 'Overnight' ? '🌙' : s);
+        btn.title = s;
+        
+        btn.onclick = () => {
+            btn.classList.toggle('selected');
+            const idx = currentDogSelection.services.indexOf(s);
+            if (idx > -1) currentDogSelection.services.splice(idx, 1);
+            else currentDogSelection.services.push(s);
+            
+            // Always show time inputs
+            timeInputsContainer.style.display = 'block';
+        };
+        
+        serviceButtonsContainer.appendChild(btn);
+    });
+}
 
 // cancel single add
 document.getElementById('cancelAddBtn').onclick = ()=>{ currentDogSelection = { dog:null, services:[], start:'', end:'' }; dogSelect.value=''; serviceButtonsContainer.innerHTML=''; document.getElementById('startTimeInput').value=''; document.getElementById('endTimeInput').value=''; };
