@@ -15,67 +15,12 @@ h1{text-align:center;margin-bottom:20px;color:#373e2e;}
 button{cursor:pointer;}
 
 /* ===== DATE CONTROLS ===== */
-.month-header{
-    text-align:center;
-    font-size:20px;
-    font-weight:600;
-    color:#303021;
-    margin-bottom:15px;
+.date-controls{display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:25px;}
+.date-btn,.date-nav{
+    padding:18px 28px;font-size:22px;font-weight:700;border:none;border-radius:14px;
+    cursor:pointer;background:#303021;color:#c6d197;transition:0.2s ease;
 }
-.date-controls{
-    display:flex;
-    justify-content:flex-start;
-    align-items:center;
-    gap:8px;
-    margin-bottom:25px;
-    overflow-x:auto;
-    padding:10px 5px;
-    scroll-behavior:smooth;
-    -webkit-overflow-scrolling:touch;
-}
-.date-controls::-webkit-scrollbar{display:none;}
-.date-controls{-ms-overflow-style:none;scrollbar-width:none;}
-.date-item{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:8px;
-    min-width:60px;
-    flex-shrink:0;
-}
-.day-label{
-    font-size:13px;
-    font-weight:600;
-    color:#666;
-    text-transform:uppercase;
-}
-.date-btn{
-    width:50px;
-    height:50px;
-    border-radius:50%;
-    border:none;
-    background:white;
-    color:#303021;
-    font-size:18px;
-    font-weight:600;
-    cursor:pointer;
-    transition:all 0.2s ease;
-    box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
-.date-btn:hover{
-    transform:scale(1.05);
-    box-shadow:0 3px 10px rgba(0,0,0,0.15);
-}
-.date-btn.today{
-    background:#c1802a;
-    color:white;
-    box-shadow:0 4px 12px rgba(193,128,42,0.4);
-}
-.date-btn.selected{
-    background:#303021;
-    color:#c6d197;
-    box-shadow:0 4px 12px rgba(48,48,33,0.3);
-}
+.date-btn:hover,.date-nav:hover{transform:scale(1.05);box-shadow:0 6px 14px rgba(0,0,0,0.3);}
 
 /* ===== SUMMARY ===== */
 .summary{background:#d4cba8;padding:20px;border-radius:16px;margin-top:20px;margin-bottom:80px;}
@@ -126,160 +71,15 @@ select,input[type="time"],input[type="number"],input[type="text"]{
 .modal-buttons button.cancel:hover{background:#555;}
 
 /* Service selection buttons */
-.service-btn{
-    padding:14px 20px;
-    margin:8px;
-    border:2px solid #a53200;
-    border-radius:12px;
-    background:white;
-    color:#a53200;
-    font-weight:600;
-    font-size:16px;
-    cursor:pointer;
-    transition:all 0.2s ease;
-    box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
-.service-btn:hover{
-    background:#fcf9f1;
-    transform:translateY(-2px);
-    box-shadow:0 4px 10px rgba(0,0,0,0.15);
-}
-.service-btn.selected{
-    background:#8d4585;
-    color:white;
-    border-color:#8d4585;
-    box-shadow:0 4px 12px rgba(141,69,133,0.3);
-}
-
-/* Service buttons container */
-#serviceButtonsContainer{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:8px;
-    margin:15px 0;
-    padding:15px;
-    background:#f8f8f8;
-    border-radius:12px;
-}
+.service-btn{padding:10px 14px;margin:6px;border:none;border-radius:12px;background:#a53200;color:#f9e9ca;font-weight:600;font-size:16px;cursor:pointer; transition:0.2s;}
+.service-btn:hover{background:#8a2b00;transform:scale(1.05);}
+.service-btn.selected{background:#8d4585;box-shadow:0 0 0 3px #d4cba8;}
 
 /* Dog entry card */
-.dog-entry{
-    background:linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
-    padding:18px;
-    margin:12px 0;
-    border-radius:14px;
-    border:2px solid #8a8252;
-    box-shadow:0 3px 10px rgba(0,0,0,0.08);
-    transition:transform 0.2s ease;
-}
-.dog-entry:hover{
-    transform:translateX(4px);
-}
-.dog-entry h4{
-    color:#303021;
-    margin-bottom:10px;
-    font-size:18px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-.dog-entry h4:before{
-    content:"🐕";
-    font-size:20px;
-}
-.dog-entry .services-list{
-    color:#555;
-    font-size:15px;
-    margin-top:8px;
-    line-height:1.6;
-    padding-left:28px;
-}
-.dog-entry button.remove-btn{
-    background:#d32f2f;
-    color:white;
-    padding:8px 16px;
-    border:none;
-    border-radius:8px;
-    font-size:13px;
-    font-weight:600;
-    margin-top:12px;
-    transition:all 0.2s ease;
-}
-.dog-entry button.remove-btn:hover{
-    background:#b71c1c;
-    transform:scale(1.05);
-}
-
-/* Time inputs container styling */
-#timeInputsContainer{
-    background:#f0f4e8;
-    padding:20px;
-    border-radius:12px;
-    margin:15px 0;
-    border:2px solid #8a8252;
-}
-#timeInputsContainer label{
-    display:block;
-    font-weight:600;
-    color:#303021;
-    margin-bottom:5px;
-    margin-top:10px;
-}
-#timeInputsContainer label:first-child{
-    margin-top:0;
-}
-#addDogBtn{
-    width:100%;
-    margin-top:15px;
-    padding:12px 20px;
-    background:#8d4585;
-    color:white;
-    border:none;
-    border-radius:10px;
-    font-weight:700;
-    font-size:16px;
-    transition:all 0.2s ease;
-    box-shadow:0 3px 8px rgba(141,69,133,0.3);
-}
-#addDogBtn:hover{
-    background:#723a6b;
-    transform:translateY(-2px);
-    box-shadow:0 5px 12px rgba(141,69,133,0.4);
-}
-
-/* Select dropdown styling */
-#dogSelect{
-    font-size:17px;
-    font-weight:600;
-    color:#303021;
-    background:#fff;
-    border:2px solid #8a8252;
-    padding:14px;
-    cursor:pointer;
-}
-#dogSelect:focus{
-    outline:none;
-    border-color:#8d4585;
-    box-shadow:0 0 0 3px rgba(141,69,133,0.1);
-}
-
-/* Modal content improvements */
-.modal-content h2{
-    color:#303021;
-    font-size:24px;
-    margin-bottom:20px;
-    padding-bottom:15px;
-    border-bottom:3px solid #8a8252;
-}
-
-/* Added dogs container */
-#addedDogsContainer{
-    margin-bottom:20px;
-}
-#addedDogsContainer:empty{
-    display:none;
-}
+.dog-entry{background:#f9f9f9;padding:15px;margin:10px 0;border-radius:12px;border:2px solid #8a8252;}
+.dog-entry h4{color:#303021;margin-bottom:8px;}
+.dog-entry .services-list{color:#666;font-size:14px;margin-top:5px;}
+.dog-entry button.remove-btn{background:#d32f2f;color:white;padding:6px 12px;border:none;border-radius:6px;font-size:12px;margin-top:8px;}
 
 /* Checkbox styles */
 .checkbox-wrapper{display:flex;align-items:center;gap:10px;margin:10px 0;}
@@ -287,11 +87,29 @@ select,input[type="time"],input[type="number"],input[type="text"]{
 .checkbox-wrapper label{margin:0;cursor:pointer;}
 
 /* ===== FOOTER ===== */
-.footer-nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:#303021;display:flex;justify-content:space-between;align-items:center;padding:0 25px; z-index:1500;}
+.footer-nav {
+    position: fixed;
+    bottom: 0px;       /* slightly above screen bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    height: 60px;
+
+    width: 90%;         /* key change — shorter pillbox */
+    max-width: 480px;   /* prevents stretching on tablets */
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 0 25px;
+    background: #303021;
+    border-radius: 9999px;
+    z-index: 1500;
+}
 .left-group,.right-group{display:flex;justify-content:space-between;width:120px;gap:0;}
 .footer-nav .switch-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 0;width:50px;background:transparent;border:none;cursor:pointer;border-radius:12px;}
-.footer-nav .switch-btn img{width:22px;height:22px;opacity:0.9;filter:invert(1);}
-.footer-nav .switch-btn span{color:#fff;font-weight:600;font-size:12px;}
+.footer-nav .switch-btn img{width:30px;height:30px;opacity:0.9;    filter: invert(89%) sepia(12%) saturate(335%) hue-rotate(26deg) brightness(92%) contrast(88%);}
+.footer-nav .switch-btn span{color:#c6d197;font-weight:600;font-size:12px;}
 .footer-nav .switch-btn.active span{color:#8d4585;font-weight:700;}
 
 /* ===== FLOATING CENTER BUTTON ===== */
@@ -314,9 +132,11 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
 <body>
 
 <div class="container">
-<h1>Buen día!</h1>
-<div class="month-header" id="monthHeader"></div>
-<div class="date-controls" id="dateControls"></div>
+<div class="date-controls">
+  <button id="prevDay" class="date-nav">&lt;</button>
+  <button id="dateBtn" class="date-btn"></button>
+  <button id="nextDay" class="date-nav">&gt;</button>
+</div>
 <div class="summary">
   <h3>Agenda:</h3>
   <div id="summaryContent">No hay servicios seleccionados.</div>
@@ -343,11 +163,11 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
       <input id="startTimeInput" type="time" />
       <label>Fin:</label>
       <input id="endTimeInput" type="time" />
-      <button id="addDogBtn" style="margin-top:10px;padding:10px 20px;background:#8d4585;color:white;border:none;border-radius:8px;font-weight:600;">Añadir Otro Perro</button>
+      <button id="addDogBtn" style="margin-top:10px;padding:10px 20px;background:#8d4585;color:white;border:none;border-radius:8px;font-weight:600;">Guardar</button>
     </div>
     
     <div class="modal-buttons">
-      <button id="saveAllBtn">Guardar Todo</button>
+      <button id="saveAllBtn">Terminado</button>
       <button id="closeModalBtn" class="cancel">Cancelar</button>
     </div>
   </div>
@@ -357,16 +177,6 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
 <div id="tarifsSheet" class="modal">
   <div class="modal-content">
     <h2>Tarifas por Perro (€)</h2>
-    
-    <div id="addDogForm" style="display:none;background:#f0f0f0;padding:15px;border-radius:10px;margin-bottom:15px;">
-      <label style="display:block;margin-bottom:8px;font-weight:600;">Nombre del nuevo perro:</label>
-      <input type="text" id="newDogNameInput" placeholder="Introduce el nombre" style="margin-bottom:10px;">
-      <div style="display:flex;gap:10px;">
-        <button id="confirmAddDogBtn" style="padding:8px 16px;background:#8d4585;color:white;border:none;border-radius:6px;font-weight:600;">Confirmar</button>
-        <button id="cancelAddDogBtn" style="padding:8px 16px;background:#666;color:white;border:none;border-radius:6px;">Cancelar</button>
-      </div>
-    </div>
-    
     <table id="tarifsTable">
       <thead>
         <tr><th>Perro</th><th>Día</th><th>Noche</th><th>Paseo</th></tr>
@@ -395,19 +205,19 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
 <!-- FOOTER -->
 <footer class="footer-nav">
   <div class="left-group">
-    <button class="switch-btn tarifs" id="tarifsBtn"><img src="icons/tarifs.svg"><span>Tarifas</span></button>
+    <button class="switch-btn tarifs" id="tarifsBtn"><img src="icons/walk.svg"><span>Tarifas</span></button>
     <button class="switch-btn accounts" id="accountsBtn"><img src="icons/accounts.svg"><span>Cuentas</span></button>
   </div>
   <div class="right-group">
     <button class="switch-btn profile" id="profileBtn"><img src="icons/vet.svg"><span>Perfiles</span></button>
-    <button class="switch-btn blank" id="calendarBtn"><img src="icons/agenda.svg"><span>Agenda</span></button>
+    <button class="switch-btn calendar" id="calendarBtn"><img src="icons/agenda.svg"><span>Agenda</span></button>
   </div>
 </footer>
 
 <button class="floating-center-btn" id="centralBtn">+</button>
 
 <script>
-const defaultDogs = ["PABLO","LILI","JUGNIA","LEO","INDIA","KIMCHI","NINA","CARMELA","CUATRI","TB","NEO","BRISO","ZOZI","R&H"];
+const defaultDogs = ["Nina","Carmela", "Pancho", "Pablo","Lili","Jugnia","Leo","India","Kimchi","Cuatri","Tristona y Belona","Neo","Briso","Zaspi","R&H"];
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
 let selections = JSON.parse(localStorage.getItem('selections')) || {};
 let tarifs = JSON.parse(localStorage.getItem('tarifs')) || {};
@@ -602,30 +412,13 @@ document.getElementById('saveTarifsBtn').onclick=()=>{
 }
 
 document.getElementById('addDogTarifBtn').onclick=()=>{
-  document.getElementById('addDogForm').style.display='block';
-  document.getElementById('newDogNameInput').value='';
-  document.getElementById('newDogNameInput').focus();
-}
-
-document.getElementById('confirmAddDogBtn').onclick=()=>{
-  const name = document.getElementById('newDogNameInput').value.trim().toUpperCase();
-  if(!name){
-    alert("Introduce un nombre válido");
-    return;
-  }
-  if(allDogs.includes(name)){
-    alert("Este perro ya existe");
-    return;
-  }
-  allDogs.push(name);
+  const name=prompt("Introduce el nombre del perro:");
+  if(!name) return; 
+  if(allDogs.includes(name)){alert("Perro ya existe."); return;}
+  allDogs.push(name); 
   localStorage.setItem('allDogs',JSON.stringify(allDogs));
-  tarifs[name]={day:10,night:10,walk:10};
+  tarifs[name]={day:10,night:10,walk:10}; 
   loadTarifs();
-  document.getElementById('addDogForm').style.display='none';
-}
-
-document.getElementById('cancelAddDogBtn').onclick=()=>{
-  document.getElementById('addDogForm').style.display='none';
 }
 
 // AGENDA MODAL
