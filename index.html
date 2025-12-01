@@ -388,20 +388,20 @@ function renderServiceButtons() {
         const btn = document.createElement('button');
         btn.className = 'service-btn';
         btn.title = s;
+        btn.textContent = s;  // <-- add this line
 
         btn.addEventListener('click', () => {
             btn.classList.toggle('selected');
             const idx = currentDogSelection.services.indexOf(s);
             if (idx > -1) currentDogSelection.services.splice(idx, 1);
             else currentDogSelection.services.push(s);
-            // show time inputs if any non-overnight selected; time fields are optional
-            const showTime = currentDogSelection.services.some(x => x !== 'Overnight');
-            timeInputsContainer.style.display = showTime ? 'block' : 'block'; // keep visible (optional)
+            timeInputsContainer.style.display = 'block';
         });
 
         serviceButtonsContainer.appendChild(btn);
     });
 }
+
 
 // cancel single add
 const cancelAddBtn = document.getElementById('cancelAddBtn');
