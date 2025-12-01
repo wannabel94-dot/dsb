@@ -11,11 +11,9 @@
 * { box-sizing:border-box;margin:0;padding:0; }
 body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto; background:#c6d197; min-height:100vh; padding:10px; }
 .container{max-width:800px;margin:0 auto;padding:20px;}
-h1{text-align:center;margin-bottom:20px;color:#373e2e;}
-button{cursor:pointer;}
+h1{text-align:center;margin-bottom:20px;color:#373e2e;}button{cursor:pointer;}
 
 /* ===== DATE CONTROLS ===== */
-/* ===== HORIZONTAL DATE STRIP ===== */
 .date-strip {
     display: flex;
     overflow-x: auto;
@@ -63,72 +61,41 @@ button{cursor:pointer;}
     color: #ffffff;
 }
 
-.date-strip::-webkit-scrollbar {
-    display: none;
-}
-.date-btn,.date-nav{
-    padding:18px 28px;font-size:22px;font-weight:700;border:none;border-radius:14px;
-    cursor:pointer;background:#303021;color:#c6d197;transition:0.2s ease;
-}
+.date-strip::-webkit-scrollbar { display: none; }
+.date-btn,.date-nav{ padding:18px 28px;font-size:22px;font-weight:700;border:none;border-radius:14px; cursor:pointer;background:#303021;color:#c6d197;transition:0.2s ease; }
 .date-btn:hover,.date-nav:hover{transform:scale(1.05);box-shadow:0 6px 14px rgba(0,0,0,0.3);}
     
-.month-header {
-    text-align: center;
-    font-size: 22px;
-    font-weight: 700;
-    color: #303021;
-    margin-bottom: 10px;
-}
+.month-header { text-align: center; font-size: 22px; font-weight: 700; color: #303021; margin-bottom: 10px; }
 
 /* ===== SUMMARY ===== */
 .summary{background:#d4cba8;padding:20px;border-radius:16px;margin-top:20px;margin-bottom:80px;}
 #summaryContent{line-height:1.6;}
 
 /* ===== MODALS ===== */
-.modal {
-    display:none;
-    position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:rgba(0,0,0,0.55);
-    justify-content:flex-start; /* SLIDE DOWN FROM TOP */
-    align-items:flex-start;
-    padding:0;
-    z-index:3000; /* ABOVE EVERYTHING */
-}
-.dimmed {
-    opacity: 0.3;
-    pointer-events: none; /* optional, so you can’t click the old cards */
-    transition: opacity 0.2s ease;
-}
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:3000; }
+.dimmed { opacity: 0.3; pointer-events: none; transition: opacity 0.2s ease; }
 
-/* SLIDE-DOWN PANEL */
+/* SLIDE-UP PANEL (agenda) or SLIDE-IN PANEL (services) */
 .modal-content {
     background:white;
     width:100%;
     max-height:90vh;
-    border-radius:0 0 22px 22px;
-    padding:25px;
+    border-radius:22px 22px 0 0;
+    padding:18px;
     overflow-y:auto;
     box-shadow:0 4px 20px rgba(0,0,0,0.25);
-    animation:slideDown 0.3s ease-out;
 }
 
-/* Animation */
-@keyframes slideDown {
-    from { transform:translateY(-100%); }
-    to { transform:translateY(0); }
-}
+/* Animations */
+@keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+@keyframes slideDown { from { transform:translateY(-100%);} to { transform:translateY(0);} }
 
-select,input[type="time"],input[type="number"],input[type="text"]{
-    width:100%;padding:12px 14px;margin-top:8px;margin-bottom:12px;border-radius:10px;border:2px solid #8a8252;
-    background:#fcf9f1;font-size:16px;color:#303021;
-}
+/* small inputs */
+select,input[type="time"],input[type="number"],input[type="text"]{ width:100%;padding:12px 14px;margin-top:8px;margin-bottom:12px;border-radius:10px;border:2px solid #8a8252; background:#fcf9f1;font-size:16px;color:#303021; }
 
 /* Buttons in modals */
 .modal-buttons{display:flex;justify-content:flex-end;gap:12px;margin-top:18px;padding-top:15px;border-top:2px solid #e0e0e0;}
-.modal-buttons button{padding:12px 24px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;
-    background:#a53200;color:#f9e9ca;transition:0.2s;}
+.modal-buttons button{padding:10px 16px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer; background:#a53200;color:#f9e9ca;transition:0.2s;}
 .modal-buttons button:hover{transform:scale(1.04);background:#8a2b00;}
 .modal-buttons button.cancel{background:#666;color:#fff;}
 .modal-buttons button.cancel:hover{background:#555;}
@@ -139,10 +106,16 @@ select,input[type="time"],input[type="number"],input[type="text"]{
 .service-btn.selected{background:#8d4585;box-shadow:0 0 0 3px #d4cba8;}
 
 /* Dog entry card */
-.dog-entry{background:#f9f9f9;padding:15px;margin:10px 0;border-radius:12px;border:2px solid #8a8252;}
+.dog-entry{background:#f9f9f9;padding:12px;margin:10px 0;border-radius:12px;border:2px solid #8a8252;display:flex;justify-content:space-between;align-items:center;}
 .dog-entry h4{color:#303021;margin-bottom:8px;}
 .dog-entry .services-list{color:#666;font-size:14px;margin-top:5px;}
-.dog-entry button.remove-btn{background:#d32f2f;color:white;padding:6px 12px;border:none;border-radius:6px;font-size:12px;margin-top:8px;}
+.dog-entry button.remove-btn{background:#d32f2f;color:white;padding:6px 12px;border:none;border-radius:6px;font-size:12px;margin-left:12px;}
+
+/* small controls row */
+.controls-row{display:flex;gap:10px;align-items:center;margin-top:6px;}
+.controls-row .small-btn{padding:8px 12px;border-radius:8px;border:none;font-weight:700;}
+.small-cancel{background:#666;color:#fff;}
+.small-save{background:#8d4585;color:#fff;}
 
 /* Checkbox styles */
 .checkbox-wrapper{display:flex;align-items:center;gap:10px;margin:10px 0;}
@@ -150,46 +123,40 @@ select,input[type="time"],input[type="number"],input[type="text"]{
 .checkbox-wrapper label{margin:0;cursor:pointer;}
 
 /* ===== FOOTER ===== */
-.footer-nav {
-    position: fixed;
-    bottom: 0px;       /* slightly above screen bottom */
-    left: 50%;
-    transform: translateX(-50%);
-    height: 60px;
-
-    width: 90%;         /* key change — shorter pillbox */
-    max-width: 480px;   /* prevents stretching on tablets */
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    padding: 0 25px;
-    background: #303021;
-    border-radius: 9999px;
-    z-index: 1500;
-}
+.footer-nav { position: fixed; bottom: 0px; left: 50%; transform: translateX(-50%); height: 60px; width: 90%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; background: #303021; border-radius: 9999px; z-index: 1500; }
 .left-group,.right-group{display:flex;justify-content:space-between;width:120px;gap:0;}
 .footer-nav .switch-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 0;width:50px;background:transparent;border:none;cursor:pointer;border-radius:12px;}
-.footer-nav .switch-btn img{width:30px;height:30px;opacity:0.9;    filter: invert(89%) sepia(12%) saturate(335%) hue-rotate(26deg) brightness(92%) contrast(88%);}
-.footer-nav .switch-btn span{color:#c6d197;font-weight:600;font-size:12px;}
+.footer-nav .switch-btn img{width:30px;height:30px;opacity:0.9; filter: invert(89%) sepia(12%) saturate(335%) hue-rotate(26deg) brightness(92%) contrast(88%);} 
+.footer-nav .switch-btn span{color:#c6d197;font-weight:600;font-size:12px;} 
 .footer-nav .switch-btn.active span{color:#8d4585;font-weight:700;}
 
 /* ===== FLOATING CENTER BUTTON ===== */
-.floating-center-btn{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
-width:60px;height:60px;border-radius:50%;background:#a53200;border:none;
-display:flex;justify-content:center;align-items:center;font-size:36px;font-weight:700;color:#c6d197;cursor:pointer;z-index:2500;}
+.floating-center-btn{position:fixed;bottom:30px;left:50%;transform:translateX(-50%); width:60px;height:60px;border-radius:50%;background:#a53200;border:none; display:flex;justify-content:center;align-items:center;font-size:36px;font-weight:700;color:#c6d197;cursor:pointer;z-index:2500;}
 
 /* ===== TARIFS TABLE ===== */
 #tarifsSheet table{width:100%;border-collapse:collapse;margin-top:10px;}
 #tarifsSheet th,#tarifsSheet td{border:1px solid #8a8252;padding:8px;text-align:center;font-size:16px;}
 #tarifsSheet th{background:#303021;color:#c6d197;font-weight:700;}
 
-/* ===== AGENDA TABLE ===== */
-#agendaSheet .agenda-day{background:#f9f9f9;padding:15px;margin:10px 0;border-radius:12px;border:2px solid #8a8252;}
-#agendaSheet .agenda-day h3{color:#303021;margin-bottom:10px;}
-#agendaSheet .agenda-dog{margin:8px 0;padding:8px;background:white;border-radius:8px;}
-#agendaSheet .agenda-dog strong{color:#a53200;}
+/* ===== AGENDA ===== */
+#agendaSheet .agenda-wrap{ animation: slideUp 0.25s ease-out; }
+.agenda-block{margin:6px 0;padding:10px;border-radius:12px;background:#fff;}
+.agenda-day{padding:12px;border-radius:12px;margin-bottom:8px;border:1px solid #e6e2cf;}
+.agenda-day h3{margin-bottom:8px;color:#303021;}
+.agenda-entry{display:flex;gap:12px;align-items:flex-start;padding:8px;border-radius:10px;margin:6px 0;background:#fbfbfa;border:1px solid #f0ede0;}
+.entry-time{width:110px;font-weight:700;color:#303021;}
+.entry-body{flex:1;}
+.entry-services{font-size:14px;color:#666;margin-top:4px;}
+
+/* Today's special styling */
+.agenda-today{background:linear-gradient(180deg,#fff9ee,#fff);border:2px solid #c1802a;box-shadow:0 6px 18px rgba(193,128,42,0.12);} 
+
+/* Past dates less visible */
+.agenda-past{opacity:0.45;}
+
+/* moon icon style fallback */
+.moon{font-size:16px;margin-left:8px;}
+
 </style>
 </head>
 <body>
@@ -206,7 +173,10 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
 <!-- SERVICE MODAL -->
 <div id="serviceModal" class="modal">
   <div class="modal-content" id="modalContent">
-    <h2>Añadir Servicios</h2>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+      <button id="backBtn" style="background:transparent;border:none;font-size:18px;font-weight:700;">← Volver</button>
+      <h2 style="flex:1;margin-left:6px;">Añadir Servicios</h2>
+    </div>
     
     <div id="addedDogsContainer"></div>
     
@@ -218,18 +188,17 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
     
     <div id="serviceButtonsContainer"></div>
     
-    <div id="timeInputsContainer" style="display:none;">
-      <label>Inicio:</label>
+    <div id="timeInputsContainer">
+      <label>Inicio (opcional):</label>
       <input id="startTimeInput" type="time" />
-      <label>Fin:</label>
+      <label>Fin (opcional):</label>
       <input id="endTimeInput" type="time" />
-      <button id="addDogBtn" style="margin-top:10px;padding:10px 20px;background:#8d4585;color:white;border:none;border-radius:8px;font-weight:600;">Guardar</button>
+      <div class="controls-row">
+        <button id="addDogBtn" class="small-btn small-save">Guardar</button>
+        <button id="cancelAddBtn" class="small-btn small-cancel">Cancelar</button>
+      </div>
     </div>
     
-    <div class="modal-buttons">
-      <button id="saveAllBtn">Terminado</button>
-      <button id="closeModalBtn" class="cancel">Cancelar</button>
-    </div>
   </div>
 </div>
 
@@ -251,9 +220,9 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
   </div>
 </div>
 
-<!-- AGENDA MODAL -->
+<!-- AGENDA MODAL (slides up) -->
 <div id="agendaSheet" class="modal">
-  <div class="modal-content">
+  <div class="modal-content agenda-wrap" id="agendaContent">
     <h2>Agenda Completa</h2>
     <div id="agendaContainer"></div>
     <div class="modal-buttons">
@@ -283,7 +252,6 @@ const defaultDogs = ["Nina","Carmela","Pancho","Pablo","Lili","Jugnia","Leo","In
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
 let selections = JSON.parse(localStorage.getItem('selections')) || {};
 let tarifs = JSON.parse(localStorage.getItem('tarifs')) || {};
-let tempDogs = [];
 let currentDogSelection = { dog: null, services: [], start: '', end: '' };
 const formatDate = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 
@@ -294,7 +262,6 @@ const dateStrip = document.getElementById("dateStrip");
 const DAYS_TO_SHOW = 365; // forward/back from today
 let allDates = [];
 
-// Generate full year of dates
 function generateDates(centerDate = new Date()){
     allDates = [];
     for(let i=-DAYS_TO_SHOW;i<=DAYS_TO_SHOW;i++){
@@ -304,7 +271,6 @@ function generateDates(centerDate = new Date()){
     }
 }
 
-// Build full scrollable strip
 function buildFullDateStrip(centerDate = new Date()){
     generateDates(centerDate);
     dateStrip.innerHTML = '';
@@ -321,11 +287,9 @@ function buildFullDateStrip(centerDate = new Date()){
         dateStrip.appendChild(div);
     });
 
-    // Scroll to center
     setTimeout(()=>scrollToDate(centerDate),50);
 }
 
-// Scroll to a specific date
 function scrollToDate(targetDate){
     const items = dateStrip.querySelectorAll(".date-item");
     for(let i=0;i<allDates.length;i++){
@@ -337,95 +301,20 @@ function scrollToDate(targetDate){
     }
 }
 
-// Update month header
-function updateMonthHeader(date){
-    document.getElementById("monthHeader").textContent = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-}
+function updateMonthHeader(date){ document.getElementById("monthHeader").textContent = `${monthNames[date.getMonth()]} ${date.getFullYear()}`; }
 
-// ===== SCROLL LISTENER =====
-// ===== FULL DAY SNAP SCROLL =====
-let isDragging = false;
-let startX, scrollLeft;
+// Dragging behaviour
+let isDragging = false; let startX, scrollLeft;
+dateStrip.addEventListener('mousedown', (e)=>{ isDragging = true; startX = e.pageX - dateStrip.offsetLeft; scrollLeft = dateStrip.scrollLeft; });
+dateStrip.addEventListener('touchstart', (e)=>{ isDragging = true; startX = e.touches[0].pageX - dateStrip.offsetLeft; scrollLeft = dateStrip.scrollLeft; });
+dateStrip.addEventListener('mousemove', (e)=>{ if(!isDragging) return; e.preventDefault(); const x = e.pageX - dateStrip.offsetLeft; const walk = (x - startX); dateStrip.scrollLeft = scrollLeft - walk; });
+dateStrip.addEventListener('touchmove', (e)=>{ if(!isDragging) return; const x = e.touches[0].pageX - dateStrip.offsetLeft; const walk = (x - startX); dateStrip.scrollLeft = scrollLeft - walk; });
 
-// Mouse/touch down
-dateStrip.addEventListener('mousedown', (e)=>{
-    isDragging = true;
-    startX = e.pageX - dateStrip.offsetLeft;
-    scrollLeft = dateStrip.scrollLeft;
-});
-dateStrip.addEventListener('touchstart', (e)=>{
-    isDragging = true;
-    startX = e.touches[0].pageX - dateStrip.offsetLeft;
-    scrollLeft = dateStrip.scrollLeft;
-});
-
-// Mouse/touch move
-dateStrip.addEventListener('mousemove', (e)=>{
-    if(!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - dateStrip.offsetLeft;
-    const walk = (x - startX);
-    dateStrip.scrollLeft = scrollLeft - walk;
-});
-dateStrip.addEventListener('touchmove', (e)=>{
-    if(!isDragging) return;
-    const x = e.touches[0].pageX - dateStrip.offsetLeft;
-    const walk = (x - startX);
-    dateStrip.scrollLeft = scrollLeft - walk;
-});
-
-// Mouse/touch up
 dateStrip.addEventListener('mouseup', snapToClosest);
 dateStrip.addEventListener('mouseleave', snapToClosest);
 dateStrip.addEventListener('touchend', snapToClosest);
 
-function snapToClosest(){
-    if(!isDragging) return;
-    isDragging = false;
-
-    const stripRect = dateStrip.getBoundingClientRect();
-    const stripCenter = stripRect.left + stripRect.width/2;
-
-    let closestIdx = 0;
-    let closestDist = Infinity;
-
-    dateStrip.querySelectorAll('.date-item').forEach((item,i)=>{
-        const itemRect = item.getBoundingClientRect();
-        const itemCenter = itemRect.left + itemRect.width/2;
-        const dist = Math.abs(stripCenter - itemCenter);
-        if(dist < closestDist){
-            closestDist = dist;
-            closestIdx = i;
-        }
-    });
-
-    // Snap scroll
-    const targetItem = dateStrip.children[closestIdx];
-    dateStrip.scrollTo({
-        left: targetItem.offsetLeft - dateStrip.offsetWidth/2 + targetItem.offsetWidth/2,
-        behavior: 'smooth'
-    });
-
-    // Update active
-    dateStrip.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active'));
-    targetItem.classList.add('active');
-
-    // Update current date & month
-    currentDate = allDates[closestIdx];
-    updateMonthHeader(currentDate);
-    updateSummary();
-}
-
-// ===== DIMMING FUNCTION FOR NEW DOG SELECTION =====
-function setDimmed(isDimmed){
-    if(isDimmed){
-        addedDogsContainer.classList.add('dimmed');
-        document.querySelector('.modal-buttons').classList.add('dimmed');
-    } else {
-        addedDogsContainer.classList.remove('dimmed');
-        document.querySelector('.modal-buttons').classList.remove('dimmed');
-    }
-}
+function snapToClosest(){ if(!isDragging) return; isDragging = false; const stripRect = dateStrip.getBoundingClientRect(); const stripCenter = stripRect.left + stripRect.width/2; let closestIdx = 0; let closestDist = Infinity; dateStrip.querySelectorAll('.date-item').forEach((item,i)=>{ const itemRect = item.getBoundingClientRect(); const itemCenter = itemRect.left + itemRect.width/2; const dist = Math.abs(stripCenter - itemCenter); if(dist < closestDist){ closestDist = dist; closestIdx = i; } }); const targetItem = dateStrip.children[closestIdx]; dateStrip.scrollTo({ left: targetItem.offsetLeft - dateStrip.offsetWidth/2 + targetItem.offsetWidth/2, behavior: 'smooth' }); dateStrip.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active')); targetItem.classList.add('active'); currentDate = allDates[closestIdx]; updateMonthHeader(currentDate); updateSummary(); }
 
 // ===== SERVICE MODAL =====
 const serviceModal = document.getElementById('serviceModal');
@@ -434,240 +323,178 @@ const serviceButtonsContainer = document.getElementById('serviceButtonsContainer
 const timeInputsContainer = document.getElementById('timeInputsContainer');
 const addedDogsContainer = document.getElementById('addedDogsContainer');
 
+// open modal
 document.getElementById('centralBtn').onclick = ()=>{
-    tempDogs = [];
     currentDogSelection = { dog: null, services: [], start: '', end: '' };
     dogSelect.innerHTML = '<option value="">Seleccionar Perro</option>';
-    allDogs.forEach(d=>{
-        const opt = document.createElement('option');
-        opt.value = d;
-        opt.textContent = d;
-        dogSelect.appendChild(opt);
-    });
+    allDogs.forEach(d=>{ const opt = document.createElement('option'); opt.value = d; opt.textContent = d; dogSelect.appendChild(opt); });
     serviceButtonsContainer.innerHTML='';
     timeInputsContainer.style.display='none';
     addedDogsContainer.innerHTML='';
-    serviceModal.style.display='flex';
-    setDimmed(false);
+    serviceModal.style.display='block';
 };
 
-// Dog selection change
-dogSelect.onchange = ()=>{
-    currentDogSelection.dog = dogSelect.value || null;
-    renderServiceButtons();
-    setDimmed(!!currentDogSelection.dog);
-};
+// back button closes popup
+document.getElementById('backBtn').onclick = ()=>{ serviceModal.style.display='none'; };
 
-// Render service buttons
-function renderServiceButtons(){
-    serviceButtonsContainer.innerHTML='';
-    if(!currentDogSelection.dog) return;
-    const services = ['Daycare','Overnight','Walk'];
-    services.forEach(s=>{
-        const btn = document.createElement('button');
-        btn.className='service-btn';
-        btn.textContent = s;
-        btn.onclick = ()=>{
-            btn.classList.toggle('selected');
-            const idx = currentDogSelection.services.indexOf(s);
-            if(idx > -1) currentDogSelection.services.splice(idx,1);
-            else currentDogSelection.services.push(s);
+// Dog selection
+dogSelect.onchange = ()=>{ currentDogSelection.dog = dogSelect.value || null; renderServiceButtons(); };
 
-            const showTime = currentDogSelection.services.some(x=>x!=='Overnight');
-            timeInputsContainer.style.display = showTime ? 'block' : 'none';
-        }
-        serviceButtonsContainer.appendChild(btn);
-    });
-}
+function renderServiceButtons(){ serviceButtonsContainer.innerHTML=''; if(!currentDogSelection.dog) return; const services = ['Daycare','Overnight','Walk']; services.forEach(s=>{ const btn = document.createElement('button'); btn.className='service-btn'; btn.textContent = (s==='Overnight'? '🌙' : s); btn.title = s; btn.onclick = ()=>{ btn.classList.toggle('selected'); const idx = currentDogSelection.services.indexOf(s); if(idx > -1) currentDogSelection.services.splice(idx,1); else currentDogSelection.services.push(s); const showTime = currentDogSelection.services.some(x=>x!=='Overnight'); timeInputsContainer.style.display = showTime ? 'block' : 'block'; // always show time inputs but optional
+        } serviceButtonsContainer.appendChild(btn); }); }
 
-// Add dog to temporary list
+// cancel single add
+document.getElementById('cancelAddBtn').onclick = ()=>{ currentDogSelection = { dog:null, services:[], start:'', end:'' }; dogSelect.value=''; serviceButtonsContainer.innerHTML=''; document.getElementById('startTimeInput').value=''; document.getElementById('endTimeInput').value=''; };
+
+// add single dog immediately (no global save)
 document.getElementById('addDogBtn').onclick = ()=>{
-    if(!currentDogSelection.dog || currentDogSelection.services.length===0){
-        alert('Selecciona un perro y al menos un servicio');
-        return;
-    }
-    const hasNonOvernight = currentDogSelection.services.some(s=>s!=='Overnight');
+    if(!currentDogSelection.dog || currentDogSelection.services.length===0){ alert('Selecciona un perro y al menos un servicio'); return; }
     const startVal = document.getElementById('startTimeInput').value;
     const endVal = document.getElementById('endTimeInput').value;
-    if(hasNonOvernight && (!startVal || !endVal)){
-        alert('Introduce horario de inicio y fin');
-        return;
-    }
-
+    // allow no time entry (optional). store empty strings when not provided.
     currentDogSelection.start = startVal || '';
     currentDogSelection.end = endVal || '';
-    tempDogs.push({...currentDogSelection});
-    renderAddedDogs();
 
-    // Reset form
-    currentDogSelection = { dog:null, services:[], start:'', end:'' };
-    dogSelect.value='';
-    serviceButtonsContainer.innerHTML='';
-    timeInputsContainer.style.display='none';
-    document.getElementById('startTimeInput').value='';
-    document.getElementById('endTimeInput').value='';
-    setDimmed(false);
-}
-
-// Render added dogs
-function renderAddedDogs(){
-    addedDogsContainer.innerHTML='';
-    tempDogs.forEach((dog,idx)=>{
-        const card = document.createElement('div');
-        card.className='dog-entry';
-        const timeStr = dog.start && dog.end ? ` (${dog.start} → ${dog.end})` : '';
-        card.innerHTML = `
-            <h4>${dog.dog}</h4>
-            <div class="services-list">${dog.services.join(', ')}${timeStr}</div>
-            <button class="remove-btn" onclick="removeTempDog(${idx})">Eliminar</button>
-        `;
-        addedDogsContainer.appendChild(card);
-    });
-}
-window.removeTempDog = (idx)=>{
-    tempDogs.splice(idx,1);
-    renderAddedDogs();
-};
-
-// Save all temporary dogs
-document.getElementById('saveAllBtn').onclick = ()=>{
+    // save immediately to selections for currentDate
     const dateKey = formatDate(currentDate);
-    if(!selections[dateKey]) selections[dateKey]={};
-    tempDogs.forEach(dog=>{
-        dog.services.forEach(s=>{
-            selections[dateKey][`${dog.dog}_${s}`] = { selected:true, start:dog.start, end:dog.end };
-        });
+    if(!selections[dateKey]) selections[dateKey] = {};
+    currentDogSelection.services.forEach(s=>{
+        const key = `${currentDogSelection.dog}_${s}`;
+        selections[dateKey][key] = { selected:true, start: currentDogSelection.start, end: currentDogSelection.end };
     });
-    localStorage.setItem('selections',JSON.stringify(selections));
-    serviceModal.style.display='none';
+    localStorage.setItem('selections', JSON.stringify(selections));
+
+    // show in added list
+    renderAddedDogsForDate(dateKey);
     updateSummary();
+
+    // reset form
+    currentDogSelection = { dog:null, services:[], start:'', end:'' };
+    dogSelect.value=''; serviceButtonsContainer.innerHTML=''; document.getElementById('startTimeInput').value=''; document.getElementById('endTimeInput').value='';
 };
 
-document.getElementById('closeModalBtn').onclick = ()=>{
-    setDimmed(false);
-    serviceModal.style.display='none';
-};
+function renderAddedDogsForDate(dateKey){ addedDogsContainer.innerHTML=''; const entries = selections[dateKey] || {}; Object.entries(entries).forEach(([k,v])=>{ if(!v.selected) return; const [dog, service] = k.split('_'); const timeStr = v.start || v.end ? ` ${v.start || ''}${v.start && v.end ? ' - ' : ''}${v.end || ''}` : '';
+    const card = document.createElement('div'); card.className = 'dog-entry'; card.innerHTML = `<div><strong>${dog}</strong><div class="services-list">${service}${timeStr}${service==='Overnight' ? ' 🌙' : ''}</div></div><div><button class="remove-btn">Eliminar</button></div>`;
+    card.querySelector('.remove-btn').onclick = ()=>{ delete selections[dateKey][k]; localStorage.setItem('selections', JSON.stringify(selections)); renderAddedDogsForDate(dateKey); updateSummary(); };
+    addedDogsContainer.appendChild(card);
+}); }
+
+// show existing for current date when modal opens or date changes
+// when opening service modal we call this; also when date changes
+function refreshServiceModalForCurrentDate(){ const dateKey = formatDate(currentDate); renderAddedDogsForDate(dateKey); }
 
 // ===== SUMMARY =====
-function updateSummary(){
-    const dateKey = formatDate(currentDate);
-    const div = document.getElementById('summaryContent');
-    if(!selections[dateKey]){ div.textContent = 'No hay servicios seleccionados.'; return; }
-
-    const groups = {};
-    Object.entries(selections[dateKey]).forEach(([key,val])=>{
-        if(!val.selected) return;
-        const [dog, service] = key.split('_');
-        if(!groups[dog]) groups[dog]=[];
-        const timeStr = val.start && val.end ? ` (${val.start} → ${val.end})` : '';
-        groups[dog].push(`${service}${timeStr}`);
-    });
-
-    let html='';
-    for(let dog in groups){
-        html += `<strong>${dog}</strong><br>`;
-        groups[dog].forEach(s=>{ html+=`• ${s}<br>`; });
-        html+='<br>';
-    }
-    div.innerHTML = html || 'No hay servicios seleccionados.';
-}
+function updateSummary(){ const dateKey = formatDate(currentDate); const div = document.getElementById('summaryContent'); if(!selections[dateKey]){ div.textContent = 'No hay servicios seleccionados.'; return; } const groups = {}; Object.entries(selections[dateKey]).forEach(([key,val])=>{ if(!val.selected) return; const [dog, service] = key.split('_'); if(!groups[dog]) groups[dog]=[]; const timeStr = val.start || val.end ? ` (${val.start || ''}${val.start && val.end ? ' → ' : ''}${val.end || ''})` : ''; groups[dog].push(`${service}${service==='Overnight' ? ' 🌙' : ''}${timeStr}`); }); let html=''; for(let dog in groups){ html += `<strong>${dog}</strong><br>`; groups[dog].forEach(s=>{ html+=`• ${s}<br>`; }); html+='<br>'; } div.innerHTML = html || 'No hay servicios seleccionados.'; }
 
 // ===== TARIFS MODAL =====
 const tarifsSheet = document.getElementById('tarifsSheet');
 const tarifsTableBody = document.querySelector('#tarifsTable tbody');
 
-function loadTarifs(){
-    tarifsTableBody.innerHTML='';
-    allDogs.forEach(d=>{
-        if(!tarifs[d]) tarifs[d]={day:10,night:10,walk:10};
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${d}</td>
-            <td><input type="number" min="0" value="${tarifs[d].day}"></td>
-            <td><input type="number" min="0" value="${tarifs[d].night}"></td>
-            <td><input type="number" min="0" value="${tarifs[d].walk}"></td>`;
-        tarifsTableBody.appendChild(row);
-    });
-}
+function loadTarifs(){ tarifsTableBody.innerHTML=''; allDogs.forEach(d=>{ if(!tarifs[d]) tarifs[d]={day:10,night:10,walk:10}; const row = document.createElement('tr'); row.innerHTML = `<td>${d}</td> <td><input type="number" min="0" value="${tarifs[d].day}"></td> <td><input type="number" min="0" value="${tarifs[d].night}"></td> <td><input type="number" min="0" value="${tarifs[d].walk}"></td>`; tarifsTableBody.appendChild(row); }); }
 loadTarifs();
 
-document.getElementById('tarifsBtn').onclick = ()=>{ tarifsSheet.style.display='flex'; };
+document.getElementById('tarifsBtn').onclick = ()=>{ tarifsSheet.style.display='block'; };
 document.getElementById('closeTarifsBtn').onclick = ()=>{ tarifsSheet.style.display='none'; };
-document.getElementById('saveTarifsBtn').onclick = ()=>{
-    [...tarifsTableBody.querySelectorAll('tr')].forEach(tr=>{
-        const dog = tr.children[0].textContent;
-        tarifs[dog] = {
-            day: Number(tr.children[1].querySelector('input').value),
-            night: Number(tr.children[2].querySelector('input').value),
-            walk: Number(tr.children[3].querySelector('input').value)
-        };
-    });
-    localStorage.setItem('tarifs',JSON.stringify(tarifs));
-    tarifsSheet.style.display='none';
-};
-document.getElementById('addDogTarifBtn').onclick = ()=>{
-    const name = prompt("Introduce el nombre del perro:");
-    if(!name) return;
-    if(allDogs.includes(name)){ alert("Perro ya existe."); return; }
-    allDogs.push(name); localStorage.setItem('allDogs',JSON.stringify(allDogs));
-    tarifs[name] = {day:10, night:10, walk:10};
-    loadTarifs();
-};
+document.getElementById('saveTarifsBtn').onclick = ()=>{ [...tarifsTableBody.querySelectorAll('tr')].forEach(tr=>{ const dog = tr.children[0].textContent; tarifs[dog] = { day: Number(tr.children[1].querySelector('input').value), night: Number(tr.children[2].querySelector('input').value), walk: Number(tr.children[3].querySelector('input').value) }; }); localStorage.setItem('tarifs',JSON.stringify(tarifs)); tarifsSheet.style.display='none'; };
+document.getElementById('addDogTarifBtn').onclick = ()=>{ const name = prompt("Introduce el nombre del perro:"); if(!name) return; if(allDogs.includes(name)){ alert("Perro ya existe."); return; } allDogs.push(name); localStorage.setItem('allDogs',JSON.stringify(allDogs)); tarifs[name] = {day:10, night:10, walk:10}; loadTarifs(); };
 
 // ===== AGENDA MODAL =====
 const agendaSheet = document.getElementById('agendaSheet');
 const agendaContainer = document.getElementById('agendaContainer');
 
-document.getElementById('calendarBtn').onclick = ()=>{
-    renderAgenda();
-    agendaSheet.style.display='flex';
-};
-document.getElementById('closeAgendaBtn').onclick = ()=>{
-    agendaSheet.style.display='none';
-};
+function openAgenda(){ renderAgenda(); agendaSheet.style.display='block'; // animate
+    const content = document.getElementById('agendaContent'); content.style.animation = 'slideUp 0.25s ease-out';
+}
 
-function renderAgenda(){
-    agendaContainer.innerHTML='';
-    const sortedDates = Object.keys(selections).sort((a,b)=>{
-        const [da,ma,ya]=a.split('/').map(Number);
-        const [db,mb,yb]=b.split('/').map(Number);
-        return new Date(ya,ma-1,da)-new Date(yb,mb-1,db);
+document.getElementById('calendarBtn').onclick = ()=>{ openAgenda(); };
+document.getElementById('closeAgendaBtn').onclick = ()=>{ agendaSheet.style.display='none'; };
+
+function renderAgenda(){ agendaContainer.innerHTML='';
+    // Build three sections: past (desc), today, future (asc)
+    const dateKeys = Object.keys(selections);
+    if(dateKeys.length===0){ agendaContainer.innerHTML='<p>No hay servicios programados.</p>'; return; }
+
+    const todayKey = formatDate(new Date());
+    const past = [];
+    const future = [];
+    let todayBlock = null;
+
+    dateKeys.forEach(k=>{
+        const [da,ma,ya]=k.split('/').map(Number);
+        const dt = new Date(ya,ma-1,da);
+        const now = new Date(); now.setHours(0,0,0,0);
+        if(dt < now) past.push(k);
+        else if(dt > now) future.push(k);
+        else todayBlock = k;
     });
 
-    if(sortedDates.length===0){
-        agendaContainer.innerHTML='<p>No hay servicios programados.</p>';
-        return;
-    }
+    // sort past descending (most recent past first) and future ascending
+    past.sort((a,b)=>{ const [da,ma,ya]=a.split('/').map(Number); const [db,mb,yb]=b.split('/').map(Number); return new Date(yb,mb-1,db)-new Date(ya,ma-1,da); });
+    future.sort((a,b)=>{ const [da,ma,ya]=a.split('/').map(Number); const [db,mb,yb]=b.split('/').map(Number); return new Date(ya,ma-1,da)-new Date(yb,mb-1,db); });
 
-    sortedDates.forEach(dateKey=>{
-        const dayDiv = document.createElement('div');
-        dayDiv.className='agenda-day';
-        dayDiv.innerHTML=`<h3>${dateKey}</h3>`;
-        const groups={};
+    // Render past (less visible) — placed before but scroll will be moved so today is visible
+    const pastSection = document.createElement('div'); pastSection.className = 'agenda-block';
+    past.forEach(pk=>{ const dayDiv = buildAgendaDay(pk, true); pastSection.appendChild(dayDiv); });
+    if(past.length) { pastSection.classList.add('agenda-past'); agendaContainer.appendChild(pastSection); }
 
-        Object.entries(selections[dateKey]).forEach(([key,val])=>{
-            if(!val.selected) return;
-            const [dog, service] = key.split('_');
-            if(!groups[dog]) groups[dog]=[];
-            const timeStr = val.start && val.end ? ` (${val.start} → ${val.end})` : '';
-            groups[dog].push(`${service}${timeStr}`);
-        });
+    // Today's block
+    if(todayBlock){ const todaySection = document.createElement('div'); todaySection.className = 'agenda-block agenda-today'; const dayDiv = buildAgendaDay(todayBlock, false, true); todaySection.appendChild(dayDiv); agendaContainer.appendChild(todaySection); }
 
-        for(let dog in groups){
-            const dogDiv = document.createElement('div');
-            dogDiv.className='agenda-dog';
-            dogDiv.innerHTML=`<strong>${dog}:</strong> ${groups[dog].join(', ')}`;
-            dayDiv.appendChild(dogDiv);
-        }
-        agendaContainer.appendChild(dayDiv);
+    // Future
+    const futureSection = document.createElement('div'); futureSection.className = 'agenda-block'; future.forEach(fk=>{ const dayDiv = buildAgendaDay(fk,false); futureSection.appendChild(dayDiv); });
+    if(future.length) agendaContainer.appendChild(futureSection);
+
+    // After rendering, scroll so that today's section is at top (if exists), otherwise scroll to first future
+    setTimeout(()=>{
+        const container = document.getElementById('agendaContent');
+        // find first element with agenda-today or first agenda-block after past
+        const todayEl = container.querySelector('.agenda-today');
+        if(todayEl){ container.scrollTop = todayEl.offsetTop - container.offsetTop - 8; }
+        else if(container.querySelector('.agenda-block:not(.agenda-past)')){ const el = container.querySelector('.agenda-block:not(.agenda-past)'); container.scrollTop = el.offsetTop - container.offsetTop - 8; }
+    },60);
+}
+
+function buildAgendaDay(dateKey, isPast=false, isToday=false){ const dayDiv = document.createElement('div'); dayDiv.className = 'agenda-day'; dayDiv.innerHTML = `<h3>${dateKey}</h3>`;
+    // collect entries and sort by start time
+    const items = [];
+    Object.entries(selections[dateKey]).forEach(([key,val])=>{ if(!val.selected) return; const [dog, service] = key.split('_'); const start = val.start || ''; const end = val.end || ''; // if no time, push to end
+        items.push({ dog, service, start, end }); });
+    items.sort((a,b)=>{
+        // convert hh:mm to minutes, missing times are large number
+        const toM = t=>{ if(!t) return 9999; const [hh,mm]=t.split(':').map(Number); return hh*60 + (mm||0); };
+        return toM(a.start) - toM(b.start);
     });
+
+    items.forEach(it=>{
+        const entry = document.createElement('div'); entry.className = 'agenda-entry';
+        if(isToday) entry.style.borderLeft = '4px solid #c1802a';
+        const timeTxt = (it.start || it.end) ? `${it.start || ''}${it.start && it.end ? ' - ' : ''}${it.end || ''}` : '';
+        const servicesTxt = `${it.service==='Overnight' ? '🌙' : it.service}`;
+        entry.innerHTML = `<div class="entry-time">${timeTxt}</div><div class="entry-body"><div><strong>${it.dog}</strong></div><div class="entry-services">${servicesTxt}</div></div>`;
+        dayDiv.appendChild(entry);
+    });
+
+    return dayDiv;
 }
 
 // ===== INITIAL CALLS =====
 buildFullDateStrip(currentDate);
 updateMonthHeader(currentDate);
 updateSummary();
-</script>
 
+// when opening service modal for a date, refresh added list
+// listen to date strip clicks to update currentDate and refresh summary
+dateStrip.addEventListener('click', (e)=>{ // find nearest .date-item with center snapping already handled in drag; here capture click
+    const item = e.target.closest('.date-item'); if(!item) return; const idx = Array.from(dateStrip.children).indexOf(item); if(idx>=0){ currentDate = allDates[idx]; dateStrip.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active')); item.classList.add('active'); updateMonthHeader(currentDate); updateSummary(); refreshServiceModalForCurrentDate(); }
+});
+
+// open service modal should also show existing for date
+document.getElementById('centralBtn').addEventListener('click', ()=>{ refreshServiceModalForCurrentDate(); });
+
+// open agenda via button
+document.getElementById('calendarBtn').addEventListener('click', ()=>{ openAgenda(); });
+
+</script>
 
 </body>
 </html>
