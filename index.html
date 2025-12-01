@@ -343,37 +343,78 @@ function updateMonthHeader(date){
 }
 
 // ===== SCROLL LISTENER =====
-let scrollTimeout;
-dateStrip.addEventListener('scroll', ()=>{
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(()=>{
-        const stripRect = dateStrip.getBoundingClientRect();
-        const stripCenter = stripRect.left + stripRect.width/2;
+// ===== FULL DAY SNAP SCROLL =====
+let isDragging = false;
+let startX, scrollLeft;
 
-        let closest = null;
-        let closestDistance = Infinity;
-
-        document.querySelectorAll('.date-item').forEach(item=>{
-            const itemRect = item.getBoundingClientRect();
-            const itemCenter = itemRect.left + itemRect.width/2;
-            const distance = Math.abs(stripCenter - itemCenter);
-            if(distance < closestDistance){
-                closestDistance = distance;
-                closest = item;
-            }
-        });
-
-        if(closest){
-            document.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active'));
-            closest.classList.add('active');
-
-            const idx = Array.from(dateStrip.children).indexOf(closest);
-            currentDate = allDates[idx];
-            updateMonthHeader(currentDate);
-            updateSummary();
-        }
-    },50);
+// Mouse/touch down
+dateStrip.addEventListener('mousedown', (e)=>{
+    isDragging = true;
+    startX = e.pageX - dateStrip.offsetLeft;
+    scrollLeft = dateStrip.scrollLeft;
 });
+dateStrip.addEventListener('touchstart', (e)=>{
+    isDragging = true;
+    startX = e.touches[0].pageX - dateStrip.offsetLeft;
+    scrollLeft = dateStrip.scrollLeft;
+});
+
+// Mouse/touch move
+dateStrip.addEventListener('mousemove', (e)=>{
+    if(!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - dateStrip.offsetLeft;
+    const walk = (x - startX);
+    dateStrip.scrollLeft = scrollLeft - walk;
+});
+dateStrip.addEventListener('touchmove', (e)=>{
+    if(!isDragging) return;
+    const x = e.touches[0].pageX - dateStrip.offsetLeft;
+    const walk = (x - startX);
+    dateStrip.scrollLeft = scrollLeft - walk;
+});
+
+// Mouse/touch up
+dateStrip.addEventListener('mouseup', snapToClosest);
+dateStrip.addEventListener('mouseleave', snapToClosest);
+dateStrip.addEventListener('touchend', snapToClosest);
+
+function snapToClosest(){
+    if(!isDragging) return;
+    isDragging = false;
+
+    const stripRect = dateStrip.getBoundingClientRect();
+    const stripCenter = stripRect.left + stripRect.width/2;
+
+    let closestIdx = 0;
+    let closestDist = Infinity;
+
+    dateStrip.querySelectorAll('.date-item').forEach((item,i)=>{
+        const itemRect = item.getBoundingClientRect();
+        const itemCenter = itemRect.left + itemRect.width/2;
+        const dist = Math.abs(stripCenter - itemCenter);
+        if(dist < closestDist){
+            closestDist = dist;
+            closestIdx = i;
+        }
+    });
+
+    // Snap scroll
+    const targetItem = dateStrip.children[closestIdx];
+    dateStrip.scrollTo({
+        left: targetItem.offsetLeft - dateStrip.offsetWidth/2 + targetItem.offsetWidth/2,
+        behavior: 'smooth'
+    });
+
+    // Update active
+    dateStrip.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active'));
+    targetItem.classList.add('active');
+
+    // Update current date & month
+    currentDate = allDates[closestIdx];
+    updateMonthHeader(currentDate);
+    updateSummary();
+}
 
 // ===== DIMMING FUNCTION FOR NEW DOG SELECTION =====
 function setDimmed(isDimmed){
