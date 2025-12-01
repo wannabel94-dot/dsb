@@ -219,8 +219,10 @@ z-index: 10;
 <div class="date-strip" id="dateStrip"></div>
 <div class="summary">
   <div id="summaryContent">No hay servicios seleccionados.</div>
+      <div id="dailyTotal" style="margin-top: 10px; font-weight: 700;"></div>
 </div>
 </div>
+
 
 <!-- SERVICE MODAL -->
 <div id="serviceModal" class="modal">
@@ -529,6 +531,49 @@ function updateSummary() {
 }
 
 
+function updateDailyTotal(date) {
+    const dateKey = formatDate(date);
+    const entries = selections[dateKey] || {};
+    let total = 0;
+
+    Object.entries(entries).forEach(([key, val]) => {
+        if (!val.selected) return;
+        const [dog, service] = key.split('_');
+        const dogTarif = tarifs[dog] || { day: 0, night: 0, walk: 0 };
+        if (service.toLowerCase().includes('guardería') || service.toLowerCase().includes('day')) total += dogTarif.day || 0;
+        else if (service.toLowerCase().includes('paseo') || service.toLowerCase().includes('walk')) total += dogTarif.walk || 0;
+        else if (service.toLowerCase().includes('noche') || service.toLowerCase().includes('night')) total += dogTarif.night || 0;
+    });
+
+    document.getElementById('dailyTotal').textContent = `Total diario: €${total}`;
+}
+ function updateSummary() {
+    const dateKey = formatDate(currentDate);
+    const div = document.getElementById('summaryContent');
+    if(!selections[dateKey]){
+        div.textContent = 'No hay servicios seleccionados.';
+    } else {
+        const groups = {};
+        Object.entries(selections[dateKey]).forEach(([key,val])=>{
+            if(!val.selected) return;
+            const [dog, service] = key.split('_');
+            if(!groups[dog]) groups[dog]=[];
+            const timeStr = val.start || val.end ? ` (${val.start || ''} - ${val.end || ''})` : '';
+            groups[dog].push(`${service}${timeStr}`);
+        });
+
+        let html='';
+        for(let dog in groups){
+            html += `<strong>${dog}</strong><br>`;
+            groups[dog].forEach(s=>{ html+=`• ${s}<br>`; });
+            html+='<br>';
+        }
+        div.innerHTML = html || 'No hay servicios seleccionados.';
+    }
+
+    // Separate call for the total
+    updateDailyTotal(currentDate);
+}
 
 // ===== TARIFS MODAL =====
 const tarifsSheet = document.getElementById('tarifsSheet');
