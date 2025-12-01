@@ -9,7 +9,7 @@
 <style>
 /* ===== GLOBAL ===== */
 * { box-sizing:border-box;margin:0;padding:0; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto; background:#c6d197; min-height:100vh; padding:10px; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto; background:#e7e5d8; min-height:100vh; padding:10px; }
 .container{max-width:800px;margin:0 auto;padding:20px;}
 h1{text-align:center;margin-bottom:20px;color:#373e2e;}button{cursor:pointer;}
 
@@ -104,7 +104,10 @@ h1{text-align:center;margin-bottom:20px;color:#373e2e;}button{cursor:pointer;}
 }
 
 /* Animations */
-@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 1; }
+  to { transform: translateY(0); opacity: 1; }
+} to { transform: translateY(0); opacity: 1; } }
 @keyframes slideDown { from { transform:translateY(-100%);} to { transform:translateY(0);} }
 
 /* small inputs */
