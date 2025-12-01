@@ -96,6 +96,11 @@ button{cursor:pointer;}
     padding:0;
     z-index:3000; /* ABOVE EVERYTHING */
 }
+.dimmed {
+    opacity: 0.3;
+    pointer-events: none; /* optional, so you can’t click the old cards */
+    transition: opacity 0.2s ease;
+}
 
 /* SLIDE-DOWN PANEL */
 .modal-content {
@@ -336,6 +341,62 @@ function scrollToDate(targetDate){
             break;
         }
     }
+}
+function setDimmed(isDimmed) {
+    if(isDimmed){
+        addedDogsContainer.classList.add('dimmed');
+        document.querySelector('.modal-buttons').classList.add('dimmed');
+    } else {
+        addedDogsContainer.classList.remove('dimmed');
+        document.querySelector('.modal-buttons').classList.remove('dimmed');
+    }
+}
+
+// When a dog is selected from the dropdown
+dogSelect.onchange = ()=>{
+  if(dogSelect.value){
+    currentDogSelection.dog = dogSelect.value;
+    renderServiceButtons();
+    setDimmed(true);  // Dim the existing cards/buttons
+  } else {
+    setDimmed(false);
+  }
+}
+
+// When a new dog is added
+document.getElementById('addDogBtn').onclick = ()=>{
+  if(!currentDogSelection.dog || currentDogSelection.services.length === 0){
+    alert('Selecciona un perro y al menos un servicio');
+    return;
+  }
+
+  const hasNonOvernight = currentDogSelection.services.some(s => s !== 'Overnight');
+  if(hasNonOvernight && (!document.getElementById('startTimeInput').value || !document.getElementById('endTimeInput').value)){
+    alert('Introduce horario de inicio y fin');
+    return;
+  }
+
+  currentDogSelection.start = document.getElementById('startTimeInput').value || '';
+  currentDogSelection.end = document.getElementById('endTimeInput').value || '';
+
+  tempDogs.push({...currentDogSelection});
+  renderAddedDogs();
+
+  // Reset form
+  currentDogSelection = {dog:null, services:[], start:'', end:''};
+  dogSelect.value = '';
+  serviceButtonsContainer.innerHTML='';
+  timeInputsContainer.style.display='none';
+  document.getElementById('startTimeInput').value='';
+  document.getElementById('endTimeInput').value='';
+
+  setDimmed(false);  // Restore visibility
+}
+
+// Cancel button should also restore visibility
+document.getElementById('closeModalBtn').onclick = ()=>{
+  setDimmed(false);
+  serviceModal.style.display='none';
 }
 
 // Scroll listener
