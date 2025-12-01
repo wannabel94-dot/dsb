@@ -272,43 +272,20 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
 <button class="floating-center-btn" id="centralBtn">+</button>
 
 <script>
-function buildDateStrip(selectedDate = new Date()) {
-    updateMonthHeader(selectedDate);  // ← ADD THIS LINE
+let currentDate = new Date();   // ← MUST COME FIRST
 
-    const dateStrip = document.getElementById("dateStrip");
-    dateStrip.innerHTML = "";
-
-    const start = new Date(selectedDate);
-    start.setDate(selectedDate.getDate() - 3);
-
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(start);
-        d.setDate(start.getDate() + i);
-
-        const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-        const div = document.createElement("div");
-        div.className = "date-item";
-
-        if (d.toDateString() === selectedDate.toDateString()) {
-            div.classList.add("active");
-        }
-
-        div.innerHTML = `
-            <span class="dayname">${dayNames[d.getDay() === 0 ? 6 : d.getDay()-1]}</span>
-            <div class="circle">${d.getDate()}</div>
-        `;
-
-        div.onclick = () => {
-            currentDate = d;
-            buildDateStrip(currentDate);
-            updateSummary();
-        };
-
-        dateStrip.appendChild(div);
-    }
+function updateMonthHeader(date) {
+    const monthNames = [
+        "January","February","March","April","May","June",
+        "July","August","September","October","November","December"
+    ];
+    document.getElementById("monthHeader").textContent =
+        monthNames[date.getMonth()] + " " + date.getFullYear();
 }
 
-    function buildDateStrip(selectedDate = new Date()) {
+function buildDateStrip(selectedDate = new Date()) {
+    updateMonthHeader(selectedDate);
+
     const dateStrip = document.getElementById("dateStrip");
     dateStrip.innerHTML = "";
 
@@ -343,6 +320,7 @@ function buildDateStrip(selectedDate = new Date()) {
 }
 
 buildDateStrip(currentDate);
+
 
 const defaultDogs = ["Nina","Carmela", "Pancho", "Pablo","Lili","Jugnia","Leo","India","Kimchi","Cuatri","Tristona y Belona","Neo","Briso","Zaspi","R&H"];
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
