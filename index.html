@@ -114,8 +114,18 @@ h1{text-align:center;margin-bottom:20px;color:#373e2e;}button{cursor:pointer;}
 select,input[type="time"],input[type="number"],input[type="text"]{ width:100%;padding:12px 14px;margin-top:8px;margin-bottom:12px;border-radius:10px;border:2px solid #8a8252; background:#fcf9f1;font-size:16px;color:#303021; }
 
 /* Buttons in modals */
-.modal-buttons{display:flex;justify-content:flex-end;gap:12px;margin-top:18px;padding-top:15px;border-top:2px solid #e0e0e0;}
-.modal-buttons button{padding:10px 16px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer; background:#a53200;color:#f9e9ca;transition:0.2s;}
+.modal-buttons {
+display: flex;
+justify-content: flex-end;
+gap: 12px;
+margin-top: 18px;
+padding: 12px 18px;
+border-top: 1px solid #e0e0e0;
+position: sticky;
+bottom: 0;
+background: #fff;
+z-index: 10;
+}.modal-buttons button{padding:10px 16px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer; background:#a53200;color:#f9e9ca;transition:0.2s;}
 .modal-buttons button:hover{transform:scale(1.04);background:#8a2b00;}
 .modal-buttons button.cancel{background:#666;color:#fff;}
 .modal-buttons button.cancel:hover{background:#555;}
@@ -243,13 +253,13 @@ select,input[type="time"],input[type="number"],input[type="text"]{ width:100%;pa
 
 <!-- AGENDA MODAL (slides up) -->
 <div id="agendaSheet" class="modal">
-  <div class="modal-content agenda-wrap" id="agendaContent">
-    <h2>Agenda Completa</h2>
-    <div id="agendaContainer"></div>
-    <div class="modal-buttons">
-      <button id="closeAgendaBtn" class="cancel">Cerrar</button>
-    </div>
-  </div>
+<div class="modal-content agenda-wrap" id="agendaContent">
+<h2>Agenda Completa</h2>
+<div id="agendaContainer"></div>
+<div class="modal-buttons">
+<button id="closeAgendaBtn" class="cancel">Cerrar</button>
+</div>
+</div>
 </div>
 
 <!-- FOOTER -->
@@ -488,79 +498,53 @@ document.getElementById('addDogTarifBtn').onclick = ()=>{ const name = prompt("I
 const agendaSheet = document.getElementById('agendaSheet');
 const agendaContainer = document.getElementById('agendaContainer');
 
-function openAgenda(){ renderAgenda(); agendaSheet.style.display='block'; // animate
-    const content = document.getElementById('agendaContent'); content.style.animation = 'slideUp 0.25s ease-out';
-}
 
 document.getElementById('calendarBtn').onclick = ()=>{ openAgenda(); };
 document.getElementById('closeAgendaBtn').onclick = ()=>{ agendaSheet.style.display='none'; };
 
-function renderAgenda(){ agendaContainer.innerHTML='';
-    // Build three sections: past (desc), today, future (asc)
-    const dateKeys = Object.keys(selections);
-    if(dateKeys.length===0){ agendaContainer.innerHTML='<p>No hay servicios programados.</p>'; return; }
 
-    const todayKey = formatDate(new Date());
-    const past = [];
-    const future = [];
-    let todayBlock = null;
-
-    dateKeys.forEach(k=>{
-        const [da,ma,ya]=k.split('/').map(Number);
-        const dt = new Date(ya,ma-1,da);
-        const now = new Date(); now.setHours(0,0,0,0);
-        if(dt < now) past.push(k);
-        else if(dt > now) future.push(k);
-        else todayBlock = k;
-    });
-
-    // sort past descending (most recent past first) and future ascending
-    past.sort((a,b)=>{ const [da,ma,ya]=a.split('/').map(Number); const [db,mb,yb]=b.split('/').map(Number); return new Date(yb,mb-1,db)-new Date(ya,ma-1,da); });
-    future.sort((a,b)=>{ const [da,ma,ya]=a.split('/').map(Number); const [db,mb,yb]=b.split('/').map(Number); return new Date(ya,ma-1,da)-new Date(yb,mb-1,db); });
-
-    // Render past (less visible) — placed before but scroll will be moved so today is visible
-    const pastSection = document.createElement('div'); pastSection.className = 'agenda-block';
-    past.forEach(pk=>{ const dayDiv = buildAgendaDay(pk, true); pastSection.appendChild(dayDiv); });
-    if(past.length) { pastSection.classList.add('agenda-past'); agendaContainer.appendChild(pastSection); }
-
-    // Today's block
-    if(todayBlock){ const todaySection = document.createElement('div'); todaySection.className = 'agenda-block agenda-today'; const dayDiv = buildAgendaDay(todayBlock, false, true); todaySection.appendChild(dayDiv); agendaContainer.appendChild(todaySection); }
-
-    // Future
-    const futureSection = document.createElement('div'); futureSection.className = 'agenda-block'; future.forEach(fk=>{ const dayDiv = buildAgendaDay(fk,false); futureSection.appendChild(dayDiv); });
-    if(future.length) agendaContainer.appendChild(futureSection);
-
-    // After rendering, scroll so that today's section is at top (if exists), otherwise scroll to first future
-    setTimeout(()=>{
-        const container = document.getElementById('agendaContent');
-        // find first element with agenda-today or first agenda-block after past
-        const todayEl = container.querySelector('.agenda-today');
-        if(todayEl){ container.scrollTop = todayEl.offsetTop - container.offsetTop - 8; }
-        else if(container.querySelector('.agenda-block:not(.agenda-past)')){ const el = container.querySelector('.agenda-block:not(.agenda-past)'); container.scrollTop = el.offsetTop - container.offsetTop - 8; }
-    },60);
+function openAgenda(){
+renderAgenda();
+agendaSheet.style.display='block';
+document.getElementById('agendaContent').style.animation = 'slideUp 0.25s ease-out';
 }
 
-function buildAgendaDay(dateKey, isPast=false, isToday=false){ const dayDiv = document.createElement('div'); dayDiv.className = 'agenda-day'; dayDiv.innerHTML = `<h3>${dateKey}</h3>`;
-    // collect entries and sort by start time
-    const items = [];
-    Object.entries(selections[dateKey]).forEach(([key,val])=>{ if(!val.selected) return; const [dog, service] = key.split('_'); const start = val.start || ''; const end = val.end || ''; // if no time, push to end
-        items.push({ dog, service, start, end }); });
-    items.sort((a,b)=>{
-        // convert hh:mm to minutes, missing times are large number
-        const toM = t=>{ if(!t) return 9999; const [hh,mm]=t.split(':').map(Number); return hh*60 + (mm||0); };
-        return toM(a.start) - toM(b.start);
-    });
 
-    items.forEach(it=>{
-        const entry = document.createElement('div'); entry.className = 'agenda-entry';
-        if(isToday) entry.style.borderLeft = '4px solid #c1802a';
-        const timeTxt = (it.start || it.end) ? `${it.start || ''}${it.start && it.end ? ' - ' : ''}${it.end || ''}` : '';
-        const servicesTxt = `${it.service==='Overnight' ? '🌙' : it.service}`;
-        entry.innerHTML = `<div class="entry-time">${timeTxt}</div><div class="entry-body"><div><strong>${it.dog}</strong></div><div class="entry-services">${servicesTxt}</div></div>`;
-        dayDiv.appendChild(entry);
-    });
+function renderAgenda(){
+agendaContainer.innerHTML='';
+const dateKeys = Object.keys(selections);
+if(dateKeys.length===0){ agendaContainer.innerHTML='<p>No hay servicios programados.</p>'; return; }
 
-    return dayDiv;
+
+let todayBlock = null;
+const future = [];
+const now = new Date(); now.setHours(0,0,0,0);
+
+
+dateKeys.forEach(k=>{
+const [da,ma,ya]=k.split('/').map(Number);
+const dt = new Date(ya,ma-1,da);
+if(dt.getTime() === now.getTime()) todayBlock = k;
+else if(dt > now) future.push(k);
+});
+
+
+// Today's block
+if(todayBlock){
+const todaySection = document.createElement('div');
+todaySection.className = 'agenda-block agenda-today';
+const dayDiv = buildAgendaDay(todayBlock, false, true);
+todaySection.appendChild(dayDiv);
+agendaContainer.appendChild(todaySection);
+}
+
+
+// Future block
+if(future.length){
+const futureSection = document.createElement('div');
+futureSection.className = 'agenda-block';
+future.forEach(fk => {
+const dayDiv = buildAgendaDay(fk, false);
 }
 
 // ===== INITIAL CALLS =====
