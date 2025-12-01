@@ -272,91 +272,78 @@ display:flex;justify-content:center;align-items:center;font-size:36px;font-weigh
 <button class="floating-center-btn" id="centralBtn">+</button>
 
 <script>
-let currentDate = new Date(); // initial selected date
+// ===== GLOBAL STATE =====
+let currentDate = new Date();
+const defaultDogs = ["Nina","Carmela","Pancho","Pablo","Lili","Jugnia","Leo","India","Kimchi","Cuatri","Tristona y Belona","Neo","Briso","Zaspi","R&H"];
+let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
+let selections = JSON.parse(localStorage.getItem('selections')) || {};
+let tarifs = JSON.parse(localStorage.getItem('tarifs')) || {};
+let tempDogs = [];
+let currentDogSelection = { dog: null, services: [], start: '', end: '' };
+const formatDate = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 
-function updateMonthHeader(date) {
-    const monthNames = [
-        "January","February","March","April","May","June",
-        "July","August","September","October","November","December"
-    ];
-    document.getElementById("monthHeader").textContent =
-        monthNames[date.getMonth()] + " " + date.getFullYear();
+// ===== DATE STRIP =====
+const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+function updateMonthHeader(date){
+    document.getElementById("monthHeader").textContent = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-function buildDateStrip(selectedDate = new Date()) {
+function buildDateStrip(selectedDate = new Date()){
     updateMonthHeader(selectedDate);
-
     const dateStrip = document.getElementById("dateStrip");
-    dateStrip.innerHTML = "";
+    dateStrip.innerHTML = '';
 
     const start = new Date(selectedDate);
-    start.setDate(selectedDate.getDate() - 3); // show 3 days before
+    start.setDate(selectedDate.getDate() - 3);
 
-    const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-
-    for (let i = 0; i < 7; i++) {
+    for(let i=0; i<7; i++){
         const d = new Date(start);
         d.setDate(start.getDate() + i);
 
         const div = document.createElement("div");
         div.className = "date-item";
-
-        if (d.toDateString() === selectedDate.toDateString()) {
-            div.classList.add("active");
-        }
+        if(d.toDateString() === selectedDate.toDateString()) div.classList.add("active");
 
         div.innerHTML = `
-            <span class="dayname">${dayNames[d.getDay() === 0 ? 6 : d.getDay()-1]}</span>
+            <span class="dayname">${dayNames[d.getDay()]}</span>
             <div class="circle">${d.getDate()}</div>
         `;
-
         dateStrip.appendChild(div);
     }
 
-    // Scroll to center the selected date
+    // Scroll selected date to center
     const active = dateStrip.querySelector(".date-item.active");
-    if (active) {
-        const stripRect = dateStrip.getBoundingClientRect();
-        const activeRect = active.getBoundingClientRect();
-        const offset = activeRect.left - stripRect.left - (stripRect.width / 2) + (activeRect.width / 2);
-        dateStrip.scrollLeft += offset;
+    if(active){
+        dateStrip.scrollLeft = active.offsetLeft - dateStrip.offsetWidth/2 + active.offsetWidth/2;
     }
+    updateSummary();
 }
 
-// Call initially
-buildDateStrip(currentDate);
-updateSummary();
-
-// ---- Scroll-driven date selection ----
+// Scroll-driven selection
 const dateStrip = document.getElementById("dateStrip");
-
 let isScrolling;
-dateStrip.addEventListener('scroll', () => {
-    window.clearTimeout(isScrolling);
-
-    // Use a timeout to update only after scroll stops
-    isScrolling = setTimeout(() => {
-        const stripRect = dateStrip.getBoundingClientRect();
-        const stripCenter = stripRect.left + stripRect.width / 2;
-
+dateStrip.addEventListener('scroll', ()=>{
+    clearTimeout(isScrolling);
+    isScrolling = setTimeout(()=>{
+        const stripCenter = dateStrip.offsetWidth / 2;
         let closest = null;
         let closestDistance = Infinity;
 
-        document.querySelectorAll('.date-item').forEach(item => {
-            const itemRect = item.getBoundingClientRect();
-            const itemCenter = itemRect.left + itemRect.width / 2;
-            const distance = Math.abs(stripCenter - itemCenter);
-            if (distance < closestDistance) {
-                closestDistance = distance;
+        document.querySelectorAll('.date-item').forEach(item=>{
+            const itemCenter = item.offsetLeft + item.offsetWidth/2 - dateStrip.scrollLeft;
+            const dist = Math.abs(stripCenter - itemCenter);
+            if(dist < closestDistance){
+                closestDistance = dist;
                 closest = item;
             }
         });
 
-        if (closest) {
-            document.querySelectorAll('.date-item').forEach(d => d.classList.remove('active'));
+        if(closest){
+            document.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active'));
             closest.classList.add('active');
 
-            // Update currentDate
             const day = parseInt(closest.querySelector('.circle').textContent);
             const [monthName, yearStr] = document.getElementById('monthHeader').textContent.split(' ');
             const month = new Date(`${monthName} 1, ${yearStr}`).getMonth();
@@ -365,269 +352,232 @@ dateStrip.addEventListener('scroll', () => {
             currentDate = new Date(year, month, day);
             updateSummary();
         }
-    }, 100); // adjust delay for responsiveness
+    },100);
 });
 
-const defaultDogs = ["Nina","Carmela", "Pancho", "Pablo","Lili","Jugnia","Leo","India","Kimchi","Cuatri","Tristona y Belona","Neo","Briso","Zaspi","R&H"];
-let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
-let selections = JSON.parse(localStorage.getItem('selections')) || {};
-let tarifs = JSON.parse(localStorage.getItem('tarifs')) || {};
-const formatDate = d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-
-// Temporary storage for dogs being added
-let tempDogs = [];
-
-function promptDatePicker() {
-    const input = document.createElement('input');
-    input.type = 'date';
-    input.style.display = 'none';
-    document.body.appendChild(input);
-    input.valueAsDate = currentDate;
-
-    input.onchange = () => {
-        currentDate = new Date(input.value);
-        buildDateStrip(currentDate);  // ✅ rebuild the date strip
-        updateSummary();              // ✅ update summary
-        input.remove();
-    };
-
-    input.click(); // trigger only when calling this function
-}
-
-
-// SERVICE MODAL
+// ===== SERVICE MODAL =====
 const serviceModal = document.getElementById('serviceModal');
 const dogSelect = document.getElementById('dogSelect');
 const serviceButtonsContainer = document.getElementById('serviceButtonsContainer');
 const timeInputsContainer = document.getElementById('timeInputsContainer');
 const addedDogsContainer = document.getElementById('addedDogsContainer');
-let currentDogSelection = {dog:null, services:[], start:'', end:''};
 
-document.getElementById('centralBtn').onclick=()=>{
-  tempDogs = [];
-  currentDogSelection = {dog:null, services:[], start:'', end:''};
-  dogSelect.innerHTML='<option value="">Seleccionar Perro</option>';
-  allDogs.forEach(d=>{const opt=document.createElement('option'); opt.value=d; opt.textContent=d; dogSelect.appendChild(opt);});
-  serviceButtonsContainer.innerHTML='';
-  timeInputsContainer.style.display='none';
-  addedDogsContainer.innerHTML='';
-  serviceModal.style.display='flex';
+document.getElementById('centralBtn').onclick = ()=>{
+    tempDogs = [];
+    currentDogSelection = { dog: null, services: [], start: '', end: '' };
+    dogSelect.innerHTML = '<option value="">Seleccionar Perro</option>';
+    allDogs.forEach(d=>{ const opt=document.createElement('option'); opt.value=d; opt.textContent=d; dogSelect.appendChild(opt); });
+    serviceButtonsContainer.innerHTML = '';
+    timeInputsContainer.style.display = 'none';
+    addedDogsContainer.innerHTML = '';
+    serviceModal.style.display = 'flex';
 };
 
 dogSelect.onchange = ()=>{
-  if(dogSelect.value){
-    currentDogSelection.dog = dogSelect.value;
+    currentDogSelection.dog = dogSelect.value || null;
     renderServiceButtons();
-  }
-}
+};
 
 function renderServiceButtons(){
-  serviceButtonsContainer.innerHTML='';
-  const services = ['Daycare','Overnight','Walk'];
-  services.forEach(s=>{
-    const btn=document.createElement('button'); 
-    btn.className='service-btn'; 
-    btn.textContent=s;
-    btn.onclick=()=>{
-      btn.classList.toggle('selected');
-      const idx = currentDogSelection.services.indexOf(s);
-      if(idx > -1){
-        currentDogSelection.services.splice(idx, 1);
-      } else {
-        currentDogSelection.services.push(s);
-      }
-      
-      // Show time inputs only if non-overnight service selected
-      const hasNonOvernight = currentDogSelection.services.some(srv => srv !== 'Overnight');
-      timeInputsContainer.style.display = hasNonOvernight ? 'block' : 'none';
-    }
-    serviceButtonsContainer.appendChild(btn);
-  });
+    serviceButtonsContainer.innerHTML = '';
+    if(!currentDogSelection.dog) return;
+
+    const services = ['Daycare','Overnight','Walk'];
+    services.forEach(s=>{
+        const btn = document.createElement('button');
+        btn.className = 'service-btn';
+        btn.textContent = s;
+        btn.onclick = ()=>{
+            btn.classList.toggle('selected');
+            const idx = currentDogSelection.services.indexOf(s);
+            if(idx > -1) currentDogSelection.services.splice(idx,1);
+            else currentDogSelection.services.push(s);
+
+            const showTime = currentDogSelection.services.some(x => x !== 'Overnight');
+            timeInputsContainer.style.display = showTime ? 'block' : 'none';
+        }
+        serviceButtonsContainer.appendChild(btn);
+    });
 }
 
 document.getElementById('addDogBtn').onclick = ()=>{
-  if(!currentDogSelection.dog || currentDogSelection.services.length === 0){
-    alert('Selecciona un perro y al menos un servicio');
-    return;
-  }
-  
-  const hasNonOvernight = currentDogSelection.services.some(s => s !== 'Overnight');
-  if(hasNonOvernight && (!document.getElementById('startTimeInput').value || !document.getElementById('endTimeInput').value)){
-    alert('Introduce horario de inicio y fin');
-    return;
-  }
-  
-  currentDogSelection.start = document.getElementById('startTimeInput').value || '';
-  currentDogSelection.end = document.getElementById('endTimeInput').value || '';
-  
-  tempDogs.push({...currentDogSelection});
-  renderAddedDogs();
-  
-  // Reset for next dog
-  currentDogSelection = {dog:null, services:[], start:'', end:''};
-  dogSelect.value = '';
-  serviceButtonsContainer.innerHTML='';
-  timeInputsContainer.style.display='none';
-  document.getElementById('startTimeInput').value='';
-  document.getElementById('endTimeInput').value='';
-}
+    if(!currentDogSelection.dog || currentDogSelection.services.length===0){
+        alert('Selecciona un perro y al menos un servicio');
+        return;
+    }
+
+    const hasNonOvernight = currentDogSelection.services.some(s=>s!=='Overnight');
+    const startVal = document.getElementById('startTimeInput').value;
+    const endVal = document.getElementById('endTimeInput').value;
+    if(hasNonOvernight && (!startVal || !endVal)){
+        alert('Introduce horario de inicio y fin');
+        return;
+    }
+
+    currentDogSelection.start = startVal || '';
+    currentDogSelection.end = endVal || '';
+    tempDogs.push({...currentDogSelection});
+
+    renderAddedDogs();
+    currentDogSelection = { dog:null, services:[], start:'', end:'' };
+    dogSelect.value='';
+    serviceButtonsContainer.innerHTML='';
+    timeInputsContainer.style.display='none';
+    document.getElementById('startTimeInput').value='';
+    document.getElementById('endTimeInput').value='';
+};
 
 function renderAddedDogs(){
-  addedDogsContainer.innerHTML='';
-  tempDogs.forEach((dog, idx)=>{
-    const card = document.createElement('div');
-    card.className='dog-entry';
-    const serviceText = dog.services.join(', ');
-    const timeText = dog.start && dog.end ? ` (${dog.start} → ${dog.end})` : '';
-    card.innerHTML=`
-      <h4>${dog.dog}</h4>
-      <div class="services-list">${serviceText}${timeText}</div>
-      <button class="remove-btn" onclick="removeTempDog(${idx})">Eliminar</button>
-    `;
-    addedDogsContainer.appendChild(card);
-  });
+    addedDogsContainer.innerHTML = '';
+    tempDogs.forEach((dog, idx)=>{
+        const card = document.createElement('div');
+        card.className = 'dog-entry';
+        const timeStr = dog.start && dog.end ? ` (${dog.start} → ${dog.end})` : '';
+        card.innerHTML = `
+            <h4>${dog.dog}</h4>
+            <div class="services-list">${dog.services.join(', ')}${timeStr}</div>
+            <button class="remove-btn" onclick="removeTempDog(${idx})">Eliminar</button>
+        `;
+        addedDogsContainer.appendChild(card);
+    });
 }
-
 window.removeTempDog = (idx)=>{
-  tempDogs.splice(idx, 1);
-  renderAddedDogs();
-}
+    tempDogs.splice(idx,1);
+    renderAddedDogs();
+};
 
 document.getElementById('saveAllBtn').onclick = ()=>{
-  const dateKey=formatDate(currentDate);
-  if(!selections[dateKey]) selections[dateKey]={};
-  
-  tempDogs.forEach(dog=>{
-    dog.services.forEach(s=>{
-      selections[dateKey][`${dog.dog}_${s}`]={
-        selected:true,
-        start:dog.start,
-        end:dog.end
-      };
+    const dateKey = formatDate(currentDate);
+    if(!selections[dateKey]) selections[dateKey]={};
+    tempDogs.forEach(dog=>{
+        dog.services.forEach(s=>{
+            selections[dateKey][`${dog.dog}_${s}`] = { selected:true, start:dog.start, end:dog.end };
+        });
     });
-  });
-  
-  localStorage.setItem('selections',JSON.stringify(selections));
-  serviceModal.style.display='none';
-  updateSummary();
-}
+    localStorage.setItem('selections',JSON.stringify(selections));
+    serviceModal.style.display='none';
+    updateSummary();
+};
+document.getElementById('closeModalBtn').onclick = ()=>{ serviceModal.style.display='none'; };
 
-document.getElementById('closeModalBtn').onclick=()=>{serviceModal.style.display='none';}
-
-// UPDATE SUMMARY
+// ===== SUMMARY =====
 function updateSummary(){
-  const dateKey=formatDate(currentDate);
-  const div=document.getElementById('summaryContent');
-  if(!selections[dateKey]){div.textContent='No hay servicios seleccionados.'; return;}
-  let html=''; const groups={};
-  Object.entries(selections[dateKey]).forEach(([key,val])=>{
-    if(!val.selected) return;
-    const [dog,service]=key.split('_'); 
-    if(!groups[dog]) groups[dog]=[];
-    const timeStr = val.start && val.end ? ` (${val.start} → ${val.end})` : '';
-    groups[dog].push(`${service}${timeStr}`);
-  });
-  for(let dog in groups){ 
-    html+=`<strong>${dog}</strong><br>`; 
-    groups[dog].forEach(s=>{html+=`• ${s}<br>`}); 
-    html+='<br>'; 
-  }
-  div.innerHTML=html||'No hay servicios seleccionados.';
-}
-updateSummary();
+    const dateKey = formatDate(currentDate);
+    const div = document.getElementById('summaryContent');
+    if(!selections[dateKey]){ div.textContent = 'No hay servicios seleccionados.'; return; }
 
-// TARIFS MODAL
-const tarifsSheet=document.getElementById('tarifsSheet');
-const tarifsTableBody=document.querySelector('#tarifsTable tbody');
+    const groups = {};
+    Object.entries(selections[dateKey]).forEach(([key,val])=>{
+        if(!val.selected) return;
+        const [dog, service] = key.split('_');
+        if(!groups[dog]) groups[dog]=[];
+        const timeStr = val.start && val.end ? ` (${val.start} → ${val.end})` : '';
+        groups[dog].push(`${service}${timeStr}`);
+    });
+
+    let html='';
+    for(let dog in groups){
+        html += `<strong>${dog}</strong><br>`;
+        groups[dog].forEach(s=>{ html+=`• ${s}<br>`; });
+        html+='<br>';
+    }
+    div.innerHTML = html || 'No hay servicios seleccionados.';
+}
+
+// ===== TARIFS MODAL =====
+const tarifsSheet = document.getElementById('tarifsSheet');
+const tarifsTableBody = document.querySelector('#tarifsTable tbody');
+
 function loadTarifs(){
-  tarifsTableBody.innerHTML=''; 
-  allDogs.forEach(d=>{
-    if(!tarifs[d]) tarifs[d]={day:10,night:10,walk:10};
-    const row=document.createElement('tr');
-    row.innerHTML=`<td>${d}</td>
-      <td><input type="number" min="0" value="${tarifs[d].day}"></td>
-      <td><input type="number" min="0" value="${tarifs[d].night}"></td>
-      <td><input type="number" min="0" value="${tarifs[d].walk}"></td>`;
-    tarifsTableBody.appendChild(row);
-  });
+    tarifsTableBody.innerHTML='';
+    allDogs.forEach(d=>{
+        if(!tarifs[d]) tarifs[d]={day:10,night:10,walk:10};
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${d}</td>
+            <td><input type="number" min="0" value="${tarifs[d].day}"></td>
+            <td><input type="number" min="0" value="${tarifs[d].night}"></td>
+            <td><input type="number" min="0" value="${tarifs[d].walk}"></td>`;
+        tarifsTableBody.appendChild(row);
+    });
 }
 loadTarifs();
 
-document.getElementById('tarifsBtn').onclick=()=>{tarifsSheet.style.display='flex';}
-document.getElementById('closeTarifsBtn').onclick=()=>{tarifsSheet.style.display='none';}
-document.getElementById('saveTarifsBtn').onclick=()=>{
-  [...tarifsTableBody.querySelectorAll('tr')].forEach(tr=>{
-    const dog=tr.children[0].textContent;
-    tarifs[dog]={
-      day:Number(tr.children[1].querySelector('input').value),
-      night:Number(tr.children[2].querySelector('input').value),
-      walk:Number(tr.children[3].querySelector('input').value)
-    };
-  });
-  localStorage.setItem('tarifs',JSON.stringify(tarifs));
-  tarifsSheet.style.display='none';
-}
+document.getElementById('tarifsBtn').onclick = ()=>{ tarifsSheet.style.display='flex'; };
+document.getElementById('closeTarifsBtn').onclick = ()=>{ tarifsSheet.style.display='none'; };
+document.getElementById('saveTarifsBtn').onclick = ()=>{
+    [...tarifsTableBody.querySelectorAll('tr')].forEach(tr=>{
+        const dog = tr.children[0].textContent;
+        tarifs[dog] = {
+            day: Number(tr.children[1].querySelector('input').value),
+            night: Number(tr.children[2].querySelector('input').value),
+            walk: Number(tr.children[3].querySelector('input').value)
+        };
+    });
+    localStorage.setItem('tarifs',JSON.stringify(tarifs));
+    tarifsSheet.style.display='none';
+};
+document.getElementById('addDogTarifBtn').onclick = ()=>{
+    const name = prompt("Introduce el nombre del perro:");
+    if(!name) return;
+    if(allDogs.includes(name)){ alert("Perro ya existe."); return; }
+    allDogs.push(name); localStorage.setItem('allDogs',JSON.stringify(allDogs));
+    tarifs[name] = {day:10, night:10, walk:10};
+    loadTarifs();
+};
 
-document.getElementById('addDogTarifBtn').onclick=()=>{
-  const name=prompt("Introduce el nombre del perro:");
-  if(!name) return; 
-  if(allDogs.includes(name)){alert("Perro ya existe."); return;}
-  allDogs.push(name); 
-  localStorage.setItem('allDogs',JSON.stringify(allDogs));
-  tarifs[name]={day:10,night:10,walk:10}; 
-  loadTarifs();
-}
-
-// AGENDA MODAL
+// ===== AGENDA MODAL =====
 const agendaSheet = document.getElementById('agendaSheet');
 const agendaContainer = document.getElementById('agendaContainer');
 
 document.getElementById('calendarBtn').onclick = ()=>{
-  renderAgenda();
-  agendaSheet.style.display='flex';
-}
-
+    renderAgenda();
+    agendaSheet.style.display='flex';
+};
 document.getElementById('closeAgendaBtn').onclick = ()=>{
-  agendaSheet.style.display='none';
-}
+    agendaSheet.style.display='none';
+};
 
 function renderAgenda(){
-  agendaContainer.innerHTML='';
-  const sortedDates = Object.keys(selections).sort((a,b)=>{
-    const [da,ma,ya]=a.split('/').map(Number);
-    const [db,mb,yb]=b.split('/').map(Number);
-    return new Date(ya,ma-1,da) - new Date(yb,mb-1,db);
-  });
-  
-  if(sortedDates.length === 0){
-    agendaContainer.innerHTML='<p>No hay servicios programados.</p>';
-    return;
-  }
-  
-  sortedDates.forEach(dateKey=>{
-    const dayDiv = document.createElement('div');
-    dayDiv.className='agenda-day';
-    dayDiv.innerHTML=`<h3>${dateKey}</h3>`;
-    
-    const groups = {};
-    Object.entries(selections[dateKey]).forEach(([key,val])=>{
-      if(!val.selected) return;
-      const [dog,service]=key.split('_');
-      if(!groups[dog]) groups[dog]=[];
-      const timeStr = val.start && val.end ? ` (${val.start} → ${val.end})` : '';
-      groups[dog].push(`${service}${timeStr}`);
+    agendaContainer.innerHTML='';
+    const sortedDates = Object.keys(selections).sort((a,b)=>{
+        const [da,ma,ya]=a.split('/').map(Number);
+        const [db,mb,yb]=b.split('/').map(Number);
+        return new Date(ya,ma-1,da)-new Date(yb,mb-1,db);
     });
-    
-    for(let dog in groups){
-      const dogDiv = document.createElement('div');
-      dogDiv.className='agenda-dog';
-      dogDiv.innerHTML=`<strong>${dog}:</strong> ${groups[dog].join(', ')}`;
-      dayDiv.appendChild(dogDiv);
+
+    if(sortedDates.length===0){
+        agendaContainer.innerHTML='<p>No hay servicios programados.</p>';
+        return;
     }
-    
-    agendaContainer.appendChild(dayDiv);
-  });
+
+    sortedDates.forEach(dateKey=>{
+        const dayDiv = document.createElement('div');
+        dayDiv.className='agenda-day';
+        dayDiv.innerHTML=`<h3>${dateKey}</h3>`;
+        const groups={};
+
+        Object.entries(selections[dateKey]).forEach(([key,val])=>{
+            if(!val.selected) return;
+            const [dog, service] = key.split('_');
+            if(!groups[dog]) groups[dog]=[];
+            const timeStr = val.start && val.end ? ` (${val.start} → ${val.end})` : '';
+            groups[dog].push(`${service}${timeStr}`);
+        });
+
+        for(let dog in groups){
+            const dogDiv = document.createElement('div');
+            dogDiv.className='agenda-dog';
+            dogDiv.innerHTML=`<strong>${dog}:</strong> ${groups[dog].join(', ')}`;
+            dayDiv.appendChild(dogDiv);
+        }
+        agendaContainer.appendChild(dayDiv);
+    });
 }
+
+// ===== INITIAL CALLS =====
+buildDateStrip(currentDate);
+updateSummary();
 </script>
+
 </body>
 </html>
