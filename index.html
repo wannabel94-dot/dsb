@@ -173,7 +173,12 @@ z-index: 10;
 .agenda-block{margin:6px 0;padding:10px;border-radius:12px;background:#fff;}
 .agenda-day{padding:12px;border-radius:12px;margin-bottom:8px;border:1px solid #e6e2cf;}
 .agenda-day h3{margin-bottom:8px;color:#303021;}
-.agenda-entry{display:flex;gap:12px;align-items:flex-start;padding:8px;border-radius:10px;margin:6px 0;background:#fbfbfa;border:1px solid #f0ede0;}
+.agenda-entry {
+    display: block; /* or inline-block */
+    padding: 4px 8px;
+    font-size: 16px;
+    color: #303021;
+}
 .entry-time{width:110px;font-weight:700;color:#303021;}
 .entry-body{flex:1;}
 .entry-services{font-size:14px;color:#666;margin-top:4px;}
