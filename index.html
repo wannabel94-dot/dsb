@@ -331,10 +331,23 @@ const formatDate = d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMont
 // Temporary storage for dogs being added
 let tempDogs = [];
 
-  const input=document.createElement('input'); input.type='date'; input.style.display='none'; document.body.appendChild(input);
-  input.valueAsDate=currentDate; input.click();
-  input.onchange=()=>{currentDate=new Date(input.value); updateDate(); updateSummary(); input.remove();}
+function promptDatePicker() {
+    const input = document.createElement('input');
+    input.type = 'date';
+    input.style.display = 'none';
+    document.body.appendChild(input);
+    input.valueAsDate = currentDate;
+
+    input.onchange = () => {
+        currentDate = new Date(input.value);
+        buildDateStrip(currentDate);  // ✅ rebuild the date strip
+        updateSummary();              // ✅ update summary
+        input.remove();
+    };
+
+    input.click(); // trigger only when calling this function
 }
+
 
 // SERVICE MODAL
 const serviceModal = document.getElementById('serviceModal');
