@@ -550,7 +550,7 @@ function renderAgenda() {
     });
 }
 
-    function buildAgendaDay(dateKey, isPast=false, isToday=false){
+function buildAgendaDay(dateKey, isPast=false, isToday=false){
     const dayDiv = document.createElement('div');
     dayDiv.className = 'agenda-day';
     if(isPast) dayDiv.classList.add('agenda-past');
@@ -560,18 +560,30 @@ function renderAgenda() {
     dayDiv.appendChild(header);
 
     const entries = selections[dateKey] || {};
-    Object.entries(entries).forEach(([key, val]) => {
-        if(!val.selected) return;
-        const [dog, service] = key.split('_');
+    // Convert entries to array and sort: no time first, then by start time
+    const sortedEntries = Object.entries(entries)
+        .filter(([key,val]) => val.selected)
+        .map(([key,val]) => {
+            const [dog, service] = key.split('_');
+            return { dog, service, start: val.start, end: val.end };
+        })
+        .sort((a,b) => {
+            if(!a.start && b.start) return -1;       // a has no start → comes first
+            if(a.start && !b.start) return 1;        // b has no start → comes first
+            return a.start.localeCompare(b.start);    // both have time → sort by start
+        });
+
+    sortedEntries.forEach(e => {
         const entry = document.createElement('div');
         entry.className = 'agenda-entry';
-        const timeStr = val.start || val.end ? ` ${val.start || ''}${val.start && val.end ? ' → ' : ''}${val.end || ''}` : '';
-        entry.innerHTML = `<div class="entry-time">${dog}</div><div class="entry-body">${service}${service==='Overnight' ? ' 🌙' : ''}${timeStr}</div>`;
+        const timeStr = e.start ? `${e.start} - ` : '';
+        entry.innerHTML = `<div class="entry-time">${timeStr}${e.dog}</div><div class="entry-body">${e.service}${e.service==='Overnight' ? ' 🌙' : ''}</div>`;
         dayDiv.appendChild(entry);
     });
 
     return dayDiv;
 }
+
 
 // ===== INITIAL CALLS =====
 buildFullDateStrip(currentDate);
