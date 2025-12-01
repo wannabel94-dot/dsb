@@ -290,70 +290,83 @@ function updateMonthHeader(date){
     document.getElementById("monthHeader").textContent = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-function buildDateStrip(selectedDate = new Date()){
-    updateMonthHeader(selectedDate);
+// ===== FULL CALENDAR STRIP =====
+const DAYS_TO_SHOW = 365; // 1 year forward/back
+let allDates = [];
+
+function generateDates(centerDate = new Date()) {
+    allDates = [];
+    for(let i=-DAYS_TO_SHOW; i<=DAYS_TO_SHOW; i++){
+        const d = new Date(centerDate);
+        d.setDate(centerDate.getDate() + i);
+        allDates.push(d);
+    }
+}
+
+function buildFullDateStrip(centerDate = new Date()){
+    generateDates(centerDate);
     const dateStrip = document.getElementById("dateStrip");
     dateStrip.innerHTML = '';
+    dateStrip.style.scrollSnapType = "x mandatory";
 
-    const start = new Date(selectedDate);
-    start.setDate(selectedDate.getDate() - 3);
-
-    for(let i=0; i<7; i++){
-        const d = new Date(start);
-        d.setDate(start.getDate() + i);
-
+    allDates.forEach(d=>{
         const div = document.createElement("div");
         div.className = "date-item";
-        if(d.toDateString() === selectedDate.toDateString()) div.classList.add("active");
-
+        if(d.toDateString() === centerDate.toDateString()) div.classList.add("active");
         div.innerHTML = `
             <span class="dayname">${dayNames[d.getDay()]}</span>
             <div class="circle">${d.getDate()}</div>
         `;
         dateStrip.appendChild(div);
-    }
+    });
 
-    // Scroll selected date to center
-    const active = dateStrip.querySelector(".date-item.active");
-    if(active){
-        dateStrip.scrollLeft = active.offsetLeft - dateStrip.offsetWidth/2 + active.offsetWidth/2;
-    }
-    updateSummary();
+    // Scroll to center
+    setTimeout(()=>{
+        scrollToDate(centerDate);
+    }, 50);
 }
 
-// Scroll-driven selection
-const dateStrip = document.getElementById("dateStrip");
-let isScrolling;
+function scrollToDate(targetDate){
+    const dateStrip = document.getElementById("dateStrip");
+    const items = dateStrip.querySelectorAll(".date-item");
+    for(let i=0;i<allDates.length;i++){
+        if(allDates[i].toDateString() === targetDate.toDateString()){
+            const item = items[i];
+            dateStrip.scrollLeft = item.offsetLeft - dateStrip.offsetWidth/2 + item.offsetWidth/2;
+            break;
+        }
+    }
+}
+
+// Scroll listener
 dateStrip.addEventListener('scroll', ()=>{
     clearTimeout(isScrolling);
     isScrolling = setTimeout(()=>{
-        const stripCenter = dateStrip.offsetWidth / 2;
-        let closest = null;
-        let closestDistance = Infinity;
+        const stripCenter = dateStrip.offsetWidth/2;
+        let closestIdx = 0;
+        let minDist = Infinity;
 
-        document.querySelectorAll('.date-item').forEach(item=>{
+        allDates.forEach((d,i)=>{
+            const item = dateStrip.children[i];
             const itemCenter = item.offsetLeft + item.offsetWidth/2 - dateStrip.scrollLeft;
             const dist = Math.abs(stripCenter - itemCenter);
-            if(dist < closestDistance){
-                closestDistance = dist;
-                closest = item;
-            }
+            if(dist < minDist){ minDist = dist; closestIdx = i; }
         });
 
-        if(closest){
-            document.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active'));
-            closest.classList.add('active');
+        // Update active
+        document.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active'));
+        const activeItem = dateStrip.children[closestIdx];
+        activeItem.classList.add('active');
 
-            const day = parseInt(closest.querySelector('.circle').textContent);
-            const [monthName, yearStr] = document.getElementById('monthHeader').textContent.split(' ');
-            const month = new Date(`${monthName} 1, ${yearStr}`).getMonth();
-            const year = parseInt(yearStr);
-
-            currentDate = new Date(year, month, day);
-            updateSummary();
-        }
-    },100);
+        // Update current date
+        currentDate = allDates[closestIdx];
+        updateMonthHeader(currentDate);
+        updateSummary();
+    }, 50);
 });
+
+// Initial call
+buildFullDateStrip(currentDate);
 
 // ===== SERVICE MODAL =====
 const serviceModal = document.getElementById('serviceModal');
