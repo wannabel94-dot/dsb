@@ -550,6 +550,29 @@ function renderAgenda() {
     });
 }
 
+    function buildAgendaDay(dateKey, isPast=false, isToday=false){
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'agenda-day';
+    if(isPast) dayDiv.classList.add('agenda-past');
+    
+    const header = document.createElement('h3');
+    header.textContent = dateKey + (isToday ? ' (Hoy)' : '');
+    dayDiv.appendChild(header);
+
+    const entries = selections[dateKey] || {};
+    Object.entries(entries).forEach(([key, val]) => {
+        if(!val.selected) return;
+        const [dog, service] = key.split('_');
+        const entry = document.createElement('div');
+        entry.className = 'agenda-entry';
+        const timeStr = val.start || val.end ? ` ${val.start || ''}${val.start && val.end ? ' → ' : ''}${val.end || ''}` : '';
+        entry.innerHTML = `<div class="entry-time">${dog}</div><div class="entry-body">${service}${service==='Overnight' ? ' 🌙' : ''}${timeStr}</div>`;
+        dayDiv.appendChild(entry);
+    });
+
+    return dayDiv;
+}
+
 // ===== INITIAL CALLS =====
 buildFullDateStrip(currentDate);
 updateMonthHeader(currentDate);
