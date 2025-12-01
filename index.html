@@ -296,52 +296,54 @@ function updateMonthHeader(date){
 }
 
 // ===== FULL CALENDAR STRIP =====
-const DAYS_TO_SHOW = 365; // 1 year forward/back
-let allDates = [];
+const dateStrip = document.getElementById("dateStrip");
+let scrollTimeout;
 
-function generateDates(centerDate = new Date()) {
-    allDates = [];
-    for(let i=-DAYS_TO_SHOW; i<=DAYS_TO_SHOW; i++){
-        const d = new Date(centerDate);
-        d.setDate(centerDate.getDate() + i);
-        allDates.push(d);
-    }
-}
+dateStrip.addEventListener('scroll', () => {
+    window.clearTimeout(scrollTimeout);
 
-function buildFullDateStrip(centerDate = new Date()){
-    generateDates(centerDate);
-    const dateStrip = document.getElementById("dateStrip");
-    dateStrip.innerHTML = '';
-    dateStrip.style.scrollSnapType = "x mandatory";
+    scrollTimeout = setTimeout(() => {
+        const stripRect = dateStrip.getBoundingClientRect();
+        const stripCenter = stripRect.left + stripRect.width / 2;
 
-    allDates.forEach(d=>{
-        const div = document.createElement("div");
-        div.className = "date-item";
-        if(d.toDateString() === centerDate.toDateString()) div.classList.add("active");
-        div.innerHTML = `
-            <span class="dayname">${dayNames[d.getDay()]}</span>
-            <div class="circle">${d.getDate()}</div>
-        `;
-        dateStrip.appendChild(div);
-    });
+        let closest = null;
+        let closestDistance = Infinity;
 
-    // Scroll to center
-    setTimeout(()=>{
-        scrollToDate(centerDate);
-    }, 50);
-}
+        document.querySelectorAll('.date-item').forEach(item => {
+            const itemRect = item.getBoundingClientRect();
+            const itemCenter = itemRect.left + itemRect.width / 2;
+            const distance = Math.abs(stripCenter - itemCenter);
 
-function scrollToDate(targetDate){
-    const dateStrip = document.getElementById("dateStrip");
-    const items = dateStrip.querySelectorAll(".date-item");
-    for(let i=0;i<allDates.length;i++){
-        if(allDates[i].toDateString() === targetDate.toDateString()){
-            const item = items[i];
-            dateStrip.scrollLeft = item.offsetLeft - dateStrip.offsetWidth/2 + item.offsetWidth/2;
-            break;
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closest = item;
+            }
+        });
+
+        if (closest) {
+            // Update active class
+            document.querySelectorAll('.date-item').forEach(d => d.classList.remove('active'));
+            closest.classList.add('active');
+
+            // Read day from the circle
+            const day = parseInt(closest.querySelector('.circle').textContent);
+            
+            // Calculate the date relative to the first date in the strip
+            const firstItemDateText = dateStrip.querySelector('.date-item .circle').textContent;
+            const firstItemDate = new Date(currentDate);
+            firstItemDate.setDate(currentDate.getDate() - 3); // match buildDateStrip
+
+            const newDate = new Date(firstItemDate);
+            const idx = Array.from(dateStrip.children).indexOf(closest);
+            newDate.setDate(firstItemDate.getDate() + idx);
+
+            currentDate = newDate;
+            updateMonthHeader(currentDate);
+            updateSummary();
         }
-    }
-}
+    }, 50); // lower timeout for smoother updates
+});
+
 function setDimmed(isDimmed) {
     if(isDimmed){
         addedDogsContainer.classList.add('dimmed');
