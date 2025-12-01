@@ -379,7 +379,7 @@ function renderServiceButtons() {
     serviceButtonsContainer.innerHTML = '';
     if (!currentDogSelection.dog) return;
     
-    const services = ['+ Guardería', '+ Noche', '+ Paseo'];
+    const services = ['Guardería', 'Noche', 'Paseo'];
     services.forEach(s => {
         const btn = document.createElement('button');
         btn.className = 'service-btn';
