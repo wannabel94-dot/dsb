@@ -218,8 +218,10 @@ z-index: 10;
     <div id="serviceButtonsContainer">
     <button class="service-btn" title="Paseo">Paseo</button>
       <button class="service-btn" title="Guardería">Guardería</button>
-     <button class="service-btn" title="Otro">Otro</button>
+     <button class="service-btn" title="Otro servicio">Otro servicio</button>
+             <button class="service-btn" title="Noche">+ Noche</button>
       </div>
+      
       
     <div id="timeInputsContainer">
       <label>Recogida:</label>
@@ -383,7 +385,7 @@ function renderServiceButtons() {
     serviceButtonsContainer.innerHTML = '';
     if (!currentDogSelection.dog) return;
     
-    const services = ['Guardería', 'Paseo', 'Otro'];
+    const services = ['Guardería', 'Paseo', 'Otro servicio', '+ Noche'];
     services.forEach(s => {
         const btn = document.createElement('button');
         btn.className = 'service-btn';
@@ -577,13 +579,15 @@ function buildAgendaDay(dateKey, isPast=false, isToday=false){
             return a.start.localeCompare(b.start);    // both have time → sort by start
         });
 
-    sortedEntries.forEach(e => {
-        const entry = document.createElement('div');
-        entry.className = 'agenda-entry';
-        const timeStr = e.start ? `${e.start} - ` : '';
-        entry.innerHTML = `<div class="entry-time">${timeStr}${e.dog}</div><div class="entry-body">${e.service}${e.service==='Overnight' ? ' 🌙' : ''}</div>`;
-        dayDiv.appendChild(entry);
-    });
+sortedEntries.forEach(e => {
+    const entry = document.createElement('div');
+    entry.className = 'agenda-entry';
+    const timeStr = e.start ? e.start : '';
+    const endStr = e.end ? ` - ${e.end}` : '';
+    const serviceStr = e.service === 'Overnight' ? `${e.service} 🌙` : e.service;
+    entry.textContent = `${timeStr}${endStr} ${e.dog} ${serviceStr}`;
+    dayDiv.appendChild(entry);
+});
 
     return dayDiv;
 }
