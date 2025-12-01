@@ -350,7 +350,7 @@ document.getElementById('centralBtn').onclick = ()=>{
 };
 
 // back button closes popup
-document.getElementById('backBtn').onclick = ()=>{ serviceModal.style.display='none'; };
+document.getElementById('modalBackBtn').onclick = ()=>{ serviceModal.style.display='none'; };
 
 // Dog selection
 dogSelect.onchange = ()=>{ currentDogSelection.dog = dogSelect.value || null; renderServiceButtons(); };
