@@ -405,7 +405,7 @@ if(bottomBack) bottomBack.addEventListener('click', ()=>{ serviceModal.style.dis
 
 // Dog selection
 dogSelect.onchange = ()=>{ currentDogSelection.dog = dogSelect.value || null; renderServiceButtons(); };
-
+    
 function renderServiceButtons() {
     serviceButtonsContainer.innerHTML = '';
     if (!currentDogSelection.dog) return;
@@ -415,20 +415,24 @@ function renderServiceButtons() {
         const btn = document.createElement('button');
         btn.className = 'service-btn';
         btn.title = s;
-        btn.textContent = s;  // <-- add this line
+        btn.textContent = s;
 
         btn.addEventListener('click', () => {
             btn.classList.toggle('selected');
             const idx = currentDogSelection.services.indexOf(s);
             if (idx > -1) currentDogSelection.services.splice(idx, 1);
             else currentDogSelection.services.push(s);
-            timeInputsContainer.style.display = 'block';
+            
+            // Only show time inputs if a service requiring time is selected
+            const needsTime = currentDogSelection.services.some(
+                service => service !== '+ Noche'
+            );
+            timeInputsContainer.style.display = needsTime ? 'block' : 'none';
         });
 
         serviceButtonsContainer.appendChild(btn);
     });
 }
-
 
 // cancel single add
 const cancelAddBtn = document.getElementById('cancelAddBtn');
