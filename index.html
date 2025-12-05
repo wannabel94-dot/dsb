@@ -492,7 +492,7 @@ function renderAddedDogsForDate(dateKey){
         const timeStr = v.start || v.end ? ` ${v.start || ''}${v.start && v.end ? ' - ' : ''}${v.end || ''}` : '';
         const card = document.createElement('div');
         card.className = 'dog-entry';
-        card.innerHTML = `<div><strong>${dog}</strong><div class="services-list">${service}${timeStr}${service==='Overnight' ? ' 🌙' : ''}</div></div><div><button class="remove-btn">Eliminar</button></div>`;
+        card.innerHTML = `<div><strong>${dog}</strong><div class="services-list">${service}${timeStr}${service==='Overnight' ? ' 🌙' : ''}</div></div>`;
         const removeBtn = card.querySelector('.remove-btn');
         if(removeBtn) removeBtn.addEventListener('click', ()=>{ delete selections[dateKey][k]; localStorage.setItem('selections', JSON.stringify(selections)); renderAddedDogsForDate(dateKey); updateSummary(); });
         addedDogsContainer.appendChild(card);
