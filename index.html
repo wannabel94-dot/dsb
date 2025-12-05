@@ -171,7 +171,41 @@ z-index: 10;
 .checkbox-wrapper{display:flex;align-items:center;gap:10px;margin:10px 0;}
 .checkbox-wrapper input[type="checkbox"]{width:auto;margin:0;}
 .checkbox-wrapper label{margin:0;cursor:pointer;}
+/* ===== NESTED POPUP ===== */
+.nested-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 4000;
+    align-items: center;
+    justify-content: center;
+}
 
+.nested-popup-content {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    border-radius: 20px;
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    animation: popIn 0.25s ease-out;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.nested-popup h3 {
+    margin-bottom: 15px;
+    color: #303021;
+}
 /* ===== FOOTER ===== */
 .footer-nav { position: fixed; bottom: 0px; left: 50%; transform: translateX(-50%); height: 60px; width: 90%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; background: #303021; border-radius: 9999px; z-index: 1500; }
 .left-group,.right-group{display:flex;justify-content:space-between;width:120px;gap:0;}
@@ -229,39 +263,42 @@ z-index: 10;
 <!-- SERVICE MODAL -->
 <div id="serviceModal" class="modal">
   <div class="modal-content" id="modalContent">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-      <h2 style="flex:1;margin-left:6px;">Añadir Servicios</h2>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;">
+      <h2 style="margin-left:6px;">Servicios del Día</h2>
+      <button id="addNewServiceBtn" style="padding:10px 20px;background:#c1802a;color:#c6d197;border:none;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;">+ Añadir</button>
     </div>
     
     <div id="addedDogsContainer"></div>
+
+    <!-- bottom back -->
+    <button id="modalBackBtn" class="back-bottom-btn">Volver</button>
+  </div>
+</div>
+
+<!-- NESTED ADD SERVICE POPUP -->
+<div id="addServicePopup" class="nested-popup">
+  <div class="nested-popup-content">
+    <h3>Añadir Servicio</h3>
     
-    <label>
-      <select id="dogSelect">
-        <option value="">Seleccionar Perro</option>
-      </select>
-    </label>
+    <label>Perro:</label>
+    <select id="dogSelect">
+      <option value="">Seleccionar Perro</option>
+    </select>
     
-    <div id="serviceButtonsContainer">
-    <button class="service-btn" title="Paseo">Paseo</button>
-      <button class="service-btn" title="Guardería">Guardería</button>
-     <button class="service-btn" title="Otro servicio">Otro</button>
-             <button class="service-btn" title="Noche">+1 Noche</button>
-      </div>
-      
-      
-    <div id="timeInputsContainer">
+    <label style="display:block;margin-top:15px;margin-bottom:8px;font-weight:600;">Servicios:</label>
+    <div id="serviceButtonsContainer"></div>
+    
+    <div id="timeInputsContainer" style="display:none;margin-top:15px;">
       <label>Recogida:</label>
       <input id="startTimeInput" type="time" />
       <label>Entrega:</label>
       <input id="endTimeInput" type="time" />
-      <div class="controls-row">
-        <button id="addDogBtn" class="small-btn small-save">Guardar</button>
-        <button id="cancelAddBtn" class="small-btn small-cancel">Cancelar</button>
-      </div>
     </div>
-
-    <!-- bottom back -->
-    <button id="modalBackBtn" class="back-bottom-btn">Volver</button>
+    
+    <div class="controls-row" style="margin-top:20px;justify-content:flex-end;">
+      <button id="cancelAddBtn" class="small-btn small-cancel">Cancelar</button>
+      <button id="addDogBtn" class="small-btn small-save">Guardar</button>
+    </div>
   </div>
 </div>
 
@@ -381,37 +418,45 @@ function snapToClosest(){ if(!isDragging) return; isDragging = false; const stri
 
 // ===== SERVICE MODAL =====
 const serviceModal = document.getElementById('serviceModal');
+const addServicePopup = document.getElementById('addServicePopup');
 const dogSelect = document.getElementById('dogSelect');
 const serviceButtonsContainer = document.getElementById('serviceButtonsContainer');
 const timeInputsContainer = document.getElementById('timeInputsContainer');
 const addedDogsContainer = document.getElementById('addedDogsContainer');
 
-// open modal
+// open main service modal
 document.getElementById('centralBtn').onclick = ()=>{
+    serviceModal.style.display='block';
+    refreshServiceModalForCurrentDate();
+};
+
+// open nested add service popup
+document.getElementById('addNewServiceBtn').onclick = ()=>{
     currentDogSelection = { dog: null, services: [], start: '', end: '' };
     dogSelect.innerHTML = '<option value="">Seleccionar Perro</option>';
     allDogs.forEach(d=>{ const opt = document.createElement('option'); opt.value = d; opt.textContent = d; dogSelect.appendChild(opt); });
     serviceButtonsContainer.innerHTML='';
     timeInputsContainer.style.display='none';
-    addedDogsContainer.innerHTML='';
-    serviceModal.style.display='block';
-    refreshServiceModalForCurrentDate();
+    document.getElementById('startTimeInput').value='';
+    document.getElementById('endTimeInput').value='';
+    addServicePopup.style.display='flex';
 };
 
-// back buttons close popup (both top and bottom)
-const topBack = document.getElementById('backBtn');
-if(topBack) topBack.addEventListener('click', ()=>{ serviceModal.style.display='none'; });
+// close main modal
 const bottomBack = document.getElementById('modalBackBtn');
 if(bottomBack) bottomBack.addEventListener('click', ()=>{ serviceModal.style.display='none'; });
 
 // Dog selection
-dogSelect.onchange = ()=>{ currentDogSelection.dog = dogSelect.value || null; renderServiceButtons(); };
+dogSelect.onchange = ()=>{ 
+    currentDogSelection.dog = dogSelect.value || null; 
+    renderServiceButtons(); 
+};
     
 function renderServiceButtons() {
     serviceButtonsContainer.innerHTML = '';
     if (!currentDogSelection.dog) return;
     
-    const services = ['Guardería', 'Paseo', 'Otro servicio', '+ Noche'];
+    const services = ['Guardería', 'Paseo', 'Otro servicio', '+1 Noche'];
     services.forEach(s => {
         const btn = document.createElement('button');
         btn.className = 'service-btn';
@@ -426,7 +471,7 @@ function renderServiceButtons() {
             
             // Only show time inputs if a service requiring time is selected
             const needsTime = currentDogSelection.services.some(
-                service => service !== '+ Noche'
+                service => service !== '+1 Noche'
             );
             timeInputsContainer.style.display = needsTime ? 'block' : 'none';
         });
@@ -435,25 +480,21 @@ function renderServiceButtons() {
     });
 }
 
-// cancel single add
+// cancel - close popup
 const cancelAddBtn = document.getElementById('cancelAddBtn');
 if(cancelAddBtn) cancelAddBtn.addEventListener('click', ()=>{ 
-    currentDogSelection.services = [];
-    currentDogSelection.start = '';
-    currentDogSelection.end = '';
-    document.getElementById('startTimeInput').value=''; 
-    document.getElementById('endTimeInput').value=''; 
-    timeInputsContainer.style.display='none';
-    renderServiceButtons();
+    addServicePopup.style.display='none';
 });
 
-    // add single dog immediately (no global save)
+// add dog - save and close popup
 const addDogBtn = document.getElementById('addDogBtn');
 if(addDogBtn) addDogBtn.addEventListener('click', ()=>{
-    if(!currentDogSelection.dog || currentDogSelection.services.length===0){ alert('Selecciona un perro y al menos un servicio'); return; }
+    if(!currentDogSelection.dog || currentDogSelection.services.length===0){ 
+        alert('Selecciona un perro y al menos un servicio'); 
+        return; 
+    }
     const startVal = document.getElementById('startTimeInput').value;
     const endVal = document.getElementById('endTimeInput').value;
-    // allow no time entry (optional). store empty strings when not provided.
     currentDogSelection.start = startVal || '';
     currentDogSelection.end = endVal || '';
 
@@ -466,40 +507,46 @@ if(addDogBtn) addDogBtn.addEventListener('click', ()=>{
     });
     localStorage.setItem('selections', JSON.stringify(selections));
 
-    // show in added list
+    // refresh the main modal's list
     renderAddedDogsForDate(dateKey);
     updateSummary();
 
-    // reset form and HIDE time inputs
-    currentDogSelection.services = [];
-    currentDogSelection.start = '';
-    currentDogSelection.end = '';
-    document.getElementById('startTimeInput').value=''; 
-    document.getElementById('endTimeInput').value='';
-    timeInputsContainer.style.display='none';
-    
-    // Re-render service buttons (unselected)
-    renderServiceButtons();
+    // close the popup
+    addServicePopup.style.display='none';
 });
 
 function renderAddedDogsForDate(dateKey){
     addedDogsContainer.innerHTML='';
     const entries = selections[dateKey] || {};
+    
+    if(Object.keys(entries).length === 0){
+        addedDogsContainer.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">No hay servicios para este día. Click "+" para añadir.</p>';
+        return;
+    }
+    
     Object.entries(entries).forEach(([k,v])=>{
         if(!v.selected) return;
         const [dog, service] = k.split('_');
         const timeStr = v.start || v.end ? ` ${v.start || ''}${v.start && v.end ? ' - ' : ''}${v.end || ''}` : '';
         const card = document.createElement('div');
         card.className = 'dog-entry';
-        card.innerHTML = `<div><strong>${dog}</strong><div class="services-list">${service}${timeStr}${service==='Overnight' ? ' 🌙' : ''}</div></div>`;
+        card.innerHTML = `<div><strong>${dog}</strong><div class="services-list">${service}${timeStr}</div></div><div><button class="remove-btn">Eliminar</button></div>`;
         const removeBtn = card.querySelector('.remove-btn');
-        if(removeBtn) removeBtn.addEventListener('click', ()=>{ delete selections[dateKey][k]; localStorage.setItem('selections', JSON.stringify(selections)); renderAddedDogsForDate(dateKey); updateSummary(); });
+        if(removeBtn) removeBtn.addEventListener('click', ()=>{ 
+            delete selections[dateKey][k]; 
+            localStorage.setItem('selections', JSON.stringify(selections)); 
+            renderAddedDogsForDate(dateKey); 
+            updateSummary(); 
+        });
         addedDogsContainer.appendChild(card);
     });
 }
 
 // show existing for current date when modal opens or date changes
-function refreshServiceModalForCurrentDate(){ const dateKey = formatDate(currentDate); renderAddedDogsForDate(dateKey); }
+function refreshServiceModalForCurrentDate(){ 
+    const dateKey = formatDate(currentDate); 
+    renderAddedDogsForDate(dateKey); 
+}
 
 // ===== SUMMARY =====
 function updateSummary() {
