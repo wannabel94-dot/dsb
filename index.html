@@ -144,13 +144,15 @@ position: sticky;
 bottom: 0;
 background: #fff;
 z-index: 10;
-}.modal-buttons button{padding:10px 16px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer; background:#a53200;color:#f9e9ca;transition:0.2s;}
+}
+    
+.modal-buttons button{padding:10px 16px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer; background:#a53200;color:#f9e9ca;transition:0.2s;}
 .modal-buttons button:hover{transform:scale(1.04);background:#8a2b00;}
 .modal-buttons button.cancel{background:#666;color:#fff;}
 .modal-buttons button.cancel:hover{background:#555;}
-
+   
 /* Service selection buttons */
-.service-btn{padding:10px 14px;margin:6px;border:none;border-radius:12px;background:#a53200;color:#f9e9ca;font-weight:600;font-size:16px;cursor:pointer; transition:0.2s;}
+.service-btn{padding:10px 14px;margin:6px;border:none;border-radius:12px;background:#b7e3c2;color:#195928;font-weight:600;font-size:16px;cursor:pointer; transition:0.2s;}
 .service-btn:hover{background:#8a2b00;transform:scale(1.05);}
 .service-btn.selected{background:#8d4585;box-shadow:0 0 0 3px #d4cba8;}
 
@@ -243,8 +245,8 @@ z-index: 10;
     <div id="serviceButtonsContainer">
     <button class="service-btn" title="Paseo">Paseo</button>
       <button class="service-btn" title="Guardería">Guardería</button>
-     <button class="service-btn" title="Otro servicio">Otro servicio</button>
-             <button class="service-btn" title="Noche">+ Noche</button>
+     <button class="service-btn" title="Otro servicio">Otro</button>
+             <button class="service-btn" title="Noche">+1 Noche</button>
       </div>
       
       
@@ -434,7 +436,6 @@ function renderServiceButtons() {
     });
 }
 
-// cancel single add
 // cancel single add
 const cancelAddBtn = document.getElementById('cancelAddBtn');
 if(cancelAddBtn) cancelAddBtn.addEventListener('click', ()=>{ 
