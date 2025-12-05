@@ -435,10 +435,19 @@ function renderServiceButtons() {
 }
 
 // cancel single add
+// cancel single add
 const cancelAddBtn = document.getElementById('cancelAddBtn');
-if(cancelAddBtn) cancelAddBtn.addEventListener('click', ()=>{ currentDogSelection = { dog:null, services:[], start:'', end:'' }; dogSelect.value=''; serviceButtonsContainer.innerHTML=''; document.getElementById('startTimeInput').value=''; document.getElementById('endTimeInput').value=''; });
+if(cancelAddBtn) cancelAddBtn.addEventListener('click', ()=>{ 
+    currentDogSelection.services = [];
+    currentDogSelection.start = '';
+    currentDogSelection.end = '';
+    document.getElementById('startTimeInput').value=''; 
+    document.getElementById('endTimeInput').value=''; 
+    timeInputsContainer.style.display='none';
+    renderServiceButtons();
+});
 
-// add single dog immediately (no global save)
+    // add single dog immediately (no global save)
 const addDogBtn = document.getElementById('addDogBtn');
 if(addDogBtn) addDogBtn.addEventListener('click', ()=>{
     if(!currentDogSelection.dog || currentDogSelection.services.length===0){ alert('Selecciona un perro y al menos un servicio'); return; }
@@ -461,9 +470,16 @@ if(addDogBtn) addDogBtn.addEventListener('click', ()=>{
     renderAddedDogsForDate(dateKey);
     updateSummary();
 
-    // reset form
-    currentDogSelection = { dog:null, services:[], start:'', end:'' };
-    dogSelect.value=''; serviceButtonsContainer.innerHTML=''; document.getElementById('startTimeInput').value=''; document.getElementById('endTimeInput').value='';
+    // reset form and HIDE time inputs
+    currentDogSelection.services = [];
+    currentDogSelection.start = '';
+    currentDogSelection.end = '';
+    document.getElementById('startTimeInput').value=''; 
+    document.getElementById('endTimeInput').value='';
+    timeInputsContainer.style.display='none';
+    
+    // Re-render service buttons (unselected)
+    renderServiceButtons();
 });
 
 function renderAddedDogsForDate(dateKey){
