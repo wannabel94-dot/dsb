@@ -610,7 +610,25 @@ function updateDailyTotal(date) {
 
     document.getElementById('dailyTotal').textContent = `Total diario: €${total}`;
 }
- function updateSummary() {
+// ===== SUMMARY =====
+function updateDailyTotal(date) {
+    const dateKey = formatDate(date);
+    const entries = selections[dateKey] || {};
+    let total = 0;
+
+    Object.entries(entries).forEach(([key, val]) => {
+        if (!val.selected) return;
+        const [dog, service] = key.split('_');
+        const dogTarif = tarifs[dog] || { day: 0, night: 0, walk: 0 };
+        if (service.toLowerCase().includes('guardería') || service.toLowerCase().includes('day')) total += dogTarif.day || 0;
+        else if (service.toLowerCase().includes('paseo') || service.toLowerCase().includes('walk')) total += dogTarif.walk || 0;
+        else if (service.toLowerCase().includes('noche') || service.toLowerCase().includes('night')) total += dogTarif.night || 0;
+    });
+
+    document.getElementById('dailyTotal').textContent = `Total diario: €${total}`;
+}
+
+function updateSummary() {
     const dateKey = formatDate(currentDate);
     const div = document.getElementById('summaryContent');
     if(!selections[dateKey]){
@@ -637,7 +655,6 @@ function updateDailyTotal(date) {
     // Separate call for the total
     updateDailyTotal(currentDate);
 }
-
 // ===== TARIFS MODAL =====
 const tarifsSheet = document.getElementById('tarifsSheet');
 const tarifsTableBody = document.querySelector('#tarifsTable tbody');
