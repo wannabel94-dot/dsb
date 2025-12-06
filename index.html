@@ -567,51 +567,6 @@ function refreshServiceModalForCurrentDate(){
 }
 
 // ===== SUMMARY =====
-    // Sort by start time
-    entries.sort((a,b)=>{
-        if(!a.timeStr && !b.timeStr) return 0;
-        if(!a.timeStr) return 1;
-        if(!b.timeStr) return -1;
-        return a.timeStr.localeCompare(b.timeStr);
-    });
-
-    // Build responsive flex layout
-    div.innerHTML = '';
-    entries.forEach(e => {
-        const row = document.createElement('div');
-        row.style.display = 'flex';
-        row.style.flexWrap = 'wrap';
-        row.style.alignItems = 'center';
-        row.style.gap = '8px';
-        row.innerHTML = `
-            <div style="flex: 0 0 90px; font-weight:600;">${e.timeStr}</div>
-            <div style="flex: 1 1 auto;">${e.dog} ${e.serviceStr}</div>
-        `;
-        div.appendChild(row);
-    });
-
-    if(entries.length === 0) div.textContent = 'No hay servicios seleccionados.';
-}
-
-
-function updateDailyTotal(date) {
-    const dateKey = formatDate(date);
-    const entries = selections[dateKey] || {};
-    let total = 0;
-
-    Object.entries(entries).forEach(([key, val]) => {
-        if (!val.selected) return;
-        const [dog, service] = key.split('_');
-        const dogTarif = tarifs[dog] || { day: 0, night: 0, walk: 0 };
-        if (service.toLowerCase().includes('guardería') || service.toLowerCase().includes('day')) total += dogTarif.day || 0;
-        else if (service.toLowerCase().includes('paseo') || service.toLowerCase().includes('walk')) total += dogTarif.walk || 0;
-        else if (service.toLowerCase().includes('noche') || service.toLowerCase().includes('night')) total += dogTarif.night || 0;
-    });
-
-    document.getElementById('dailyTotal').textContent = `Total diario: €${total}`;
-}
-
-// ===== SUMMARY =====
 function updateDailyTotal(date) {
     const dateKey = formatDate(date);
     const entries = selections[dateKey] || {};
