@@ -505,7 +505,8 @@ cancelAddBtn.addEventListener('click', () => {
 });
 
 // SAVE button - saves selection and closes nested popup
-addDogBtn.addEventListener('click', () => {
+addDogBtn.addEventListener('click', (e) => {
+    e.preventDefault(); // prevent any default form behavior
     if (!currentDogSelection.dog || currentDogSelection.services.length === 0) {
         alert('Selecciona un perro y al menos un servicio');
         return;
@@ -530,6 +531,7 @@ addDogBtn.addEventListener('click', () => {
 
     addServicePopup.style.display = 'none'; // close nested popup
 });
+
 
 // VOLVER button - closes the entire main service modal
 document.getElementById('modalBackBtn').addEventListener('click', () => {
