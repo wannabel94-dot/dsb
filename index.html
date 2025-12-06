@@ -429,6 +429,7 @@ const serviceButtonsContainer = document.getElementById('serviceButtonsContainer
 const timeInputsContainer = document.getElementById('timeInputsContainer');
 const addedDogsContainer = document.getElementById('addedDogsContainer');
 const cancelAddBtn = document.getElementById('cancelAddBtn');
+const addDogBtn = document.getElementById('addDogBtn');
 
 // open main service modal
 document.getElementById('centralBtn').onclick = ()=>{
@@ -495,6 +496,7 @@ function renderServiceButtons() {
         serviceButtonsContainer.appendChild(btn);
     });
 }
+    
 // CANCEL button - closes nested popup without saving
 cancelAddBtn.addEventListener('click', () => {
     addServicePopup.style.display = 'none';
