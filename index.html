@@ -259,22 +259,28 @@ z-index: 10;
 </div>
 </div>
 
-
 <!-- SERVICE MODAL -->
 <div id="serviceModal" class="modal">
   <div class="modal-content" id="modalContent">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;">
       <h2 style="margin-left:6px;">Servicios del Día</h2>
-      <button id="addNewServiceBtn" style="padding:10px 20px;background:#c1802a;color:#c6d197;border:none;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;">+ Añadir</button>
     </div>
     
     <div id="addedDogsContainer"></div>
+
+    <!-- Dog selector in main modal -->
+    <div style="margin-top:20px;padding-top:20px;border-top:2px solid #e0e0e0;">
+      <label style="display:block;margin-bottom:10px;font-weight:600;font-size:16px;">Añadir nuevo servicio:</label>
+      <select id="mainDogSelect" style="width:100%;padding:12px;font-size:16px;border:2px solid #c1802a;border-radius:8px;background:white;">
+        <option value="">Seleccionar Perro</option>
+      </select>
+    </div>
 
     <!-- bottom back -->
     <button id="modalBackBtn" class="back-bottom-btn">Volver</button>
   </div>
 </div>
-
+    
 <!-- NESTED ADD SERVICE POPUP -->
 <div id="addServicePopup" class="nested-popup">
   <div class="nested-popup-content">
@@ -417,8 +423,10 @@ dateStrip.addEventListener('touchend', snapToClosest);
 function snapToClosest(){ if(!isDragging) return; isDragging = false; const stripRect = dateStrip.getBoundingClientRect(); const stripCenter = stripRect.left + stripRect.width/2; let closestIdx = 0; let closestDist = Infinity; dateStrip.querySelectorAll('.date-item').forEach((item,i)=>{ const itemRect = item.getBoundingClientRect(); const itemCenter = itemRect.left + itemRect.width/2; const dist = Math.abs(stripCenter - itemCenter); if(dist < closestDist){ closestDist = dist; closestIdx = i; } }); const targetItem = dateStrip.children[closestIdx]; dateStrip.scrollTo({ left: targetItem.offsetLeft - dateStrip.offsetWidth/2 + targetItem.offsetWidth/2, behavior: 'smooth' }); dateStrip.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active')); targetItem.classList.add('active'); currentDate = allDates[closestIdx]; updateMonthHeader(currentDate); updateSummary(); }
 
 // ===== SERVICE MODAL =====
+// ===== SERVICE MODAL =====
 const serviceModal = document.getElementById('serviceModal');
 const addServicePopup = document.getElementById('addServicePopup');
+const mainDogSelect = document.getElementById('mainDogSelect');
 const dogSelect = document.getElementById('dogSelect');
 const serviceButtonsContainer = document.getElementById('serviceButtonsContainer');
 const timeInputsContainer = document.getElementById('timeInputsContainer');
@@ -428,28 +436,38 @@ const addedDogsContainer = document.getElementById('addedDogsContainer');
 document.getElementById('centralBtn').onclick = ()=>{
     serviceModal.style.display='block';
     refreshServiceModalForCurrentDate();
+    populateMainDogSelect();
 };
 
-// open nested add service popup
-document.getElementById('addNewServiceBtn').onclick = ()=>{
-    currentDogSelection = { dog: null, services: [], start: '', end: '' };
+// Populate the dog select in main modal
+function populateMainDogSelect(){
+    mainDogSelect.innerHTML = '<option value="">Seleccionar Perro</option>';
+    allDogs.forEach(d=>{ 
+        const opt = document.createElement('option'); 
+        opt.value = d; 
+        opt.textContent = d; 
+        mainDogSelect.appendChild(opt); 
+    });
+}
+
+// When dog is selected in main modal, open nested popup
+mainDogSelect.onchange = ()=>{
+    const selectedDog = mainDogSelect.value;
+    if(!selectedDog) return;
+    
+    currentDogSelection = { dog: selectedDog, services: [], start: '', end: '' };
     dogSelect.innerHTML = '<option value="">Seleccionar Perro</option>';
     allDogs.forEach(d=>{ const opt = document.createElement('option'); opt.value = d; opt.textContent = d; dogSelect.appendChild(opt); });
+    dogSelect.value = selectedDog;
     serviceButtonsContainer.innerHTML='';
     timeInputsContainer.style.display='none';
     document.getElementById('startTimeInput').value='';
     document.getElementById('endTimeInput').value='';
+    renderServiceButtons();
     addServicePopup.style.display='flex';
-};
-
-// close main modal
-const bottomBack = document.getElementById('modalBackBtn');
-if(bottomBack) bottomBack.addEventListener('click', ()=>{ serviceModal.style.display='none'; });
-
-// Dog selection
-dogSelect.onchange = ()=>{ 
-    currentDogSelection.dog = dogSelect.value || null; 
-    renderServiceButtons(); 
+    
+    // Reset the main select
+    mainDogSelect.value = '';
 };
     
 function renderServiceButtons() {
@@ -549,29 +567,6 @@ function refreshServiceModalForCurrentDate(){
 }
 
 // ===== SUMMARY =====
-function updateSummary() {
-    const dateKey = formatDate(currentDate);
-    const div = document.getElementById('summaryContent');
-    if(!selections[dateKey]){
-        div.textContent = 'No hay servicios seleccionados.';
-        return;
-    }
-
-    const entries = Object.entries(selections[dateKey])
-        .filter(([key,val]) => val.selected)
-        .map(([key,val]) => {
-            const [dog, service] = key.split('_');
-            const serviceStr = service === '+ Noche' ? 'Overnight 🌙' : service;
-            const startStr = val.start || '';
-            const endStr = val.end || '';
-            let timeStr = '';
-            if(startStr && endStr) timeStr = `${startStr} - ${endStr}`;
-            else if(startStr) timeStr = `${startStr} -`;
-            else if(endStr) timeStr = `- ${endStr}`;
-
-            return { timeStr, dog, serviceStr };
-        });
-
     // Sort by start time
     entries.sort((a,b)=>{
         if(!a.timeStr && !b.timeStr) return 0;
