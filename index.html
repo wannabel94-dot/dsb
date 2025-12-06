@@ -109,7 +109,7 @@ h1{text-align:center;margin-bottom:20px;color:#373e2e;}button{cursor:pointer;}
 }
 
 .back-bottom-btn {
-    position: sticky;
+    position: sticky;     /* sticks to the bottom of the modal-content */
     bottom: 0;
     width: 100%;
     background: #f2f2f2;
@@ -119,6 +119,7 @@ h1{text-align:center;margin-bottom:20px;color:#373e2e;}button{cursor:pointer;}
     border: none;
     border-radius: 16px 16px 0 0;
     margin-top: 20px;
+    z-index: 100;          /* ensure it’s above content */
 }
 
 /* Animations */
@@ -265,7 +266,7 @@ z-index: 10;
       <h2 style="margin-left:6px;">Servicios del Día</h2>
     </div>
     
-    <div id="addedDogsContainer"></div>
+    <div id="addedDogsContainer" style="padding-bottom: 80px;"></div> <!-- add padding so last entries aren't hidden -->
 
     <!-- Dog selector in main modal -->
     <div style="margin-top:20px;padding-top:20px;border-top:2px solid #e0e0e0;">
@@ -278,6 +279,7 @@ z-index: 10;
     <button id="modalBackBtn" class="back-bottom-btn">Volver</button>
   </div>
 </div>
+
     
 <!-- NESTED ADD SERVICE POPUP -->
 <div id="addServicePopup" class="nested-popup">
