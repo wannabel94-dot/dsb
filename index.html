@@ -537,11 +537,6 @@ function renderAddedDogsForDate(dateKey){
     addedDogsContainer.innerHTML='';
     const entries = selections[dateKey] || {};
     
-    if(Object.keys(entries).length === 0){
-        addedDogsContainer.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">No hay servicios para este día. Click "+" para añadir.</p>';
-        return;
-    }
-    
     Object.entries(entries).forEach(([k,v])=>{
         if(!v.selected) return;
         const [dog, service] = k.split('_');
