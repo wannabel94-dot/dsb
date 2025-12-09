@@ -499,20 +499,24 @@ function renderServiceButtons() {
 // CANCEL button - closes nested popup without saving
 cancelAddBtn.addEventListener('click', () => {
     addServicePopup.style.display = 'none';
+    resetNestedPopup();
 });
 
 // SAVE button - saves selection and closes nested popup
 addDogBtn.addEventListener('click', (e) => {
-    e.preventDefault(); // prevent any default form behavior
+    e.preventDefault();
+
     if (!currentDogSelection.dog || currentDogSelection.services.length === 0) {
         alert('Selecciona un perro y al menos un servicio');
         return;
     }
+
     currentDogSelection.start = document.getElementById('startTimeInput').value || '';
     currentDogSelection.end = document.getElementById('endTimeInput').value || '';
 
     const dateKey = formatDate(currentDate);
     if (!selections[dateKey]) selections[dateKey] = {};
+
     currentDogSelection.services.forEach(s => {
         const key = `${currentDogSelection.dog}_${s}`;
         selections[dateKey][key] = {
@@ -521,13 +525,15 @@ addDogBtn.addEventListener('click', (e) => {
             end: currentDogSelection.end
         };
     });
-    localStorage.setItem('selections', JSON.stringify(selections));
 
+    localStorage.setItem('selections', JSON.stringify(selections));
     renderAddedDogsForDate(dateKey);
     updateSummary();
 
-    addServicePopup.style.display = 'none'; // close nested popup
+    addServicePopup.style.display = 'none';
+    resetNestedPopup();   // ← **THIS IS NEW**
 });
+
 
 
 // VOLVER button - closes the entire main service modal
@@ -718,6 +724,17 @@ sortedEntries.forEach(e => {
 });
 
     return dayDiv;
+}
+function resetNestedPopup() {
+    // Clear service selections
+    currentDogSelection = { dog: null, services: [], start: '', end: '' };
+
+    // Reset UI
+    dogSelect.value = "";
+    serviceButtonsContainer.innerHTML = "";
+    timeInputsContainer.style.display = "none";
+    document.getElementById('startTimeInput').value = "";
+    document.getElementById('endTimeInput').value = "";
 }
 
 
