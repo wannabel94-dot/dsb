@@ -456,7 +456,6 @@ mainDogSelect.onchange = ()=>{
     currentDogSelection = { dog: selectedDog, services: [], start: '', end: '' };
     dogSelect.innerHTML = '<option value="">Seleccionar Perro</option>';
     allDogs.forEach(d=>{ const opt = document.createElement('option'); opt.value = d; opt.textContent = d; dogSelect.appendChild(opt); });
-    dogSelect.value = selectedDog;
     serviceButtonsContainer.innerHTML='';
     timeInputsContainer.style.display='none';
     document.getElementById('startTimeInput').value='';
