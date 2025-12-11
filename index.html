@@ -359,7 +359,6 @@ const defaultDogs = ["Nina","Carmela","Pancho","Pablo","Lili","Jugnia","Leo","In
 let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
 let selections = JSON.parse(localStorage.getItem('selections')) || {};
 let tarifs = JSON.parse(localStorage.getItem('tarifs')) || {};
-currentDogSelection = { dog: null, services: [], start: "", end: "" };
 const formatDate = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 
 // ===== DATE STRIP =====
