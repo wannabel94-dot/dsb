@@ -123,10 +123,14 @@ h1{text-align:center;margin-bottom:20px;color:#373e2e;}button{cursor:pointer;}
     
 /* Animations */
 @keyframes slideUp {
-  from { transform: translateY(100%); opacity: 1; }
-  to { transform: translateY(0); opacity: 1; }
-@keyframes slideDown { from { transform:translateY(-100%);} to { transform:translateY(0);} }
-    }
+    from { transform: translateY(100%); opacity: 1; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
 
 /* small inputs */
 select,input[type="time"],input[type="number"],input[type="text"]{ width:100%;padding:12px 14px;margin-top:8px;margin-bottom:12px;border-radius:10px;border:2px solid #8a8252; background:#fcf9f1;font-size:16px;color:#303021; }
