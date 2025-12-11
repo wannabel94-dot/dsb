@@ -724,18 +724,6 @@ sortedEntries.forEach(e => {
 
     return dayDiv;
 }
-function resetNestedPopup() {
-    // Clear service selections
-    currentDogSelection = { dog: null, services: [], start: '', end: '' };
-
-    // Reset UI
-    dogSelect.value = "";
-    serviceButtonsContainer.innerHTML = "";
-    timeInputsContainer.style.display = "none";
-    document.getElementById('startTimeInput').value = "";
-    document.getElementById('endTimeInput').value = "";
-}
-
 
 // ===== INITIAL CALLS =====
 buildFullDateStrip(currentDate);
