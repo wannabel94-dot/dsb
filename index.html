@@ -533,7 +533,7 @@ cancelAddBtn.onclick = () => {
 /* ------------------------
     SAVE nested popup
 ------------------------ */
-addDogBtn.onclick = (e) => {
+addDogBtn.addEventListener("click", function (e) {
     e.preventDefault();
 
     if (!currentDogSelection.dog || currentDogSelection.services.length === 0) {
@@ -541,14 +541,13 @@ addDogBtn.onclick = (e) => {
         return;
     }
 
-    // assign times
-    currentDogSelection.start = document.getElementById('startTimeInput').value || "";
-    currentDogSelection.end = document.getElementById('endTimeInput').value || "";
+    // Save logic (your existing code)
+    currentDogSelection.start = startTimeInput.value;
+    currentDogSelection.end   = endTimeInput.value;
 
     const dateKey = formatDate(currentDate);
     if (!selections[dateKey]) selections[dateKey] = {};
 
-    // SAVE SERVICES
     currentDogSelection.services.forEach(service => {
         const key = `${currentDogSelection.dog}_${service}`;
         selections[dateKey][key] = {
@@ -558,19 +557,16 @@ addDogBtn.onclick = (e) => {
         };
     });
 
-    // Persist
     localStorage.setItem("selections", JSON.stringify(selections));
 
-    // Refresh UI
     renderAddedDogsForDate(dateKey);
     updateSummary();
     populateMainDogSelect();
 
-    // Close popup
+    // **Close nested popup**
     addServicePopup.style.display = "none";
     resetNestedPopup();
-};
-
+});
 /* ------------------------
     Reset popup state
 ------------------------ */
