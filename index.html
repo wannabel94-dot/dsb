@@ -259,6 +259,7 @@ z-index: 10;
 <div class="date-strip" id="dateStrip"></div>
 <div class="summary">
       <div id="dailyTotal" style="margin-top: 10px; font-weight: 700;"></div>
+    <div id="dailyAgenda" style="margin-top:20px;"></div>
 </div>
 </div>
 
@@ -420,7 +421,8 @@ dateStrip.addEventListener('mouseup', snapToClosest);
 dateStrip.addEventListener('mouseleave', snapToClosest);
 dateStrip.addEventListener('touchend', snapToClosest);
 
-function snapToClosest(){ if(!isDragging) return; isDragging = false; const stripRect = dateStrip.getBoundingClientRect(); const stripCenter = stripRect.left + stripRect.width/2; let closestIdx = 0; let closestDist = Infinity; dateStrip.querySelectorAll('.date-item').forEach((item,i)=>{ const itemRect = item.getBoundingClientRect(); const itemCenter = itemRect.left + itemRect.width/2; const dist = Math.abs(stripCenter - itemCenter); if(dist < closestDist){ closestDist = dist; closestIdx = i; } }); const targetItem = dateStrip.children[closestIdx]; dateStrip.scrollTo({ left: targetItem.offsetLeft - dateStrip.offsetWidth/2 + targetItem.offsetWidth/2, behavior: 'smooth' }); dateStrip.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active')); targetItem.classList.add('active'); currentDate = allDates[closestIdx]; updateMonthHeader(currentDate); updateSummary(); }
+function snapToClosest(){ if(!isDragging) return; isDragging = false; const stripRect = dateStrip.getBoundingClientRect(); const stripCenter = stripRect.left + stripRect.width/2; let closestIdx = 0; let closestDist = Infinity; dateStrip.querySelectorAll('.date-item').forEach((item,i)=>{ const itemRect = item.getBoundingClientRect(); const itemCenter = itemRect.left + itemRect.width/2; const dist = Math.abs(stripCenter - itemCenter); if(dist < closestDist){ closestDist = dist; closestIdx = i; } }); const targetItem = dateStrip.children[closestIdx]; dateStrip.scrollTo({ left: targetItem.offsetLeft - dateStrip.offsetWidth/2 + targetItem.offsetWidth/2, behavior: 'smooth' }); dateStrip.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active')); targetItem.classList.add('active'); currentDate = allDates[closestIdx]; updateMonthHeader(currentDate); updateSummary();renderDailyAgenda();
+ }
 // ===== SERVICE MODAL =====
 const serviceModal = document.getElementById('serviceModal');
 
@@ -724,6 +726,56 @@ sortedEntries.forEach(e => {
 });
 
     return dayDiv;
+}
+function renderDailyAgenda() {
+    const container = document.getElementById("dailyAgenda");
+    const dateKey = formatDate(currentDate);
+    const entries = selections[dateKey] || {};
+
+    container.innerHTML = ""; 
+
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "agenda-day";
+
+    // title
+    const header = document.createElement("h3");
+    header.textContent = dateKey;
+    dayDiv.appendChild(header);
+
+    // no entries
+    const filtered = Object.entries(entries).filter(([k,v]) => v.selected);
+    if (filtered.length === 0) {
+        const empty = document.createElement("p");
+        empty.textContent = "Sin servicios.";
+        dayDiv.appendChild(empty);
+        container.appendChild(dayDiv);
+        return;
+    }
+
+    // same sorting as agenda modal
+    const sortedEntries = filtered
+        .map(([key,val]) => {
+            const [dog, service] = key.split("_");
+            return { dog, service, start: val.start, end: val.end };
+        })
+        .sort((a,b) => {
+            if (!a.start && b.start) return -1;
+            if (a.start && !b.start) return 1;
+            return a.start.localeCompare(b.start);
+        });
+
+    // build entries
+    sortedEntries.forEach(e => {
+        const entry = document.createElement("div");
+        entry.className = "agenda-entry";
+        const timeStr = e.start ? e.start : "";
+        const endStr = e.end ? ` - ${e.end}` : "";
+        const serviceStr = e.service === '+1 Noche' ? `${e.service} 🌙` : e.service;
+        entry.textContent = `${timeStr}${endStr} ${e.dog} ${serviceStr}`;
+        dayDiv.appendChild(entry);
+    });
+
+    container.appendChild(dayDiv);
 }
 
 // ===== INITIAL CALLS =====
