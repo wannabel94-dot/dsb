@@ -533,17 +533,14 @@ cancelAddBtn.onclick = () => {
 /* ------------------------
     SAVE nested popup
 ------------------------ */
-addDogBtn.addEventListener("click", function (e) {
-    e.preventDefault();
-
+addDogBtn.onclick = () => {
     if (!currentDogSelection.dog || currentDogSelection.services.length === 0) {
         alert("Selecciona un perro y al menos un servicio");
         return;
     }
 
-    // Save logic (your existing code)
-    currentDogSelection.start = startTimeInput.value;
-    currentDogSelection.end   = endTimeInput.value;
+    currentDogSelection.start = document.getElementById('startTimeInput').value || "";
+    currentDogSelection.end = document.getElementById('endTimeInput').value || "";
 
     const dateKey = formatDate(currentDate);
     if (!selections[dateKey]) selections[dateKey] = {};
@@ -558,15 +555,14 @@ addDogBtn.addEventListener("click", function (e) {
     });
 
     localStorage.setItem("selections", JSON.stringify(selections));
-
     renderAddedDogsForDate(dateKey);
     updateSummary();
     populateMainDogSelect();
 
-    // **Close nested popup**
+    // Close the popup
     addServicePopup.style.display = "none";
     resetNestedPopup();
-});
+};
 /* ------------------------
     Reset popup state
 ------------------------ */
