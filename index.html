@@ -777,6 +777,28 @@ function renderDailyAgenda() {
 
     container.appendChild(dayDiv);
 }
+function updateSummary() {
+    const dailyTotalEl = document.getElementById("dailyTotal");
+    const dateKey = formatDate(currentDate);
+    const entries = selections[dateKey] || {};
+
+    let total = 0;
+
+    Object.entries(entries).forEach(([key, val]) => {
+        if (!val.selected) return;
+
+        const [dog, service] = key.split("_");
+
+        // get tarifs for that dog
+        const dogTarif = tarifs[dog] || {};
+        if (service === "Guardería") total += Number(dogTarif.day || 0);
+        else if (service === "Paseo") total += Number(dogTarif.walk || 0);
+        else if (service === "+1 Noche") total += Number(dogTarif.night || 0);
+        else if (service === "Otro servicio") total += Number(dogTarif.other || 0);
+    });
+
+    dailyTotalEl.textContent = total > 0 ? `Total del día: ${total}€` : "";
+}
 
 // ===== INITIAL CALLS =====
 buildFullDateStrip(currentDate);
