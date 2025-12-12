@@ -88,6 +88,21 @@ h1{text-align:center;margin-bottom:20px;color:#373e2e;}button{cursor:pointer;}
   flex: 1 1 auto;      /* dog + service can wrap if needed */
 }
 
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 10px;
+    padding: 6px 0;
+    font-size: 14px;
+}
+
+.summary-row {
+    display: contents;
+}
+
+.summary-cell {
+    padding: 4px 0;
+}
 
 /* ===== MODALS ===== */
 .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:3000; }
@@ -786,31 +801,22 @@ function updateSummary() {
 
     let total = 0;
 
-    // Clear agenda display
+    // RESET agenda container
     dailyAgendaEl.innerHTML = "";
 
-    const dayDiv = document.createElement("div");
-    dayDiv.className = "agenda-day";
+    const wrapper = document.createElement("div");
 
-    // TITLE
-    const header = document.createElement("h3");
-    header.textContent = dateKey;
-    dayDiv.appendChild(header);
-
-    // Filter selected items
+    // If no services → show empty message
     const filtered = Object.entries(entries).filter(([k,v]) => v.selected);
-
     if (filtered.length === 0) {
-        const empty = document.createElement("p");
-        empty.textContent = "Sin servicios.";
-        dayDiv.appendChild(empty);
-        dailyAgendaEl.appendChild(dayDiv);
+        wrapper.innerHTML = "<p>Sin servicios.</p>";
+        dailyAgendaEl.appendChild(wrapper);
         dailyTotalEl.textContent = "";
         return;
     }
 
-    // Convert and sort
-    const sortedEntries = filtered
+    // Convert + sort
+    const sorted = filtered
         .map(([key,val]) => {
             const [dog, service] = key.split("_");
             return {
@@ -821,42 +827,52 @@ function updateSummary() {
             };
         })
         .sort((a,b) => {
+            // dogs with NO TIME first
             if (!a.start && b.start) return -1;
             if (a.start && !b.start) return 1;
+
+            // then sort times normally
             return a.start.localeCompare(b.start);
         });
 
-    // RENDER SUMMARY ENTRIES + calculate totals
-    sortedEntries.forEach(e => {
-        const entryDiv = document.createElement("div");
-        entryDiv.className = "agenda-entry";
+    // Create grid container
+    const grid = document.createElement("div");
+    grid.className = "summary-grid";
 
-        const timeStr =
-            e.start && e.end
-                ? `${e.start} - ${e.end}`
-                : e.start
-                ? e.start
-                : "";
+    // Render rows (TIME | DOG | SERVICE)
+    sorted.forEach(e => {
+        const timeCell = document.createElement("div");
+        timeCell.className = "summary-cell";
+        timeCell.textContent = e.start
+            ? (e.end ? `${e.start} - ${e.end}` : e.start)
+            : "";               // blank for dogs without time
 
-        const serviceStr =
+        const dogCell = document.createElement("div");
+        dogCell.className = "summary-cell";
+        dogCell.textContent = e.dog;
+
+        const serviceCell = document.createElement("div");
+        serviceCell.className = "summary-cell";
+        serviceCell.textContent =
             e.service === "+1 Noche" ? `${e.service} 🌙` : e.service;
 
-        entryDiv.textContent = `${timeStr}  ${e.dog}  ${serviceStr}`;
-        dayDiv.appendChild(entryDiv);
+        grid.appendChild(timeCell);
+        grid.appendChild(dogCell);
+        grid.appendChild(serviceCell);
 
-        // ----- PRICING -----
-        const dogTarif = tarifs[e.dog] || {};
-        if (e.service === "Guardería") total += Number(dogTarif.day || 0);
-        if (e.service === "Paseo") total += Number(dogTarif.walk || 0);
-        if (e.service === "+1 Noche") total += Number(dogTarif.night || 0);
-        if (e.service === "Otro servicio") total += Number(dogTarif.other || 0);
+        // Calculate total
+        const t = tarifs[e.dog] || {};
+        if (e.service === "Guardería") total += Number(t.day || 0);
+        if (e.service === "Paseo") total += Number(t.walk || 0);
+        if (e.service === "+1 Noche") total += Number(t.night || 0);
+        if (e.service === "Otro servicio") total += Number(t.other || 0);
     });
 
-    // PUT AGENDA INTO PAGE
-    dailyAgendaEl.appendChild(dayDiv);
+    wrapper.appendChild(grid);
+    dailyAgendaEl.appendChild(wrapper);
 
-    // TOTAL
-    dailyTotalEl.textContent = total > 0 ? `Total del día: ${total}€` : "";
+    dailyTotalEl.textContent =
+        total > 0 ? `Total del día: ${total}€` : "";
 }
 
 // ===== INITIAL CALLS =====
