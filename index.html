@@ -779,24 +779,83 @@ function renderDailyAgenda() {
 }
 function updateSummary() {
     const dailyTotalEl = document.getElementById("dailyTotal");
+    const dailyAgendaEl = document.getElementById("dailyAgenda");
+
     const dateKey = formatDate(currentDate);
     const entries = selections[dateKey] || {};
 
     let total = 0;
 
-    Object.entries(entries).forEach(([key, val]) => {
-        if (!val.selected) return;
+    // Clear agenda display
+    dailyAgendaEl.innerHTML = "";
 
-        const [dog, service] = key.split("_");
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "agenda-day";
 
-        // get tarifs for that dog
-        const dogTarif = tarifs[dog] || {};
-        if (service === "Guardería") total += Number(dogTarif.day || 0);
-        else if (service === "Paseo") total += Number(dogTarif.walk || 0);
-        else if (service === "+1 Noche") total += Number(dogTarif.night || 0);
-        else if (service === "Otro servicio") total += Number(dogTarif.other || 0);
+    // TITLE
+    const header = document.createElement("h3");
+    header.textContent = dateKey;
+    dayDiv.appendChild(header);
+
+    // Filter selected items
+    const filtered = Object.entries(entries).filter(([k,v]) => v.selected);
+
+    if (filtered.length === 0) {
+        const empty = document.createElement("p");
+        empty.textContent = "Sin servicios.";
+        dayDiv.appendChild(empty);
+        dailyAgendaEl.appendChild(dayDiv);
+        dailyTotalEl.textContent = "";
+        return;
+    }
+
+    // Convert and sort
+    const sortedEntries = filtered
+        .map(([key,val]) => {
+            const [dog, service] = key.split("_");
+            return {
+                dog,
+                service,
+                start: val.start || "",
+                end: val.end || ""
+            };
+        })
+        .sort((a,b) => {
+            if (!a.start && b.start) return -1;
+            if (a.start && !b.start) return 1;
+            return a.start.localeCompare(b.start);
+        });
+
+    // RENDER SUMMARY ENTRIES + calculate totals
+    sortedEntries.forEach(e => {
+        const entryDiv = document.createElement("div");
+        entryDiv.className = "agenda-entry";
+
+        const timeStr =
+            e.start && e.end
+                ? `${e.start} - ${e.end}`
+                : e.start
+                ? e.start
+                : "";
+
+        const serviceStr =
+            e.service === "+1 Noche" ? `${e.service} 🌙` : e.service;
+
+        entryDiv.textContent = `${timeStr}  ${e.dog}  ${serviceStr}`;
+        dayDiv.appendChild(entryDiv);
+
+        // ----- PRICING -----
+        const dogTarif = tarifs[e.dog] || {};
+        if (e.service === "Guardería") total += Number(dogTarif.day || 0);
+        if (e.service === "Paseo") total += Number(dogTarif.walk || 0);
+        if (e.service === "+1 Noche") total += Number(dogTarif.night || 0);
+        if (e.service === "Otro servicio") total += Number(dogTarif.other || 0);
     });
 
+    // PUT AGENDA INTO PAGE
+    dailyAgendaEl.appendChild(dayDiv);
+
+    // TOTAL
     dailyTotalEl.textContent = total > 0 ? `Total del día: ${total}€` : "";
 }
 
