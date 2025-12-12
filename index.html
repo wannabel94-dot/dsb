@@ -423,7 +423,6 @@ dateStrip.addEventListener('touchend', snapToClosest);
 function snapToClosest(){ if(!isDragging) return; isDragging = false; const stripRect = dateStrip.getBoundingClientRect(); const stripCenter = stripRect.left + stripRect.width/2; let closestIdx = 0; let closestDist = Infinity; dateStrip.querySelectorAll('.date-item').forEach((item,i)=>{ const itemRect = item.getBoundingClientRect(); const itemCenter = itemRect.left + itemRect.width/2; const dist = Math.abs(stripCenter - itemCenter); if(dist < closestDist){ closestDist = dist; closestIdx = i; } }); const targetItem = dateStrip.children[closestIdx]; dateStrip.scrollTo({ left: targetItem.offsetLeft - dateStrip.offsetWidth/2 + targetItem.offsetWidth/2, behavior: 'smooth' }); dateStrip.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active')); targetItem.classList.add('active'); currentDate = allDates[closestIdx]; updateMonthHeader(currentDate); updateSummary(); }
 // ===== SERVICE MODAL =====
 const serviceModal = document.getElementById('serviceModal');
-const addServicePopup = document.getElementById('addServicePopup');
 
 const mainDogSelect = document.getElementById('mainDogSelect');
 const dogSelect = document.getElementById('dogSelect');
@@ -432,10 +431,17 @@ const timeInputsContainer = document.getElementById('timeInputsContainer');
 const addedDogsContainer = document.getElementById('addedDogsContainer');
 
 const cancelAddBtn = document.getElementById('cancelAddBtn');
-const addDogBtn = document.getElementById('addDogBtn');
 
 let currentDogSelection = { dog: null, services: [], start: "", end: "" };
-
+const addDogBtn = document.getElementById('addDogBtn');
+if (addDogBtn) {
+  addDogBtn.addEventListener('click', () => {
+    const addServicePopup = document.getElementById('addServicePopup');
+    if (addServicePopup) {
+      addServicePopup.style.display = 'none';
+    }
+  });
+}
 // OPEN Main Modal
 document.getElementById('centralBtn').onclick = () => {
     serviceModal.style.display = "block";
