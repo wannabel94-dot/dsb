@@ -650,6 +650,16 @@ function refreshServiceModalForCurrentDate() {
     renderAddedDogsForDate(dateKey);
     populateMainDogSelect();
 }
+// ===== TARIFS MODAL =====
+const tarifsSheet = document.getElementById('tarifsSheet');
+
+document.getElementById('tarifsBtn').onclick = () => {
+    tarifsSheet.style.display = 'block';
+};
+
+document.getElementById('closeTarifsBtn').onclick = () => {
+    tarifsSheet.style.display = 'none';
+};
 
 // ===== AGENDA MODAL =====
 const agendaSheet = document.getElementById('agendaSheet');
