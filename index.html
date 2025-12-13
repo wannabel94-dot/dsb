@@ -654,12 +654,68 @@ function refreshServiceModalForCurrentDate() {
 const tarifsSheet = document.getElementById('tarifsSheet');
 
 document.getElementById('tarifsBtn').onclick = () => {
+    renderTarifsTable();
     tarifsSheet.style.display = 'block';
 };
 
 document.getElementById('closeTarifsBtn').onclick = () => {
     tarifsSheet.style.display = 'none';
 };
+const tarifsTableBody = document.querySelector('#tarifsTable tbody');
+const addDogTarifBtn = document.getElementById('addDogTarifBtn');
+const saveTarifsBtn = document.getElementById('saveTarifsBtn');
+addDogTarifBtn.onclick = () => {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td><input type="text" placeholder="Nombre perro" class="tarif-dog"></td>
+        <td><input type="number" placeholder="0" class="tarif-day"></td>
+        <td><input type="number" placeholder="0" class="tarif-night"></td>
+        <td><input type="number" placeholder="0" class="tarif-walk"></td>
+    `;
+
+    tarifsTableBody.appendChild(row);
+};
+saveTarifsBtn.onclick = () => {
+    const newTarifs = {};
+
+    tarifsTableBody.querySelectorAll("tr").forEach(row => {
+        const dog = row.querySelector(".tarif-dog").value.trim();
+        if (!dog) return;
+
+        newTarifs[dog] = {
+            day: Number(row.querySelector(".tarif-day").value || 0),
+            night: Number(row.querySelector(".tarif-night").value || 0),
+            walk: Number(row.querySelector(".tarif-walk").value || 0),
+        };
+    });
+
+    tarifs = newTarifs;
+    localStorage.setItem("tarifs", JSON.stringify(tarifs));
+
+    tarifsSheet.style.display = "none";
+    updateSummary();
+};
+
+/* ------------------------
+   Render tarifs table
+------------------------ */
+function renderTarifsTable() {
+    tarifsTableBody.innerHTML = "";
+
+    Object.entries(tarifs).forEach(([dog, prices]) => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td><input type="text" value="${dog}" class="tarif-dog"></td>
+            <td><input type="number" value="${prices.day || 0}" class="tarif-day"></td>
+            <td><input type="number" value="${prices.night || 0}" class="tarif-night"></td>
+            <td><input type="number" value="${prices.walk || 0}" class="tarif-walk"></td>
+        `;
+
+        tarifsTableBody.appendChild(row);
+    });
+}
 
 // ===== AGENDA MODAL =====
 const agendaSheet = document.getElementById('agendaSheet');
