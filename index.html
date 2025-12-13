@@ -169,7 +169,14 @@ z-index: 10;
 .modal-buttons button:hover{transform:scale(1.04);background:#8a2b00;}
 .modal-buttons button.cancel{background:#666;color:#fff;}
 .modal-buttons button.cancel:hover{background:#555;}
-   
+   .tarif-checkbox {
+    display: none;
+}
+
+.delete-mode .tarif-checkbox {
+    display: inline-block;
+}
+
 /* Service selection buttons */
 .service-btn{padding:10px 14px;margin:6px;border:none;border-radius:12px;background:#b7e3c2;color:#195928;font-weight:600;font-size:16px;cursor:pointer; transition:0.2s;}
 .service-btn.selected{background:#195928;box-shadow:0 0 0 3px #5aaf6e; color: #eaf6ed}
@@ -337,6 +344,7 @@ z-index: 10;
     </table>
     <div class="modal-buttons">
       <button id="addDogTarifBtn">Añadir Perro</button>
+        <button id="deleteTarifBtn" class="cancel">Eliminar</button>
       <button id="saveTarifsBtn">Guardar</button>
       <button id="closeTarifsBtn" class="cancel">Cancelar</button>
     </div>
@@ -652,30 +660,49 @@ function refreshServiceModalForCurrentDate() {
 }
 // ===== TARIFS MODAL =====
 const tarifsSheet = document.getElementById('tarifsSheet');
+const tarifsTableBody = document.querySelector('#tarifsTable tbody');
+
+const addDogTarifBtn = document.getElementById('addDogTarifBtn');
+const saveTarifsBtn = document.getElementById('saveTarifsBtn');
+const deleteTarifBtn = document.getElementById('deleteTarifBtn');
+const closeTarifsBtn = document.getElementById('closeTarifsBtn');
+
+let deleteMode = false;
 
 document.getElementById('tarifsBtn').onclick = () => {
     renderTarifsTable();
     tarifsSheet.style.display = 'block';
 };
 
-document.getElementById('closeTarifsBtn').onclick = () => {
+closeTarifsBtn.onclick = () => {
+    deleteMode = false;
+    deleteTarifBtn.textContent = "Eliminar";
     tarifsSheet.style.display = 'none';
 };
-const tarifsTableBody = document.querySelector('#tarifsTable tbody');
-const addDogTarifBtn = document.getElementById('addDogTarifBtn');
-const saveTarifsBtn = document.getElementById('saveTarifsBtn');
+
+/* ------------------------
+   Add dog row
+------------------------ */
 addDogTarifBtn.onclick = () => {
     const row = document.createElement("tr");
 
     row.innerHTML = `
-        <td><input type="text" placeholder="Nombre perro" class="tarif-dog"></td>
+        <td>
+            <input type="checkbox" class="tarif-checkbox">
+            <input type="text" placeholder="Nombre perro" class="tarif-dog">
+        </td>
         <td><input type="number" placeholder="0" class="tarif-day"></td>
         <td><input type="number" placeholder="0" class="tarif-night"></td>
         <td><input type="number" placeholder="0" class="tarif-walk"></td>
     `;
 
     tarifsTableBody.appendChild(row);
+    tarifsTableBody.classList.toggle("delete-mode", deleteMode);
 };
+
+/* ------------------------
+   Save tarifs
+------------------------ */
 saveTarifsBtn.onclick = () => {
     const newTarifs = {};
 
@@ -693,7 +720,39 @@ saveTarifsBtn.onclick = () => {
     tarifs = newTarifs;
     localStorage.setItem("tarifs", JSON.stringify(tarifs));
 
+    deleteMode = false;
+    deleteTarifBtn.textContent = "Eliminar";
+
     tarifsSheet.style.display = "none";
+    updateSummary();
+};
+
+/* ------------------------
+   Delete mode toggle / confirm
+------------------------ */
+deleteTarifBtn.onclick = () => {
+    // ENTER delete mode
+    if (!deleteMode) {
+        deleteMode = true;
+        deleteTarifBtn.textContent = "Confirmar";
+        tarifsTableBody.classList.add("delete-mode");
+        return;
+    }
+
+    // CONFIRM deletion
+    tarifsTableBody.querySelectorAll("tr").forEach(row => {
+        const checkbox = row.querySelector(".tarif-checkbox");
+        if (checkbox && checkbox.checked) {
+            const dog = row.querySelector(".tarif-dog").value.trim();
+            delete tarifs[dog];
+        }
+    });
+
+    localStorage.setItem("tarifs", JSON.stringify(tarifs));
+
+    deleteMode = false;
+    deleteTarifBtn.textContent = "Eliminar";
+    renderTarifsTable();
     updateSummary();
 };
 
@@ -707,7 +766,10 @@ function renderTarifsTable() {
         const row = document.createElement("tr");
 
         row.innerHTML = `
-            <td><input type="text" value="${dog}" class="tarif-dog"></td>
+            <td>
+                <input type="checkbox" class="tarif-checkbox">
+                <input type="text" value="${dog}" class="tarif-dog">
+            </td>
             <td><input type="number" value="${prices.day || 0}" class="tarif-day"></td>
             <td><input type="number" value="${prices.night || 0}" class="tarif-night"></td>
             <td><input type="number" value="${prices.walk || 0}" class="tarif-walk"></td>
@@ -715,8 +777,9 @@ function renderTarifsTable() {
 
         tarifsTableBody.appendChild(row);
     });
-}
 
+    tarifsTableBody.classList.toggle("delete-mode", deleteMode);
+}
 // ===== AGENDA MODAL =====
 const agendaSheet = document.getElementById('agendaSheet');
 const agendaContainer = document.getElementById('agendaContainer');
