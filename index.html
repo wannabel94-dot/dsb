@@ -261,6 +261,7 @@ z-index: 10;
   margin-bottom: 20px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+overflow: visible;
 }
 
 #tarifsSheet th {
@@ -341,14 +342,13 @@ z-index: 10;
 .tarif-checkbox {
   display: none;
   position: absolute;
-  left: -38px;
+  left: -26px;        /* ← CLOSE to table */
   top: 50%;
   transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
   accent-color: #c1802a;
-  z-index: 2;
 }
 
 /* Enable delete gutter */
