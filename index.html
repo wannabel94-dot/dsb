@@ -356,6 +356,15 @@ overflow: visible;
   cursor: pointer;
   accent-color: #c1802a;
 }
+#tarifsSheet .remove-btn {
+  background: #d32f2f;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
 
 /* Enable delete gutter */
 tbody.delete-mode tr {
@@ -579,12 +588,14 @@ tbody.delete-mode .tarif-checkbox {
       </thead>
       <tbody></tbody>
     </table>
-    <div class="modal-buttons">
-      <button id="deleteTarifBtn" class="cancel">-</button>
-      <button id="addDogTarifBtn">+</button>
-      <button id="saveTarifsBtn">Guardar</button>
-      <button id="closeTarifsBtn" class="cancel">Cancelar</button>
-    </div>
+ <div class="modal-buttons">
+  <button id="deleteTarifBtn" class="remove-btn">Eliminar</button>
+
+  <div style="flex:1"></div>
+
+  <button id="saveTarifsBtn" class="small-save">Guardar</button>
+  <button id="closeTarifsBtn" class="small-cancel">Cancelar</button>
+</div>
   </div>
 </div>
 
@@ -920,22 +931,35 @@ closeTarifsBtn.onclick = () => {
 /* ------------------------
    Add dog row
 ------------------------ */
-addDogTarifBtn.onclick = () => {
+function createEmptyTarifRow() {
     const row = document.createElement("tr");
-
     row.innerHTML = `
         <td>
             <input type="checkbox" class="tarif-checkbox">
-            <input type="text" placeholder="Nombre perro" class="tarif-dog">
+            <input type="text" class="tarif-dog" placeholder="Nombre perro">
         </td>
-        <td><input type="number" placeholder="0" class="tarif-day"></td>
-        <td><input type="number" placeholder="0" class="tarif-night"></td>
-        <td><input type="number" placeholder="0" class="tarif-walk"></td>
+        <td><input type="number" class="tarif-day" placeholder="0"></td>
+        <td><input type="number" class="tarif-night" placeholder="0"></td>
+        <td><input type="number" class="tarif-walk" placeholder="0"></td>
     `;
 
-    tarifsTableBody.appendChild(row);
-    tarifsTableBody.classList.toggle("delete-mode", deleteMode);
-};
+    // When user starts typing in dog name → ensure another blank row exists
+    row.querySelector(".tarif-dog").addEventListener("input", ensureBlankRow);
+
+    return row;
+}
+
+function ensureBlankRow() {
+    const rows = [...tarifsTableBody.querySelectorAll("tr")];
+    const lastRow = rows[rows.length - 1];
+    const lastDog = lastRow?.querySelector(".tarif-dog")?.value.trim();
+
+    if (lastDog) {
+        tarifsTableBody.appendChild(createEmptyTarifRow());
+        tarifsTableBody.classList.toggle("delete-mode", deleteMode);
+    }
+}
+
 
 /* ------------------------
    Save tarifs
@@ -1001,22 +1025,26 @@ function renderTarifsTable() {
 
     Object.entries(tarifs).forEach(([dog, prices]) => {
         const row = document.createElement("tr");
-
         row.innerHTML = `
             <td>
                 <input type="checkbox" class="tarif-checkbox">
-                <input type="text" value="${dog}" class="tarif-dog">
+                <input type="text" class="tarif-dog" value="${dog}">
             </td>
-            <td><input type="number" value="${prices.day || 0}" class="tarif-day"></td>
-            <td><input type="number" value="${prices.night || 0}" class="tarif-night"></td>
-            <td><input type="number" value="${prices.walk || 0}" class="tarif-walk"></td>
+            <td><input type="number" class="tarif-day" value="${prices.day || 0}"></td>
+            <td><input type="number" class="tarif-night" value="${prices.night || 0}"></td>
+            <td><input type="number" class="tarif-walk" value="${prices.walk || 0}"></td>
         `;
 
+        row.querySelector(".tarif-dog").addEventListener("input", ensureBlankRow);
         tarifsTableBody.appendChild(row);
     });
 
+    // Always add one blank row at bottom
+    tarifsTableBody.appendChild(createEmptyTarifRow());
+
     tarifsTableBody.classList.toggle("delete-mode", deleteMode);
 }
+
 // ===== AGENDA MODAL =====
 const agendaSheet = document.getElementById('agendaSheet');
 const agendaContainer = document.getElementById('agendaContainer');
