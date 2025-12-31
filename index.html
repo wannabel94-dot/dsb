@@ -4,298 +4,1218 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Servicios</title>
-
 <meta name="theme-color" content="#e7e5d8" />
 <link rel="icon" href="icons/dog-192.png" sizes="192x192" type="image/png" />
-
 <style>
 /* ===== GLOBAL ===== */
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto;background:#e7e5d8;min-height:100vh;padding:10px;}
+* { box-sizing:border-box;margin:0;padding:0; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto; background:#e7e5d8; min-height:100vh; padding:10px; }
 .container{max-width:800px;margin:0 auto;padding:20px;}
-h1,h2{text-align:center;color:#373e2e;}
-button{cursor:pointer}
+h1{text-align:center;margin-bottom:20px;color:#373e2e;}button{cursor:pointer;}
 
-/* ===== DATE STRIP ===== */
-.month-header{text-align:center;font-size:22px;font-weight:700;margin-bottom:10px;color:#303021;}
-.date-strip{display:flex;overflow-x:auto;gap:18px;padding:15px 5px 20px;white-space:nowrap;scroll-snap-type:x mandatory;}
-.date-strip::-webkit-scrollbar{display:none}
-.date-item{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px;scroll-snap-align:center;}
-.date-item .dayname{font-size:14px}
-.date-item .circle{width:55px;height:55px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;}
-.date-item.active .circle{background:#c1802a;color:white}
+/* ===== DATE CONTROLS ===== */
+.date-strip {
+    display: flex;
+    overflow-x: auto;
+    gap: 18px;
+    padding: 15px 5px 20px;
+    white-space: nowrap;
+    scroll-snap-type: x mandatory;
+    background: #e7e5d8;
+    border-radius: 20px;
+}
+
+.date-item {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    scroll-snap-align: center;
+}
+
+.date-item span.dayname {
+    font-size: 15px;
+    color: #303021;
+    font-weight: 500;
+}
+
+.date-item div.circle {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #303021;
+    border: 2px solid transparent;
+    transition: 0.2s ease;
+}
+
+/* Selected date */
+.date-item.active div.circle {
+    background: #c1802a; /* your yellow-orange */
+    color: #ffffff;
+}
+
+.date-strip::-webkit-scrollbar { display: none; }
+.date-btn,.date-nav{ padding:18px 28px;font-size:22px;font-weight:700;border:none;border-radius:14px; cursor:pointer;background:#303021;color:#c6d197;transition:0.2s ease; }
+.date-btn:hover,.date-nav:hover{transform:scale(1.05);box-shadow:0 6px 14px rgba(0,0,0,0.3);}
+    
+.month-header { text-align: center; font-size: 22px; font-weight: 700; color: #303021; margin-bottom: 10px; }
 
 /* ===== SUMMARY ===== */
-.summary{background:#d4cba8;padding:20px;border-radius:16px;margin-top:20px;margin-bottom:90px;}
-.summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:14px}
+.summary{background:#d4cba8;padding:20px;border-radius:16px;margin-top:20px;margin-bottom:80px;}
+#summaryContent{line-height:1.6;}
+    .summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-time {
+  flex: 0 0 auto;      /* take only the space needed */
+  min-width: 60px;     /* ensures small screens still show time clearly */
+  font-weight: 600;
+  white-space: nowrap;  /* prevents time from breaking into 2 lines */
+}
+
+.summary-text {
+  flex: 1 1 auto;      /* dog + service can wrap if needed */
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 10px;
+    padding: 6px 0;
+    font-size: 14px;
+}
+
+.summary-row {
+    display: contents;
+}
+
+.summary-cell {
+    padding: 4px 0;
+}
 
 /* ===== MODALS ===== */
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:3000;}
-.modal-content{background:white;height:100%;border-radius:22px 22px 0 0;padding:20px;overflow-y:auto;animation:slideUp .25s ease-out;}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:3000; }
+.dimmed { opacity: 0.3; pointer-events: none; transition: opacity 0.2s ease; }
 
-/* ===== BUTTONS ===== */
-.small-cancel{background:#5a5a5a;color:white;padding:10px 14px;border-radius:10px;border:none}
-.small-save{background:#f2f2f2;padding:10px 14px;border-radius:10px;border:none}
+/* SLIDE-UP PANEL (agenda) or SLIDE-IN PANEL (services) */
+.modal-content {
+    background:white;
+    max-height: none;
+    border-radius:22px 22px 0 0;
+    overflow-y:auto;
+    box-shadow:0 4px 20px rgba(0,0,0,0.25);
+    position: relative; /* required for absolute positioning of the button */
+    bottom: 0;
+    animation: slideUp 0.30s ease-out;
+    width: 100%;
+    height: calc(100vh - env(safe-area-inset-bottom));
+    padding:24px 20px calc(16px + env(safe-area-inset-bottom));
+}
+    
+.back-bottom-btn {
+    position: sticky;
+    bottom: env(safe-area-inset-bottom, 0); /* sticky above phone navigation */
+    left: 0;
+    width: 100%;
+    background: #f2f2f2;
+    padding: 16px 0;
+    text-align: center;
+    font-size: 18px;
+    border: none;
+    border-radius: 16px 16px 0 0;
+}
+    
+/* Animations */
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 1; }
+    to { transform: translateY(0); opacity: 1; }
+}
 
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+
+/* small inputs */
+select,input[type="time"],input[type="number"],input[type="text"]{ width:100%;padding:10px 10px;margin-top:8px;margin-bottom:2px;border-radius:10px; background:#fcf9f1;font-size:16px;color:#303021; }
+
+/* Buttons in modals */
+.modal-buttons {
+display: flex;
+justify-content: flex-end;
+gap: 12px;
+margin-top: 18px;
+margin-bottom: 0 !important;
+padding: 12px 18px;
+border-top: 1px solid #e0e0e0;
+position: sticky;
+bottom: 0;
+background: #fff;
+z-index: 10;
+}
+    
+/* Service selection buttons */
+.service-btn{padding:10px 14px;margin:6px;border:none;border-radius:12px;background:#b7e3c2;color:#195928;font-weight:600;font-size:16px;cursor:pointer; transition:0.2s;}
+.service-btn.selected{background:#195928;box-shadow:0 0 0 3px #5aaf6e; color: #eaf6ed}
+
+/* Dog entry card */
+.dog-entry{background:#f9f9f9;padding:12px;margin:10px 0;border-radius:12px;border:2px solid #8a8252;display:flex;justify-content:space-between;align-items:center;}
+.dog-entry h4{color:#303021;margin-bottom:8px;}
+.dog-entry .services-list{color:#666;font-size:14px;margin-top:5px;}
+.dog-entry button.remove-btn{background:#d32f2f;color:white;padding:6px 12px;border:none;border-radius:6px;font-size:12px;margin-left:12px;}
+
+/* small controls row */
+.controls-row{display:flex;gap:10px;align-items:center;margin-top:6px;}
+.controls-row .small-btn{padding:8px 12px;border-radius:8px;border:none;font-weight:700;}
+.small-cancel{background:#5a5a5a;color:#f2f2f2;}
+.small-save{background:#f2f2f2;color:#5a5a5a;}
+ 
+/* Checkbox styles */
+.checkbox-wrapper{display:flex;align-items:center;gap:10px;margin:10px 0;}
+.checkbox-wrapper input[type="checkbox"]{width:auto;margin:0;}
+.checkbox-wrapper label{margin:0;cursor:pointer;}
+/* ===== NESTED POPUP ===== */
+.nested-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 4000;
+    align-items: center;
+    justify-content: center;
+}
+
+.nested-popup-content {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    border-radius: 20px;
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    animation: popIn 0.25s ease-out;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.nested-popup h3 {
+    margin-bottom: 15px;
+    color: #303021;
+}
 /* ===== FOOTER ===== */
-.footer-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);height:60px;width:90%;max-width:480px;display:flex;justify-content:space-between;align-items:center;padding:0 25px;background:#303021;border-radius:9999px;z-index:1500}
-.switch-btn{background:none;border:none;color:#c6d197;font-size:12px}
+.footer-nav { position: fixed; bottom: 0px; left: 50%; transform: translateX(-50%); height: 60px; width: 90%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; background: #303021; border-radius: 9999px; z-index: 1500; }
+.left-group,.right-group{display:flex;justify-content:space-between;width:120px;gap:0;}
+.footer-nav .switch-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 0;width:50px;background:transparent;border:none;cursor:pointer;border-radius:12px;}
+.footer-nav .switch-btn img{width:30px;height:30px;opacity:0.9; filter: invert(89%) sepia(12%) saturate(335%) hue-rotate(26deg) brightness(92%) contrast(88%);} 
+.footer-nav .switch-btn span{color:#c6d197;font-weight:600;font-size:12px;} 
+.footer-nav .switch-btn.active span{color:#8d4585;font-weight:700;}
 
-/* ===== FLOATING BTN ===== */
-.floating-center-btn{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);width:60px;height:60px;border-radius:50%;background:#c1802a;border:none;font-size:36px;color:#c6d197;z-index:2500}
+/* ===== FLOATING CENTER BUTTON ===== */
+.floating-center-btn{position:fixed;bottom:30px;left:50%;transform:translateX(-50%); width:60px;height:60px;border-radius:50%;background:#c1802a;border:none; display:flex;justify-content:center;align-items:center;font-size:36px;font-weight:700;color:#c6d197;cursor:pointer;z-index:2500;}
+
+/* ===== TARIFS TABLE ===== */
+* ===== IMPROVED TARIFS TABLE ===== */
+#tarifsSheet {
+  backdrop-filter: blur(4px);
+}
+
+#tarifsSheet h2 {
+  color: #303021;
+  font-size: 26px;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+#tarifsSheet .modal-content {
+  background: linear-gradient(to bottom, #ffffff, #faf8f3);
+}
+    
+#tarifsSheet table {
+  width: 94%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 16px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+overflow: visible;
+}
+
+#tarifsSheet th {
+  background: linear-gradient(135deg, #303021 0%, #454533 100%);
+  color: #c6d197;
+  font-weight: 700;
+  padding: 14px 8px;
+  text-align: center;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border-bottom: 3px solid #c1802a;
+}
+
+#tarifsSheet th:first-child {
+  border-top-left-radius: 12px;
+}
+
+#tarifsSheet th:last-child {
+  border-top-right-radius: 12px;
+}
+
+#tarifsSheet tbody tr {
+  background: white;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f0ede0;
+}
+
+#tarifsSheet tbody tr:hover {
+  background: #fffef8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(193, 128, 42, 0.1);
+}
+
+#tarifsSheet tbody tr:last-child {
+  border-bottom: none;
+}
+
+#tarifsSheet td {
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 16px;
+}
+
+#tarifsSheet td input[type="text"],
+#tarifsSheet td input[type="number"] {
+  width: 100%;
+  padding: 8px 10px;
+  margin: 0;
+  border-radius: 8px;
+  background: #fcf9f1;
+  font-size: 15px;
+  color: #303021;
+  border: 2px solid #e6e2cf;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-weight: 500;
+}
+
+#tarifsSheet td input[type="text"]:focus,
+#tarifsSheet td input[type="number"]:focus {
+  outline: none;
+  border-color: #c1802a;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(193, 128, 42, 0.1);
+}
+
+#tarifsSheet td input[type="text"] {
+  text-align: center;
+  font-weight: 600;
+}
+
+#tarifsSheet td input[type="number"] {
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+}
+
+/* ---- Delete checkbox outside table ---- */
+.tarif-checkbox {
+  display: none;
+  position: absolute;
+  left: -26px;        /* ← CLOSE to table */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #c1802a;
+}
+#tarifsSheet .remove-btn {
+  background: #d32f2f;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Enable delete gutter */
+tbody.delete-mode tr {
+  position: relative;
+}
+
+tbody.delete-mode .tarif-checkbox {
+  display: block;
+}
+
+
+/* Prevent table jump */
+.delete-mode #tarifsSheet table {
+  margin-left: 38px;
+}
+
+
+/* Button improvements */
+
+/* Empty state */
+#tarifsSheet tbody:empty::after {
+  content: 'No hay tarifas. Pulsa "Añadir Perro" para empezar.';
+  display: block;
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-style: italic;
+  font-size: 15px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  #tarifsSheet th,
+  #tarifsSheet td {
+    padding: 10px 4px;
+    font-size: 14px;
+  }
+  
+  #tarifsSheet td input[type="text"],
+  #tarifsSheet td input[type="number"] {
+    padding: 6px 8px;
+    font-size: 14px;
+  }
+  
+  #tarifsSheet .modal-buttons {
+    justify-content: center;
+  }
+  
+  #tarifsSheet .modal-buttons button {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
+    /* ---- Tarif column widths ---- */
+#tarifsSheet th:nth-child(1),
+#tarifsSheet td:nth-child(1) {
+  width: 46%;
+}
+
+#tarifsSheet th:nth-child(2),
+#tarifsSheet th:nth-child(3),
+#tarifsSheet th:nth-child(4),
+#tarifsSheet td:nth-child(2),
+#tarifsSheet td:nth-child(3),
+#tarifsSheet td:nth-child(4) {
+  width: 18%;
+}
+
+/* ===== AGENDA ===== */
+#agendaSheet .agenda-wrap{ animation: slideUp 0.25s ease-out; }
+.agenda-block{margin:6px 0;padding:10px;border-radius:12px;background:#fff;}
+.agenda-day{padding:12px;border-radius:12px;margin-bottom:8px;border:1px solid #e6e2cf;}
+.agenda-day h3{margin-bottom:8px;color:#303021;}
+.agenda-entry {
+    display: block; /* or inline-block */
+    padding: 4px 8px;
+    font-size: 16px;
+    color: #303021;
+}
+.entry-time{width:110px;font-weight:700;color:#303021;}
+.entry-body{flex:1;}
+.entry-services{font-size:14px;color:#666;margin-top:4px;}
+
+/* Today's special styling */
+.agenda-today{background:linear-gradient(180deg,#fff9ee,#fff);border:2px solid #c1802a;box-shadow:0 6px 18px rgba(193,128,42,0.12);} 
+
+/* Past dates less visible */
+.agenda-past{opacity:0.45;}
+
+/* moon icon style fallback */
+.moon{font-size:16px;margin-left:8px;}
+
 </style>
 </head>
-
 <body>
 
 <div class="container">
-  <h2 id="monthHeader" class="month-header"></h2>
-  <div id="dateStrip" class="date-strip"></div>
-  <div id="dailyTotal" style="text-align:center;font-weight:700;margin-top:10px"></div>
-  <div class="summary">
-    <div id="dailyAgenda"></div>
-  </div>
+<h2 id="monthHeader" class="month-header"></h2>
+<div class="date-strip" id="dateStrip"></div>
+          <div id="dailyTotal" style="margin-top: 10px; font-weight: 700; color:#0b6632; text-align:center;"></div>
+<div class="summary">
+    <div id="dailyAgenda" style="margin-top:20px;"></div>
+</div>
 </div>
 
-<!-- SERVICE MODAL -->
 <div id="serviceModal" class="modal">
-  <div class="modal-content">
-    <h2>Servicios del Día</h2>
-    <div id="addedDogsContainer"></div>
-    <select id="mainDogSelect">
+  <div class="modal-content" id="modalContent">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;">
+      <h2 style="margin-left:6px;">Servicios del Día</h2>
+    </div>
+
+    <div id="addedDogsContainer" style="margin-bottom:16px;"></div>
+
+    <!-- Dog selector in main modal -->
+    <div style="margin-bottom:70px;"> <!-- leave space for bottom button -->
+      <select id="mainDogSelect" style="width:100%;padding:12px;font-size:16px;border:2px solid #c1802a;border-radius:8px;background:white;">
+        <option value="">Seleccionar Perro</option>
+      </select>
+    </div>
+
+    <!-- bottom back -->
+    <button id="modalBackBtn" class="back-bottom-btn">Volver</button>
+  </div>
+</div>
+    
+<!-- NESTED ADD SERVICE POPUP -->
+<div id="addServicePopup" class="nested-popup">
+  <div class="nested-popup-content">
+    <h3>Añadir Servicio</h3>
+    
+    <label>Perro:</label>
+    <select id="dogSelect">
       <option value="">Seleccionar Perro</option>
     </select>
-    <button id="closeServiceModal" class="small-cancel">Cerrar</button>
+    
+    <label style="display:block;margin-top:15px;margin-bottom:8px;font-weight:600;">Servicios:</label>
+    <div id="serviceButtonsContainer"></div>
+    
+    <div id="timeInputsContainer" style="display:none;margin-top:15px;">
+      <label>Recogida:</label>
+      <input id="startTimeInput" type="time" />
+      <label>Entrega:</label>
+      <input id="endTimeInput" type="time" />
+    </div>
+    
+    <div class="controls-row" style="margin-top:20px;justify-content:flex-end;">
+      <button id="cancelAddBtn" class="small-btn small-cancel">Cancelar</button>
+      <button id="addDogBtn" class="small-btn small-save">Guardar</button>
+    </div>
   </div>
 </div>
 
 <!-- TARIFS MODAL -->
 <div id="tarifsSheet" class="modal">
-  <div class="modal-content">
+  <div class="modal-content" id="tarifsContent">
     <h2>Tarifas</h2>
-    <table id="tarifsTable" width="100%">
+    <table id="tarifsTable">
       <thead>
         <tr><th>Perro</th><th>Día</th><th>Noche</th><th>Paseo</th></tr>
       </thead>
       <tbody></tbody>
     </table>
-    <div style="display:flex;gap:10px;margin-top:20px">
-      <button id="deleteTarifBtn" class="small-cancel">Eliminar</button>
-      <button id="saveTarifsBtn" class="small-save">Guardar</button>
-      <button id="cancelTarifsBtn" class="small-cancel">Cerrar</button>
-    </div>
-  </div>
+ <div class="modal-buttons">
+  <button id="deleteTarifBtn" class="remove-btn">Eliminar</button>
+
+  <div style="flex:1"></div>
+      <button id="cancelAddBtn" class="small-btn small-cancel">Cancelar</button>
+      <button id="addDogBtn" class="small-btn small-save">Guardar</button>
+ </div>
+</div>
 </div>
 
+<!-- AGENDA MODAL (slides up) -->
+<div id="agendaSheet" class="modal">
+<div class="modal-content agenda-wrap" id="agendaContent">
+<h2>Agenda Completa</h2>
+<div id="agendaContainer"></div>
+<div class="modal-buttons">
+<button id="closeAgendaBtn" class="cancel">Cerrar</button>
+</div>
+</div>
+</div>
+
+<!-- FOOTER -->
 <footer class="footer-nav">
-  <button id="tarifsBtn" class="switch-btn">Tarifas</button>
-  <button id="calendarBtn" class="switch-btn">Agenda</button>
+  <div class="left-group">
+    <button class="switch-btn tarifs" id="tarifsBtn"><img src="icons/bill.svg"><span>Tarifas</span></button>
+    <button class="switch-btn accounts" id="accountsBtn"><img src="icons/accounts.svg"><span>Cuentas</span></button>
+  </div>
+  <div class="right-group">
+    <button class="switch-btn profile" id="profileBtn"><img src="icons/folder.svg"><span>Perfiles</span></button>
+    <button class="switch-btn calendar" id="calendarBtn"><img src="icons/calendar1.svg"><span>Agenda</span></button>
+  </div>
 </footer>
 
-<button id="centralBtn" class="floating-center-btn">+</button>
+<button class="floating-center-btn" id="centralBtn">+</button>
 
 <script>
-/* ===== STATE ===== */
+// ===== GLOBAL STATE =====
 let currentDate = new Date();
-const selections = JSON.parse(localStorage.getItem("selections")) || {};
-const tarifs = JSON.parse(localStorage.getItem("tarifs")) || {};
-const defaultDogs=["Nina","Carmela","Pancho","Pablo","Lili","Jugnia","Leo","India","Kimchi","Cuatri","Tristona y Belona","Neo","Briso","Zaspi","R&H"];
+const defaultDogs = ["Nina","Carmela","Pancho","Pablo","Lili","Jugnia","Leo","India","Kimchi","Cuatri","Tristona y Belona","Neo","Briso","Zaspi","R&H"];
+let allDogs = JSON.parse(localStorage.getItem('allDogs')) || defaultDogs;
+let selections = JSON.parse(localStorage.getItem('selections')) || {};
+let tarifs = JSON.parse(localStorage.getItem('tarifs')) || {};
+const formatDate = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 
-const dateStrip=document.getElementById("dateStrip");
-const monthHeader=document.getElementById("monthHeader");
+// ===== DATE STRIP =====
+const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const dateStrip = document.getElementById("dateStrip");
+const DAYS_TO_SHOW = 365; // forward/back from today
+let allDates = [];
 
-/* ===== DATE STRIP ===== */
-const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
-const dayNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-
-function buildDateStrip(){
-  dateStrip.innerHTML="";
-  for(let i=-30;i<=30;i++){
-    const d=new Date();
-    d.setDate(d.getDate()+i);
-    const div=document.createElement("div");
-    div.className="date-item"+(i===0?" active":"");
-    div.innerHTML=`<div class="dayname">${dayNames[d.getDay()]}</div><div class="circle">${d.getDate()}</div>`;
-    div.onclick=()=>{document.querySelectorAll(".date-item").forEach(x=>x.classList.remove("active"));div.classList.add("active");currentDate=d;updateMonth()};
-    dateStrip.appendChild(div);
-  }
-}
-function updateMonth(){monthHeader.textContent=`${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`}
-
-/* ===== TARIFS ===== */
-const tarifsSheet=document.getElementById("tarifsSheet");
-const tarifsBody=document.querySelector("#tarifsTable tbody");
-
-document.getElementById("tarifsBtn").onclick=()=>{renderTarifs();tarifsSheet.style.display="block"};
-document.getElementById("cancelTarifsBtn").onclick=()=>tarifsSheet.style.display="none";
-document.getElementById("saveTarifsBtn").onclick=()=>{localStorage.setItem("tarifs",JSON.stringify(tarifs));tarifsSheet.style.display="none"};
-
-function renderTarifs(){
-  tarifsBody.innerHTML="";
-  Object.entries(tarifs).forEach(([dog,p])=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${dog}</td><td>${p.day||0}</td><td>${p.night||0}</td><td>${p.walk||0}</td>`;
-    tarifsBody.appendChild(tr);
-  });
+function generateDates(centerDate = new Date()){
+    allDates = [];
+    for(let i=-DAYS_TO_SHOW;i<=DAYS_TO_SHOW;i++){
+        const d = new Date(centerDate);
+        d.setDate(centerDate.getDate() + i);
+        allDates.push(d);
+    }
 }
 
-/* ===== SERVICE MODAL ===== */
-document.getElementById("centralBtn").onclick=()=>document.getElementById("serviceModal").style.display="block";
-document.getElementById("closeServiceModal").onclick=()=>document.getElementById("serviceModal").style.display="none";
+function buildFullDateStrip(centerDate = new Date()){
+    generateDates(centerDate);
+    dateStrip.innerHTML = '';
+    dateStrip.style.scrollSnapType = "x mandatory";
 
-/* ===== INIT ===== */
-buildDateStrip();
-updateMonth();
-
-    <!-- NESTED ADD SERVICE POPUP -->
-<div id="addServicePopup" class="modal">
-  <div class="modal-content">
-    <h2>Añadir Servicio</h2>
-
-    <label>Perro</label>
-    <select id="dogSelect"></select>
-
-    <label style="margin-top:12px">Servicios</label>
-    <div id="serviceButtonsContainer"></div>
-
-    <div id="timeInputsContainer" style="display:none;margin-top:12px">
-      <label>Recogida</label>
-      <input id="startTimeInput" type="time">
-      <label>Entrega</label>
-      <input id="endTimeInput" type="time">
-    </div>
-
-    <div style="display:flex;gap:10px;margin-top:20px">
-      <button id="cancelServiceBtn" class="small-cancel">Cancelar</button>
-      <button id="addServiceBtn" class="small-save">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- AGENDA MODAL -->
-<div id="agendaSheet" class="modal">
-  <div class="modal-content">
-    <h2>Agenda Completa</h2>
-    <div id="agendaContainer"></div>
-    <button id="closeAgendaBtn" class="small-cancel">Cerrar</button>
-  </div>
-</div>
-/* ===== SERVICE POPUP ===== */
-const addServicePopup = document.getElementById("addServicePopup");
-const dogSelect = document.getElementById("dogSelect");
-const serviceButtonsContainer = document.getElementById("serviceButtonsContainer");
-const timeInputsContainer = document.getElementById("timeInputsContainer");
-
-let currentDogSelection = { dog:null, services:[], start:"", end:"" };
-
-const SERVICES = ["Guardería","Paseo","+1 Noche","Otro servicio"];
-
-function openAddService(dog){
-  currentDogSelection = { dog, services:[], start:"", end:"" };
-  dogSelect.innerHTML = `<option>${dog}</option>`;
-  serviceButtonsContainer.innerHTML = "";
-  timeInputsContainer.style.display = "none";
-  SERVICES.forEach(s=>{
-    const b=document.createElement("button");
-    b.textContent=s;
-    b.className="small-save";
-    b.onclick=()=>{
-      b.classList.toggle("active");
-      const i=currentDogSelection.services.indexOf(s);
-      i>-1?currentDogSelection.services.splice(i,1):currentDogSelection.services.push(s);
-      timeInputsContainer.style.display =
-        currentDogSelection.services.some(x=>x!="+1 Noche")?"block":"none";
-    };
-    serviceButtonsContainer.appendChild(b);
-  });
-  addServicePopup.style.display="block";
-}
-
-document.getElementById("cancelServiceBtn").onclick=()=>addServicePopup.style.display="none";
-
-document.getElementById("addServiceBtn").onclick=()=>{
-  if(!currentDogSelection.services.length) return alert("Selecciona un servicio");
-  const dateKey=formatDate(currentDate);
-  selections[dateKey]=selections[dateKey]||{};
-  currentDogSelection.start=startTimeInput.value;
-  currentDogSelection.end=endTimeInput.value;
-  currentDogSelection.services.forEach(s=>{
-    selections[dateKey][`${currentDogSelection.dog}_${s}`]={
-      selected:true,start:currentDogSelection.start,end:currentDogSelection.end
-    };
-  });
-  localStorage.setItem("selections",JSON.stringify(selections));
-  addServicePopup.style.display="none";
-  updateSummary();
-};
-
-/* ===== AGENDA ===== */
-const agendaSheet=document.getElementById("agendaSheet");
-const agendaContainer=document.getElementById("agendaContainer");
-
-document.getElementById("calendarBtn").onclick=()=>{
-  agendaContainer.innerHTML="";
-  Object.keys(selections).sort().forEach(k=>{
-    const d=document.createElement("div");
-    d.innerHTML=`<h3>${k}</h3>`;
-    Object.entries(selections[k]).forEach(([key,val])=>{
-      if(!val.selected) return;
-      const [dog,svc]=key.split("_");
-      const p=document.createElement("div");
-      p.textContent=`${val.start||""} ${dog} ${svc}`;
-      d.appendChild(p);
+    allDates.forEach(d=>{
+        const div = document.createElement("div");
+        div.className = "date-item";
+        if(d.toDateString() === centerDate.toDateString()) div.classList.add("active");
+        div.innerHTML = `
+            <span class="dayname">${dayNames[d.getDay()]}</span>
+            <div class="circle">${d.getDate()}</div>
+        `;
+        dateStrip.appendChild(div);
     });
-    agendaContainer.appendChild(d);
-  });
-  agendaSheet.style.display="block";
-};
-document.getElementById("closeAgendaBtn").onclick=()=>agendaSheet.style.display="none";
 
-/* ===== DAILY SUMMARY + TOTAL ===== */
-function formatDate(d){
-  return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+    setTimeout(()=>scrollToDate(centerDate),50);
 }
 
-function updateSummary(){
-  const key=formatDate(currentDate);
-  const box=document.getElementById("dailyAgenda");
-  const totalEl=document.getElementById("dailyTotal");
-  box.innerHTML="";
-  let total=0;
-
-  const entries=Object.entries(selections[key]||{})
-    .filter(([_,v])=>v.selected)
-    .map(([k,v])=>{
-      const [dog,svc]=k.split("_");
-      return {...v,dog,svc};
-    })
-    .sort((a,b)=>(a.start||"").localeCompare(b.start||""));
-
-  if(!entries.length){
-    box.innerHTML="<p>Sin servicios.</p>";
-    totalEl.textContent="";
-    return;
-  }
-
-  entries.forEach(e=>{
-    const div=document.createElement("div");
-    div.textContent=`${e.start||""} ${e.dog} ${e.svc}`;
-    box.appendChild(div);
-
-    const t=tarifs[e.dog]||{};
-    if(e.svc==="Guardería") total+=Number(t.day||0);
-    if(e.svc==="Paseo") total+=Number(t.walk||0);
-    if(e.svc==="+1 Noche") total+=Number(t.night||0);
-  });
-
-  totalEl.textContent=`Total del día: ${total}€`;
+function scrollToDate(targetDate){
+    const items = dateStrip.querySelectorAll(".date-item");
+    for(let i=0;i<allDates.length;i++){
+        if(allDates[i].toDateString() === targetDate.toDateString()){
+            const item = items[i];
+            dateStrip.scrollLeft = item.offsetLeft - dateStrip.offsetWidth/2 + item.offsetWidth/2;
+            break;
+        }
+    }
 }
 
-/* ===== HOOK DOG SELECT ===== */
-document.getElementById("mainDogSelect").onchange=e=>{
-  if(e.target.value) openAddService(e.target.value);
+function updateMonthHeader(date){ document.getElementById("monthHeader").textContent = `${monthNames[date.getMonth()]} ${date.getFullYear()}`; }
+
+// Dragging behaviour
+let isDragging = false; let startX, scrollLeft;
+dateStrip.addEventListener('mousedown', (e)=>{ isDragging = true; startX = e.pageX - dateStrip.offsetLeft; scrollLeft = dateStrip.scrollLeft; });
+dateStrip.addEventListener('touchstart', (e)=>{ isDragging = true; startX = e.touches[0].pageX - dateStrip.offsetLeft; scrollLeft = dateStrip.scrollLeft; });
+dateStrip.addEventListener('mousemove', (e)=>{ if(!isDragging) return; e.preventDefault(); const x = e.pageX - dateStrip.offsetLeft; const walk = (x - startX); dateStrip.scrollLeft = scrollLeft - walk; });
+dateStrip.addEventListener('touchmove', (e)=>{ if(!isDragging) return; const x = e.touches[0].pageX - dateStrip.offsetLeft; const walk = (x - startX); dateStrip.scrollLeft = scrollLeft - walk; });
+
+dateStrip.addEventListener('mouseup', snapToClosest);
+dateStrip.addEventListener('mouseleave', snapToClosest);
+dateStrip.addEventListener('touchend', snapToClosest);
+
+function snapToClosest(){ if(!isDragging) return; isDragging = false; const stripRect = dateStrip.getBoundingClientRect(); const stripCenter = stripRect.left + stripRect.width/2; let closestIdx = 0; let closestDist = Infinity; dateStrip.querySelectorAll('.date-item').forEach((item,i)=>{ const itemRect = item.getBoundingClientRect(); const itemCenter = itemRect.left + itemRect.width/2; const dist = Math.abs(stripCenter - itemCenter); if(dist < closestDist){ closestDist = dist; closestIdx = i; } }); const targetItem = dateStrip.children[closestIdx]; dateStrip.scrollTo({ left: targetItem.offsetLeft - dateStrip.offsetWidth/2 + targetItem.offsetWidth/2, behavior: 'smooth' }); dateStrip.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active')); targetItem.classList.add('active'); currentDate = allDates[closestIdx]; updateMonthHeader(currentDate); updateSummary();renderDailyAgenda();
+ }
+// ===== SERVICE MODAL =====
+const serviceModal = document.getElementById('serviceModal');
+
+const mainDogSelect = document.getElementById('mainDogSelect');
+const dogSelect = document.getElementById('dogSelect');
+const serviceButtonsContainer = document.getElementById('serviceButtonsContainer');
+const timeInputsContainer = document.getElementById('timeInputsContainer');
+const addedDogsContainer = document.getElementById('addedDogsContainer');
+
+const cancelAddBtn = document.getElementById('cancelAddBtn');
+
+let currentDogSelection = { dog: null, services: [], start: "", end: "" };
+const addDogBtn = document.getElementById('addDogBtn');
+if (addDogBtn) {
+  addDogBtn.addEventListener('click', () => {
+    const addServicePopup = document.getElementById('addServicePopup');
+    if (addServicePopup) {
+      addServicePopup.style.display = 'none';
+    }
+  });
+}
+// OPEN Main Modal
+document.getElementById('centralBtn').onclick = () => {
+    serviceModal.style.display = "block";
+    refreshServiceModalForCurrentDate();
+    populateMainDogSelect();
 };
+
+/* ------------------------
+    Populate dropdown
+------------------------ */
+function populateMainDogSelect() {
+    const dateKey = formatDate(currentDate);
+    const todaysEntries = selections[dateKey] || {};
+
+    mainDogSelect.innerHTML = '<option value="">Seleccionar Perro</option>';
+
+    allDogs.forEach(dog => {
+        const alreadyUsed = Object.keys(todaysEntries).some(key => key.startsWith(dog + "_"));
+        if (!alreadyUsed) {
+            const opt = document.createElement("option");
+            opt.value = dog;
+            opt.textContent = dog;
+            mainDogSelect.appendChild(opt);
+        }
+    });
+}
+
+/* ------------------------
+    On dog selected → open popup
+------------------------ */
+mainDogSelect.onchange = () => {
+    const selectedDog = mainDogSelect.value;
+    if (!selectedDog) return;
+
+    // prepare fresh selection
+    currentDogSelection = { dog: selectedDog, services: [], start: "", end: "" };
+
+    // Reset popup UI
+    dogSelect.innerHTML = "";
+    const opt = document.createElement("option");
+    opt.value = selectedDog;
+    opt.textContent = selectedDog;
+    dogSelect.appendChild(opt);
+    dogSelect.value = selectedDog;
+
+    serviceButtonsContainer.innerHTML = "";
+    timeInputsContainer.style.display = "none";
+    document.getElementById('startTimeInput').value = "";
+    document.getElementById('endTimeInput').value = "";
+
+    renderServiceButtons();
+
+    // open popup
+    addServicePopup.style.display = "flex";
+
+    // reset dropdown in main modal
+    mainDogSelect.value = "";
+};
+
+/* ------------------------
+    Build service buttons
+------------------------ */
+function renderServiceButtons() {
+    const services = ['Guardería', 'Paseo', 'Otro servicio', '+1 Noche'];
+    serviceButtonsContainer.innerHTML = "";
+
+    services.forEach(service => {
+        const btn = document.createElement("button");
+        btn.className = "service-btn";
+        btn.textContent = service;
+
+        btn.onclick = () => {
+            btn.classList.toggle("selected");
+
+            const idx = currentDogSelection.services.indexOf(service);
+            if (idx > -1) currentDogSelection.services.splice(idx, 1);
+            else currentDogSelection.services.push(service);
+
+            const requiresTime = currentDogSelection.services.some(s => s !== "+1 Noche");
+            timeInputsContainer.style.display = requiresTime ? "block" : "none";
+        };
+
+        serviceButtonsContainer.appendChild(btn);
+    });
+}
+
+/* ------------------------
+    CANCEL nested popup
+------------------------ */
+cancelAddBtn.onclick = () => {
+    addServicePopup.style.display = "none";
+    resetNestedPopup();
+};
+
+/* ------------------------
+    SAVE nested popup
+------------------------ */
+addDogBtn.onclick = () => {
+    if (!currentDogSelection.dog || currentDogSelection.services.length === 0) {
+        alert("Selecciona un perro y al menos un servicio");
+        return;
+    }
+
+    currentDogSelection.start = document.getElementById('startTimeInput').value || "";
+    currentDogSelection.end = document.getElementById('endTimeInput').value || "";
+
+    const dateKey = formatDate(currentDate);
+    if (!selections[dateKey]) selections[dateKey] = {};
+
+    currentDogSelection.services.forEach(service => {
+        const key = `${currentDogSelection.dog}_${service}`;
+        selections[dateKey][key] = {
+            selected: true,
+            start: currentDogSelection.start,
+            end: currentDogSelection.end
+        };
+    });
+
+    localStorage.setItem("selections", JSON.stringify(selections));
+    renderAddedDogsForDate(dateKey);
+    updateSummary();
+    populateMainDogSelect();
+
+    // Close the popup
+    addServicePopup.style.display = "none";
+    resetNestedPopup();
+};
+/* ------------------------
+    Reset popup state
+------------------------ */
+function resetNestedPopup() {
+    currentDogSelection = { dog: null, services: [], start: "", end: "" };
+    dogSelect.innerHTML = "";
+    serviceButtonsContainer.innerHTML = "";
+    timeInputsContainer.style.display = "none";
+    document.getElementById('startTimeInput').value = "";
+    document.getElementById('endTimeInput').value = "";
+}
+
+/* ------------------------
+    Close full modal
+------------------------ */
+document.getElementById('modalBackBtn').onclick = () => {
+    serviceModal.style.display = "none";
+};
+
+/* ------------------------
+    Render existing selections
+------------------------ */
+function renderAddedDogsForDate(dateKey) {
+    addedDogsContainer.innerHTML = "";
+    const entries = selections[dateKey] || {};
+
+    Object.entries(entries).forEach(([key, val]) => {
+        if (!val.selected) return;
+
+        const [dog, service] = key.split("_");
+        const timeStr = (val.start || val.end)
+            ? ` ${val.start}${val.start && val.end ? " - " : ""}${val.end}`
+            : "";
+
+        const card = document.createElement("div");
+        card.className = "dog-entry";
+        card.innerHTML = `
+            <div>
+                <strong>${dog}</strong>
+                <div class="services-list">${service}${timeStr}</div>
+            </div>
+            <div><button class="remove-btn">Eliminar</button></div>
+        `;
+
+        card.querySelector(".remove-btn").onclick = () => {
+            delete selections[dateKey][key];
+            localStorage.setItem("selections", JSON.stringify(selections));
+            renderAddedDogsForDate(dateKey);
+            updateSummary();
+            populateMainDogSelect();
+        };
+
+        addedDogsContainer.appendChild(card);
+    });
+}
+
+/* ------------------------
+    Refresh modal when opened
+------------------------ */
+function refreshServiceModalForCurrentDate() {
+    const dateKey = formatDate(currentDate);
+    renderAddedDogsForDate(dateKey);
+    populateMainDogSelect();
+}
+// ===== TARIFS MODAL =====
+const tarifsSheet = document.getElementById('tarifsSheet');
+const tarifsTableBody = document.querySelector('#tarifsTable tbody');
+
+const addDogTarifBtn = document.getElementById('addDogTarifBtn');
+const saveTarifsBtn = document.getElementById('saveTarifsBtn');
+const deleteTarifBtn = document.getElementById('deleteTarifBtn');
+const closeTarifsBtn = document.getElementById('closeTarifsBtn');
+
+let deleteMode = false;
+
+document.getElementById('tarifsBtn').onclick = () => {
+    renderTarifsTable();
+    tarifsSheet.style.display = 'block';
+};
+
+closeTarifsBtn.onclick = () => {
+    deleteMode = false;
+    deleteTarifBtn.textContent = "Eliminar";
+    tarifsSheet.style.display = 'none';
+};
+
+/* ------------------------
+   Add dog row
+------------------------ */
+function createEmptyTarifRow() {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td>
+            <input type="checkbox" class="tarif-checkbox">
+            <input type="text" class="tarif-dog" placeholder="Nombre perro">
+        </td>
+        <td><input type="number" class="tarif-day" placeholder="0"></td>
+        <td><input type="number" class="tarif-night" placeholder="0"></td>
+        <td><input type="number" class="tarif-walk" placeholder="0"></td>
+    `;
+
+    // When user starts typing in dog name → ensure another blank row exists
+    row.querySelector(".tarif-dog").addEventListener("input", ensureBlankRow);
+
+    return row;
+}
+
+function ensureBlankRow() {
+    const rows = [...tarifsTableBody.querySelectorAll("tr")];
+    const lastRow = rows[rows.length - 1];
+    const lastDog = lastRow?.querySelector(".tarif-dog")?.value.trim();
+
+    if (lastDog) {
+        tarifsTableBody.appendChild(createEmptyTarifRow());
+        tarifsTableBody.classList.toggle("delete-mode", deleteMode);
+    }
+}
+
+
+/* ------------------------
+   Save tarifs
+------------------------ */
+saveTarifsBtn.onclick = () => {
+    const newTarifs = {};
+
+    tarifsTableBody.querySelectorAll("tr").forEach(row => {
+        const dog = row.querySelector(".tarif-dog").value.trim();
+        if (!dog) return;
+
+        newTarifs[dog] = {
+            day: Number(row.querySelector(".tarif-day").value || 0),
+            night: Number(row.querySelector(".tarif-night").value || 0),
+            walk: Number(row.querySelector(".tarif-walk").value || 0),
+        };
+    });
+
+    tarifs = newTarifs;
+    localStorage.setItem("tarifs", JSON.stringify(tarifs));
+
+    deleteMode = false;
+    deleteTarifBtn.textContent = "Eliminar";
+
+    tarifsSheet.style.display = "none";
+    updateSummary();
+};
+
+/* ------------------------
+   Delete mode toggle / confirm
+------------------------ */
+deleteTarifBtn.onclick = () => {
+    // ENTER delete mode
+    if (!deleteMode) {
+        deleteMode = true;
+        deleteTarifBtn.textContent = "Confirmar";
+        tarifsTableBody.classList.add("delete-mode");
+        return;
+    }
+
+    // CONFIRM deletion
+    tarifsTableBody.querySelectorAll("tr").forEach(row => {
+        const checkbox = row.querySelector(".tarif-checkbox");
+        if (checkbox && checkbox.checked) {
+            const dog = row.querySelector(".tarif-dog").value.trim();
+            delete tarifs[dog];
+        }
+    });
+
+    localStorage.setItem("tarifs", JSON.stringify(tarifs));
+
+    deleteMode = false;
+    deleteTarifBtn.textContent = "Eliminar";
+    renderTarifsTable();
+    updateSummary();
+};
+
+/* ------------------------
+   Render tarifs table
+------------------------ */
+function renderTarifsTable() {
+    tarifsTableBody.innerHTML = "";
+
+    Object.entries(tarifs).forEach(([dog, prices]) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>
+                <input type="checkbox" class="tarif-checkbox">
+                <input type="text" class="tarif-dog" value="${dog}">
+            </td>
+            <td><input type="number" class="tarif-day" value="${prices.day || 0}"></td>
+            <td><input type="number" class="tarif-night" value="${prices.night || 0}"></td>
+            <td><input type="number" class="tarif-walk" value="${prices.walk || 0}"></td>
+        `;
+
+        row.querySelector(".tarif-dog").addEventListener("input", ensureBlankRow);
+        tarifsTableBody.appendChild(row);
+    });
+
+    // Always add one blank row at bottom
+    tarifsTableBody.appendChild(createEmptyTarifRow());
+
+    tarifsTableBody.classList.toggle("delete-mode", deleteMode);
+}
+
+// ===== AGENDA MODAL =====
+const agendaSheet = document.getElementById('agendaSheet');
+const agendaContainer = document.getElementById('agendaContainer');
+
+
+document.getElementById('calendarBtn').onclick = ()=>{ openAgenda(); };
+document.getElementById('closeAgendaBtn').onclick = ()=>{ agendaSheet.style.display='none'; };
+
+
+function openAgenda(){
+renderAgenda();
+agendaSheet.style.display='block';
+document.getElementById('agendaContent').style.animation = 'slideUp 0.25s ease-out';
+}
+
+
+function renderAgenda() {
+    agendaContainer.innerHTML = '';
+    const dateKeys = Object.keys(selections);
+    if(dateKeys.length === 0){
+        agendaContainer.innerHTML = '<p>No hay servicios programados.</p>';
+        return;
+    }
+
+    const now = new Date();
+    now.setHours(0,0,0,0);
+
+    let todayBlock = null;
+    const future = [];
+
+    dateKeys.forEach(k => {
+        const [da, ma, ya] = k.split('/').map(Number);
+        const dt = new Date(ya, ma-1, da);
+        if(dt.getTime() === now.getTime()) todayBlock = k;
+        else if(dt > now) future.push(k);
+    });
+
+    // Today's block
+    if(todayBlock){
+        const todaySection = document.createElement('div');
+        todaySection.className = 'agenda-block agenda-today';
+        const dayDiv = buildAgendaDay(todayBlock, false, true);
+        todaySection.appendChild(dayDiv);
+        agendaContainer.appendChild(todaySection);
+    }
+
+    // Future block
+    future.forEach(fk => {
+        const futureSection = document.createElement('div');
+        futureSection.className = 'agenda-block';
+        const dayDiv = buildAgendaDay(fk, false);
+        futureSection.appendChild(dayDiv);
+        agendaContainer.appendChild(futureSection);
+    });
+}
+
+function buildAgendaDay(dateKey, isPast=false, isToday=false){
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'agenda-day';
+    if(isPast) dayDiv.classList.add('agenda-past');
+    
+    const header = document.createElement('h3');
+    header.textContent = dateKey + (isToday ? ' (Hoy)' : '');
+    dayDiv.appendChild(header);
+
+    const entries = selections[dateKey] || {};
+    // Convert entries to array and sort: no time first, then by start time
+    const sortedEntries = Object.entries(entries)
+        .filter(([key,val]) => val.selected)
+        .map(([key,val]) => {
+            const [dog, service] = key.split('_');
+            return { dog, service, start: val.start, end: val.end };
+        })
+        .sort((a,b) => {
+            if(!a.start && b.start) return -1;       // a has no start → comes first
+            if(a.start && !b.start) return 1;        // b has no start → comes first
+            return a.start.localeCompare(b.start);    // both have time → sort by start
+        });
+
+sortedEntries.forEach(e => {
+    const entry = document.createElement('div');
+    entry.className = 'agenda-entry';
+    const timeStr = e.start ? e.start : '';
+    const endStr = e.end ? ` - ${e.end}` : '';
+    const serviceStr = e.service === 'Overnight' ? `${e.service} 🌙` : e.service;
+    entry.textContent = `${timeStr}${endStr} ${e.dog} ${serviceStr}`;
+    dayDiv.appendChild(entry);
+});
+
+    return dayDiv;
+}
+function renderDailyAgenda() {
+    const container = document.getElementById("dailyAgenda");
+    const dateKey = formatDate(currentDate);
+    const entries = selections[dateKey] || {};
+
+    container.innerHTML = ""; 
+
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "agenda-day";
+
+    // title
+    const header = document.createElement("h3");
+    header.textContent = dateKey;
+    dayDiv.appendChild(header);
+
+    // no entries
+    const filtered = Object.entries(entries).filter(([k,v]) => v.selected);
+    if (filtered.length === 0) {
+        const empty = document.createElement("p");
+        empty.textContent = "Sin servicios.";
+        dayDiv.appendChild(empty);
+        container.appendChild(dayDiv);
+        return;
+    }
+
+    // same sorting as agenda modal
+    const sortedEntries = filtered
+        .map(([key,val]) => {
+            const [dog, service] = key.split("_");
+            return { dog, service, start: val.start, end: val.end };
+        })
+        .sort((a,b) => {
+            if (!a.start && b.start) return -1;
+            if (a.start && !b.start) return 1;
+            return a.start.localeCompare(b.start);
+        });
+
+    // build entries
+    sortedEntries.forEach(e => {
+        const entry = document.createElement("div");
+        entry.className = "agenda-entry";
+        const timeStr = e.start ? e.start : "";
+        const endStr = e.end ? ` - ${e.end}` : "";
+        const serviceStr = e.service === '+1 Noche' ? `${e.service} 🌙` : e.service;
+        entry.textContent = `${timeStr}${endStr} ${e.dog} ${serviceStr}`;
+        dayDiv.appendChild(entry);
+    });
+
+    container.appendChild(dayDiv);
+}
+function updateSummary() {
+    const dailyTotalEl = document.getElementById("dailyTotal");
+    const dailyAgendaEl = document.getElementById("dailyAgenda");
+
+    const dateKey = formatDate(currentDate);
+    const entries = selections[dateKey] || {};
+
+    let total = 0;
+
+    // RESET agenda container
+    dailyAgendaEl.innerHTML = "";
+
+    const wrapper = document.createElement("div");
+
+    // If no services → show empty message
+    const filtered = Object.entries(entries).filter(([k,v]) => v.selected);
+    if (filtered.length === 0) {
+        wrapper.innerHTML = "<p>Sin servicios.</p>";
+        dailyAgendaEl.appendChild(wrapper);
+        dailyTotalEl.textContent = "";
+        return;
+    }
+
+    // Convert + sort
+    const sorted = filtered
+        .map(([key,val]) => {
+            const [dog, service] = key.split("_");
+            return {
+                dog,
+                service,
+                start: val.start || "",
+                end: val.end || ""
+            };
+        })
+        .sort((a,b) => {
+            // dogs with NO TIME first
+            if (!a.start && b.start) return -1;
+            if (a.start && !b.start) return 1;
+
+            // then sort times normally
+            return a.start.localeCompare(b.start);
+        });
+
+    // Create grid container
+    const grid = document.createElement("div");
+    grid.className = "summary-grid";
+
+    // Render rows (TIME | DOG | SERVICE)
+    sorted.forEach(e => {
+        const timeCell = document.createElement("div");
+        timeCell.className = "summary-cell";
+        timeCell.textContent = e.start
+            ? (e.end ? `${e.start} - ${e.end}` : e.start)
+            : "";               // blank for dogs without time
+
+        const dogCell = document.createElement("div");
+        dogCell.className = "summary-cell";
+        dogCell.textContent = e.dog;
+
+        const serviceCell = document.createElement("div");
+        serviceCell.className = "summary-cell";
+        serviceCell.textContent =
+            e.service === "+1 Noche" ? `${e.service} 🌙` : e.service;
+
+        grid.appendChild(timeCell);
+        grid.appendChild(dogCell);
+        grid.appendChild(serviceCell);
+
+        // Calculate total
+        const t = tarifs[e.dog] || {};
+        if (e.service === "Guardería") total += Number(t.day || 0);
+        if (e.service === "Paseo") total += Number(t.walk || 0);
+        if (e.service === "+1 Noche") total += Number(t.night || 0);
+        if (e.service === "Otro servicio") total += Number(t.other || 0);
+    });
+
+    wrapper.appendChild(grid);
+    dailyAgendaEl.appendChild(wrapper);
+
+    dailyTotalEl.textContent =
+        total > 0 ? `Total del día: ${total}€` : "";
+}
+
+// ===== INITIAL CALLS =====
+buildFullDateStrip(currentDate);
+updateMonthHeader(currentDate);
+updateSummary();
+
+// when opening service modal for a date, refresh added list
+// listen to date strip clicks to update currentDate and refresh summary
+dateStrip.addEventListener('click', (e)=>{ // find nearest .date-item with center snapping already handled in drag; here capture click
+    const item = e.target.closest('.date-item'); if(!item) return; const idx = Array.from(dateStrip.children).indexOf(item); if(idx>=0){ currentDate = allDates[idx]; dateStrip.querySelectorAll('.date-item').forEach(d=>d.classList.remove('active')); item.classList.add('active'); updateMonthHeader(currentDate); updateSummary(); refreshServiceModalForCurrentDate(); }
+});
+
+// open service modal should also show existing for date
+document.getElementById('centralBtn').addEventListener('click', ()=>{ refreshServiceModalForCurrentDate(); });
+
+// open agenda via button
+document.getElementById('calendarBtn').addEventListener('click', ()=>{ openAgenda(); });
+
 </script>
 </body>
 </html>
