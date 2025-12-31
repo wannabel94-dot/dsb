@@ -372,6 +372,53 @@ tbody.delete-mode .tarif-checkbox {
 
 
 /* Button improvements */
+#tarifsSheet .modal-buttons {
+  background: linear-gradient(to top, #ffffff, #faf8f3);
+  border-top: 2px solid #e6e2cf;
+  padding: 16px 18px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#tarifsSheet .modal-buttons button {
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#addDogTarifBtn {
+  background: linear-gradient(135deg, #5aaf6e 0%, #419557 100%);
+  color: white;
+}
+
+#addDogTarifBtn:hover {
+  transform: translateY(-2px);
+}
+
+#deleteTarifBtn {
+  background: linear-gradient(135deg, #888 0%, #666 100%);
+  color: white;
+}
+
+#deleteTarifBtn:hover {
+  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+}
+
+#closeTarifsBtn {
+  background: linear-gradient(135deg, #666 0%, #555 100%);
+  color: white;
+}
+
+#closeTarifsBtn:hover {
+  background: linear-gradient(135deg, #555 0%, #444 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
 
 /* Empty state */
 #tarifsSheet tbody:empty::after {
@@ -523,10 +570,11 @@ tbody.delete-mode .tarif-checkbox {
   <button id="deleteTarifBtn" class="remove-btn">Eliminar</button>
 
   <div style="flex:1"></div>
-      <button id="cancelAddBtn" class="small-btn small-cancel">Cancelar</button>
-      <button id="addDogBtn" class="small-btn small-save">Guardar</button>
- </div>
+
+  <button id="saveTarifsBtn" class="small-save">Guardar</button>
+  <button id="closeTarifsBtn" class="small-cancel">Cancelar</button>
 </div>
+  </div>
 </div>
 
 <!-- AGENDA MODAL (slides up) -->
@@ -1217,5 +1265,6 @@ document.getElementById('centralBtn').addEventListener('click', ()=>{ refreshSer
 document.getElementById('calendarBtn').addEventListener('click', ()=>{ openAgenda(); });
 
 </script>
+
 </body>
 </html>
